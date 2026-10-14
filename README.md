@@ -1,6 +1,6 @@
 # ECHOLALIA
 Senior Project Group Echolalia
 
-Matthew Philip
-Catalina Escano
-Nam Nguyen
+Matthew Philip\n
+Catalina Escano\n
+Nam Nguyen\n
