@@ -1,0 +1,1 @@
+alert("Test of JS file works");

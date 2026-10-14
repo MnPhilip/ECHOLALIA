@@ -1,3 +1,7 @@
 html {
     background-color: blue;
 }
+
+canvas {
+    font-size: 400%;
+}
