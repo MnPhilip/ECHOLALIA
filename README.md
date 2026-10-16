@@ -5,6 +5,6 @@ Matthew Philip
 Catalina Escano  
 Nam Nguyen  
 Shivani Bilimoria   
-Mac Irvine
+Mac Irvine    
 JD David
 
