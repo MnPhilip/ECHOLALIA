@@ -1,1 +1,1 @@
-alert("Test of JS file works");
+alert("Test of JS file worksssss");
