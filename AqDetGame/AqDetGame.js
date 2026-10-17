@@ -1,5 +1,8 @@
 //alert("Test of JS file worksssss");
-
+document.addEventListener('DOMContentLoaded', () => {
+    alert("DEBUG SPACE LOADED");
+    start();
+})
 
 
 
@@ -22,6 +25,7 @@ function spawn(){
     ctx.fillStyle = "green";
     ctx.fillRect(x, y, size, size);
 
+
 }
 
 function start(){
@@ -30,8 +34,8 @@ function start(){
         ctx.fillStyle = "Black";
         ctx.font = "80px Arial";
         ctx. textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);
+        ctx.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        ctx.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
     } else{
         spawn();
     }
@@ -43,7 +47,5 @@ window.addEventListener("keydown", (e) =>{
     if(e.key === "Enter"){
         gameStart = true; 
         spawn();
-    }
+    } //Can incorporate a few more of these to account for WASD keys, E, and SPACE
 });
-
-start();
