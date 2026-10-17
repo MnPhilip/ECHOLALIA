@@ -53,13 +53,13 @@ function reRender(movePosX, movePosY){
 }
 
 function move(moveKey){
-    if (moveKey == "w"){
+    if (moveKey.key == "w"){
         reRender(0, moveDistance);
-    } else if (moveKey == "a"){
+    } else if (moveKey.key == "a"){
 	reRender(-moveDistance, 0);
-    } else if (moveKey == "s"){
+    } else if (moveKey.key == "s"){
 	reRender(0, -moveDistance);
-    } else if (moveKey == "d"){
+    } else if (moveKey.key == "d"){
 	reRender(moveDistance, 0);
     }
 }
@@ -71,6 +71,7 @@ window.addEventListener("keydown", (e) =>{
         spawn();
     } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
     	e.key == "d" || e.key == " " || e.key == "e" ){
+            
         move(e);
     }
 });
