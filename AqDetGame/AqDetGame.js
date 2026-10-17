@@ -27,6 +27,7 @@ function spawn(){
     rectY = canvas.height/2;
 
     ctx.fillStyle = "green";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(rectX, rectY, rectSize, rectSize);
 
 
@@ -56,11 +57,11 @@ function reRender(movePosX, movePosY){
 
 function move(moveKey){
     if (moveKey.key == "w"){
-        reRender(0, moveDistance);
+        reRender(0, -moveDistance);
     } else if (moveKey.key == "a"){
 	reRender(-moveDistance, 0);
     } else if (moveKey.key == "s"){
-	reRender(0, -moveDistance);
+	reRender(0, moveDistance);
     } else if (moveKey.key == "d"){
 	reRender(moveDistance, 0);
     }
