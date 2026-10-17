@@ -38,11 +38,25 @@ function start(){
     requestAnimationFrame(start);
 }
 
+function move(moveKey){
+    if (moveKey == "w"){
+    } else if (moveKey == "a"){
+
+    } else if (moveKey == "s"){
+
+    } else if (moveKey == "d"){
+
+    }
+}
+
 
 window.addEventListener("keydown", (e) =>{
     if(e.key === "Enter"){
         gameStart = true; 
         spawn();
+    } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
+    	e.key == "d" || e.key == " " || e.key == "e" ){
+        move(e);
     }
 });
 
