@@ -43,12 +43,14 @@ function start(){
     } else{
         spawn();
     }
-    requestAnimationFrame(start);
+    //requestAnimationFrame(start);
 }
 
 function reRender(movePosX, movePosY){
+    ctx.clearRect(rectX, rectY, rectSize, rectSize);
     rectX += movePosX;
-    rectY += movePoxY;
+    rectY += movePosY;
+    ctx.fillStyle = "green";
     ctx.fillRect(rectX, rectY, rectSize, rectSize);
 }
 
