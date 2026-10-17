@@ -5,7 +5,13 @@
 
 
 const canvas = document.querySelector("canvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d"); 
+
+const rectSize = 60;
+var rectX;
+var rectY;
+
+const moveDistance = 5; 
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -14,13 +20,11 @@ canvas.height = window.innerHeight;
 let gameStart = false;
 
 function spawn(){
-    const size =  60;
-
-    const x = 23;
-    const y = canvas.height/2;
+    rectX = 23;
+    rectY = canvas.height/2;
 
     ctx.fillStyle = "green";
-    ctx.fillRect(x, y, size, size);
+    ctx.fillRect(rectX, rectY, rectSize, rectSize);
 
 }
 
@@ -38,14 +42,21 @@ function start(){
     requestAnimationFrame(start);
 }
 
+function reRender(movePosX, movePosY){
+    rectX += movePosX;
+    rectY += movePoxY;
+    ctx.fillRect(rectX, rectY, rectSize, rectSize);
+}
+
 function move(moveKey){
     if (moveKey == "w"){
+        reRender(0, moveDistance);
     } else if (moveKey == "a"){
-
+	reRender(-moveDistance, 0);
     } else if (moveKey == "s"){
-
+	reRender(0, -moveDistance);
     } else if (moveKey == "d"){
-
+	reRender(moveDistance, 0);
     }
 }
 
