@@ -135,6 +135,15 @@ window.addEventListener("keydown", (e) =>{
         move(e);
     }
 
+//respawn function
+let RESPAWN_X = 0;
+let RESPAWN_Y = 0;
+
+function saveRespawnCoordinates(x, y) {
+  RESPAWN_X = x;
+  RESPAWN_Y = y;
+}
+
     //WASD Movement 
 
     //But update() and draw() should handle the movement and drawing, not reRender()
