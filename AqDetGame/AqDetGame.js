@@ -1,7 +1,6 @@
 //alert("Test of JS file worksssss");
 document.addEventListener('DOMContentLoaded', () => {
     alert("DEBUG SPACE LOADED");
-    
 })
 
 
@@ -12,19 +11,20 @@ window.main = () => {
     // alert(counter);
     counter++;
     // updatePhysics();
+    
     window.cancelAnimationFrame(stopMain);
     
     
 }
 
 function start(){
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
-        ctx.fillStyle = "Black";
-        ctx.font = "80px Arial";
-        ctx. textAlign = "center";
-        ctx.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        ctx.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+        playerPH.fillStyle = "Black";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
     } else{
         spawn();
     }
@@ -34,16 +34,17 @@ function start(){
 
 
 
-const canvas = document.querySelector("canvas");
-const ctx = canvas.getContext("2d"); 
+const canvas = document.getElementById('PlrDisplay');
+const playerPH = canvas.getContext("2d"); 
 
 const rectSize = 60;
-var rectX;
+var replayerPH; //player PlaceHolder
 var rectY;
 var gravVector;
 
 var RESPAWN_X;
 var RESPAWN_Y;
+//0,0, IS TOP LEFT
 
 const moveDistance = 15; 
 
@@ -52,24 +53,27 @@ counter = 0;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-
 let gameStart = false;
 
 function spawn(){
-    rectX = 23;
+    replayerPH = 23;
     rectY = canvas.height/2;
 
-    ctx.fillStyle = "green";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillRect(rectX, rectY, rectSize, rectSize);
+    playerPH.fillStyle = "green";
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    playerPH.fillRect(replayerPH, rectY, rectSize, rectSize);
 
-
+    
+    // canvasTemp = document.getElementById("LayoutDisplay");
+    // playerPHTEMP = canvasTemp.getContext("2d"); 
+    // playerPHTEMP.fillStyle("red");
+    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
 }
 
 function respawn(){
     findRespawn();
     removeOldCharacter();
-    rectX = RESPAWN_X;
+    replayerPH = RESPAWN_X;
     rectY = RESPAWN_Y;
     reRender(0, 0);
 }
@@ -82,10 +86,10 @@ function saveRespawnCoordinates(x, y) {
 function findRespawn(){
     var newResX;
     var newResY;
-    if (rectX >= 400){
+    if (replayerPH >= 400){
         newResX = 700;
     }
-    else if (rectX < 400){
+    else if (replayerPH < 400){
         newResX = 100;
     }
 
@@ -95,7 +99,6 @@ function findRespawn(){
     else if (rectY < 500){
         newResY = 100;
     }
-    alert("got");
     saveRespawnCoordinates(newResX, newResY);
 }
 
@@ -109,22 +112,22 @@ function removeOldCharacter() {
 //   // take it out of the game and release the reference
 //   removeFromEntityList(player);
 //   player = null;
-  ctx.clearRect(rectX, rectY, canvas.width, canvas.height);
+  playerPH.clearRect(replayerPH, rectY, canvas.width, canvas.height);
 //   respawn();
 }
 
 
 function reRender(movePosX, movePosY){
-    ctx.clearRect(rectX, rectY, rectSize, rectSize);
-    rectX += movePosX;
+    playerPH.clearRect(replayerPH, rectY, rectSize, rectSize);
+    replayerPH += movePosX;
     rectY += movePosY;
-    ctx.fillStyle = "green";
-    ctx.fillRect(rectX, rectY, rectSize, rectSize);
+    playerPH.fillStyle = "green";
+    playerPH.fillRect(replayerPH, rectY, rectSize, rectSize);
 }
 
 function pcInteract()
 {   
-        alert(rectX);
+        alert(replayerPH);
         alert(rectY);
         alert("Interact Key Pressed!");
 }
@@ -169,7 +172,7 @@ window.addEventListener("keydown", (e) =>{
 // }
 
 // function updatePhysics() {
-//     // var pcPos = ctx.rect.x;
+//     // var pcPos = playerPH.rect.x;
 
 //     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
 //     // if (rectY + rectSize > canvas.height) {
