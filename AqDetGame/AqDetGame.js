@@ -1,8 +1,21 @@
 //alert("Test of JS file worksssss");
 document.addEventListener('DOMContentLoaded', () => {
     alert("DEBUG SPACE LOADED");
-    start();
+    
 })
+
+
+//Consider this function the Main of the entire game AND the infinite "While loop" that will call
+//      All natually-occuring events like gravity, enemy movement, and stuff like water currents
+window.main = () => {
+    stopMain = window.requestAnimationFrame(main);
+    // alert(counter);
+    counter++;
+    // updatePhysics();
+    window.cancelAnimationFrame(stopMain);
+    
+    
+}
 
 
 
@@ -13,8 +26,11 @@ const ctx = canvas.getContext("2d");
 const rectSize = 60;
 var rectX;
 var rectY;
+var gravVector;
 
-const moveDistance = 5; 
+const moveDistance = 15; 
+
+counter = 0;
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -44,6 +60,7 @@ function start(){
     } else{
         spawn();
     }
+    
     //requestAnimationFrame(start);
 }
 
@@ -53,6 +70,13 @@ function reRender(movePosX, movePosY){
     rectY += movePosY;
     ctx.fillStyle = "green";
     ctx.fillRect(rectX, rectY, rectSize, rectSize);
+}
+
+function pcInteract()
+{   
+        alert(rectX);
+        alert(rectY);
+        alert("Interact Key Pressed!");
 }
 
 function move(moveKey){
@@ -69,12 +93,54 @@ function move(moveKey){
 
 
 window.addEventListener("keydown", (e) =>{
+    main();
     if(e.key === "Enter"){
         gameStart = true; 
         spawn();
     } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
-    	e.key == "d" || e.key == " " || e.key == "e" ){
-            
+    	e.key == "d"){
         move(e);
+    } else if (e.key === " ") { //Space Entered - call jump
+        reRender(0, -50);
+    } else if (e.key == "e") { //'e' key pressed, call enter
+        pcInteract();
     }
-});
+    else {}
+})
+
+//DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction
+// function gravUpdate() {
+//     if (rectY < 1400) {
+//         gravVector = 10;
+//         reRender(0, gravVector);
+//     }
+// }
+
+// function updatePhysics() {
+//     // var pcPos = ctx.rect.x;
+
+//     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
+//     // if (rectY + rectSize > canvas.height) {
+//     //     // The square is below the bottom of the canvas
+//     //     rectY = canvas.height - rectSize;
+//     //     // Square stops falling
+//     //     velocityY = 0;
+//     // }
+
+//     // velocityY += gravity;
+//     // if (velocityY > max_fall_speed) {
+//     //     velocityY = max_fall_speed;
+//     // }
+//     // //Update rectY by velocityY
+//     // rectY += velocityY;
+//     // //Keep it from flying off the TOP (rectY < 0)
+//     // if (rectY < 0) {
+//     //     rectY = 0;
+//     //     velocityY = 0;
+//     // }
+
+    
+//     gravUpdate();
+// }
+
+    start();

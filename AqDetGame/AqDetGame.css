@@ -5,3 +5,12 @@ html {
 canvas {
     font-size: 200%;
 }
+
+
+.debugFloor {
+    border-style: ridge;
+    border-color: red;
+    border-width: 5px;
+    object-position: 0px -0px;
+    float:top;
+}
