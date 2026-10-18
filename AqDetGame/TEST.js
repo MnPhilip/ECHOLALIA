@@ -29,6 +29,25 @@ function spawn(){
     rectY = canvas.height/2;
     velocityY = 0;
 }
+//respawn function
+let RESPAWN_X = 0;
+let RESPAWN_Y = 0;
+
+function saveRespawnCoordinates(x, y) {
+  RESPAWN_X = x;
+  RESPAWN_Y = y;
+}
+//function removeOldCharacter() {
+  if (!player) return; // nothing to remove
+
+  // stop anything still running on the old PC
+  player.stopAnimations();
+  player.detachInputHandlers();
+
+  // take it out of the game and release the reference
+  removeFromEntityList(player);
+  player = null;
+}
 
 function gravUpdate() {
     velocityY += gravity;
@@ -135,25 +154,7 @@ window.addEventListener("keydown", (e) =>{
         move(e);
     }
 
-//respawn function
-let RESPAWN_X = 0;
-let RESPAWN_Y = 0;
 
-function saveRespawnCoordinates(x, y) {
-  RESPAWN_X = x;
-  RESPAWN_Y = y;
-}
-//function removeOldCharacter() {
-  if (!player) return; // nothing to remove
-
-  // stop anything still running on the old PC
-  player.stopAnimations();
-  player.detachInputHandlers();
-
-  // take it out of the game and release the reference
-  removeFromEntityList(player);
-  player = null;
-}
     //WASD Movement 
 
     //But update() and draw() should handle the movement and drawing, not reRender()
