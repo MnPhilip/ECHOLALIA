@@ -1,0 +1,2 @@
+[Contains images that will be used as assets for background, enemies, interactables, etc.]
+
