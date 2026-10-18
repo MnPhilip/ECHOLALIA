@@ -32,8 +32,6 @@ function start(){
     //requestAnimationFrame(start);
 }
 
-
-
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
 
@@ -55,12 +53,44 @@ canvas.height = window.innerHeight;
 
 let gameStart = false;
 
+// Barriers 
+const barriers =  [
+    { 
+        x: 400, 
+        y: 0, 
+        width: 20, 
+        height: 600,
+        color: "red"
+    }
+];
+
+function drawBarriers() {
+    for (const b of barriers) {
+        playerPH.fillStyle = b.color;
+        playerPH.fillRect(b.x,b.y,b.width,b.height);
+    }
+}
+
+function collidesWithBarrier(x, y, width, height) {
+    for (const b of barriers) {
+        if (x < b.x + b.width &&
+            x + rectSize > b.x &&
+            y < b.y + b.height &&
+            y + rectSize > b.y) {
+            return true;
+            }
+    }
+    return false;
+}
+
 function spawn(){
     replayerPH = 23;
     rectY = canvas.height/2;
 
-    playerPH.fillStyle = "green";
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    drawBarriers();
+
+    playerPH.fillStyle = "green";
     playerPH.fillRect(replayerPH, rectY, rectSize, rectSize);
 
     
@@ -118,9 +148,17 @@ function removeOldCharacter() {
 
 
 function reRender(movePosX, movePosY){
+    
+    if (collidesWithBarrier(replayerPH + movePosX, rectY + movePosX)) {
+        return;
+    }
+    
     playerPH.clearRect(replayerPH, rectY, rectSize, rectSize);
     replayerPH += movePosX;
     rectY += movePosY;
+
+     drawBarriers();
+
     playerPH.fillStyle = "green";
     playerPH.fillRect(replayerPH, rectY, rectSize, rectSize);
 }
