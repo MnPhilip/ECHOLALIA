@@ -17,6 +17,20 @@ window.main = () => {
     
 }
 
+function start(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        ctx.fillStyle = "Black";
+        ctx.font = "80px Arial";
+        ctx. textAlign = "center";
+        ctx.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        ctx.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+    } else{
+        spawn();
+    }
+    
+    //requestAnimationFrame(start);
+}
 
 
 
@@ -27,6 +41,9 @@ const rectSize = 60;
 var rectX;
 var rectY;
 var gravVector;
+
+var RESPAWN_X;
+var RESPAWN_Y;
 
 const moveDistance = 15; 
 
@@ -49,20 +66,15 @@ function spawn(){
 
 }
 
-function start(){
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if(!gameStart){
-        ctx.fillStyle = "Black";
-        ctx.font = "80px Arial";
-        ctx. textAlign = "center";
-        ctx.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        ctx.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
-    } else{
-        spawn();
-    }
-    
-    //requestAnimationFrame(start);
+function respawn(){
+    saveRespawnCoordinates(100, 100);
+    removeOldCharacter();
+    rectX = RESPAWN_X;
+    rectY = RESPAWN_Y;
+    reRender(0, 0);
 }
+
+
 
 function reRender(movePosX, movePosY){
     ctx.clearRect(rectX, rectY, rectSize, rectSize);
@@ -91,19 +103,40 @@ function move(moveKey){
     }
 }
 
+function saveRespawnCoordinates(x, y) {
+  RESPAWN_X = x;
+  RESPAWN_Y = y;
+}
+
+function removeOldCharacter() {
+//   if (!player) return; // nothing to remove
+
+//   // stop anything still running on the old PC
+//   player.stopAnimations();
+//   player.detachInputHandlers();
+
+//   // take it out of the game and release the reference
+//   removeFromEntityList(player);
+//   player = null;
+  ctx.clearRect(rectX, rectY, canvas.width, canvas.height);
+//   respawn();
+}
 
 window.addEventListener("keydown", (e) =>{
     main();
-    if(e.key === "Enter"){
+    if(e.key === "Enter" && !gameStart){
         gameStart = true; 
         spawn();
     } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
     	e.key == "d"){
         move(e);
     } else if (e.key === " ") { //Space Entered - call jump
-        reRender(0, -50);
+        // reRender(0, -50);Jump no longer needed
     } else if (e.key == "e") { //'e' key pressed, call enter
         pcInteract();
+    } else if (e.key == 'c')
+    {
+        respawn();
     }
     else {}
 })
