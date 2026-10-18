@@ -67,13 +67,51 @@ function spawn(){
 }
 
 function respawn(){
-    saveRespawnCoordinates(100, 100);
+    findRespawn();
     removeOldCharacter();
     rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
     reRender(0, 0);
 }
 
+function saveRespawnCoordinates(x, y) {
+  RESPAWN_X = x;
+  RESPAWN_Y = y;
+}
+
+function findRespawn(){
+    var newResX;
+    var newResY;
+    if (rectX >= 400){
+        newResX = 700;
+    }
+    else if (rectX < 400){
+        newResX = 100;
+    }
+
+    if (rectY >= 500){
+        newResY = 900;
+    }
+    else if (rectY < 500){
+        newResY = 100;
+    }
+    alert("got");
+    saveRespawnCoordinates(newResX, newResY);
+}
+
+function removeOldCharacter() {
+//   if (!player) return; // nothing to remove
+
+//   // stop anything still running on the old PC
+//   player.stopAnimations();
+//   player.detachInputHandlers();
+
+//   // take it out of the game and release the reference
+//   removeFromEntityList(player);
+//   player = null;
+  ctx.clearRect(rectX, rectY, canvas.width, canvas.height);
+//   respawn();
+}
 
 
 function reRender(movePosX, movePosY){
@@ -101,25 +139,6 @@ function move(moveKey){
     } else if (moveKey.key == "d"){
 	reRender(moveDistance, 0);
     }
-}
-
-function saveRespawnCoordinates(x, y) {
-  RESPAWN_X = x;
-  RESPAWN_Y = y;
-}
-
-function removeOldCharacter() {
-//   if (!player) return; // nothing to remove
-
-//   // stop anything still running on the old PC
-//   player.stopAnimations();
-//   player.detachInputHandlers();
-
-//   // take it out of the game and release the reference
-//   removeFromEntityList(player);
-//   player = null;
-  ctx.clearRect(rectX, rectY, canvas.width, canvas.height);
-//   respawn();
 }
 
 window.addEventListener("keydown", (e) =>{
