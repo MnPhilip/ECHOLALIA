@@ -278,5 +278,25 @@ function onLevelSelected(level) {
 function onOfferSurrender() {
   alertPartnerPlayer(SURRENDER_OFFERED); // flag value
 }
+let levelSelectShown = false;
+
+function onSetupKeyDown(event) {
+  if (event.key !== "Enter") return;
+  if (levelSelectShown) return; // ignore repeats
+  levelSelectShown = true;
+
+  hideSetupScreen();
+  document.removeEventListener("keydown", onSetupKeyDown);
+  levelSelectDisplay();
+}
+
+function levelSelectDisplay() {
+  const TOTAL_LEVELS = 5;
+  for (let level = 1; level <= TOTAL_LEVELS; level++) {
+    drawLevelOption(level, isUnlocked(level)); // positioned in order
+  }
+}
+
+document.addEventListener("keydown", onSetupKeyDown);
 
     start();
