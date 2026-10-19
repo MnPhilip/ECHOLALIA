@@ -257,5 +257,26 @@ function onAlternatePlayerResponse() { // called when the signal arrives
   else if (chosenOption === "exit") loadLevelSelect();
   chosenOption = null;
 }
+const TOTAL_LEVELS = 5;
+let highestUnlocked = 1; // Level 1 always unlocked
+
+function isUnlocked(level) {
+  return level <= highestUnlocked;
+}
+
+function onLevelCompleted(level) {
+  if (level === highestUnlocked && level < TOTAL_LEVELS) {
+    highestUnlocked = level + 1;
+  }
+}
+
+function onLevelSelected(level) {
+  if (!isUnlocked(level)) return; // blocked: do nothing
+  loadLevel(level);
+}
+
+function onOfferSurrender() {
+  alertPartnerPlayer(SURRENDER_OFFERED); // flag value
+}
 
     start();
