@@ -235,5 +235,27 @@ window.addEventListener("keydown", (e) =>{
     
 //     gravUpdate();
 // }
+let chosenOption = null;
+
+function levelCompleted() {
+  chosenOption = null;
+  showCompletionMenu(); // Continue and Exit buttons
+}
+
+function onOptionPressed(option) { // "continue" or "exit"
+  if (chosenOption !== null) return; // ignore repeat presses
+  chosenOption = option;
+  darkenMenu();
+  showMessage("Waiting");
+  alertAlternatePlayer(option); // placeholder, see questions
+}
+
+function onAlternatePlayerResponse() { // called when the signal arrives
+  hideMessage();
+  closeMenu();
+  if (chosenOption === "continue") loadNextLevel();
+  else if (chosenOption === "exit") loadLevelSelect();
+  chosenOption = null;
+}
 
     start();
