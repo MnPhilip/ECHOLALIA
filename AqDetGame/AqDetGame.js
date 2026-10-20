@@ -235,5 +235,68 @@ window.addEventListener("keydown", (e) =>{
     
 //     gravUpdate();
 // }
+let chosenOption = null;
+
+function levelCompleted() {
+  chosenOption = null;
+  showCompletionMenu(); // Continue and Exit buttons
+}
+
+function onOptionPressed(option) { // "continue" or "exit"
+  if (chosenOption !== null) return; // ignore repeat presses
+  chosenOption = option;
+  darkenMenu();
+  showMessage("Waiting");
+  alertAlternatePlayer(option); // placeholder, see questions
+}
+
+function onAlternatePlayerResponse() { // called when the signal arrives
+  hideMessage();
+  closeMenu();
+  if (chosenOption === "continue") loadNextLevel();
+  else if (chosenOption === "exit") loadLevelSelect();
+  chosenOption = null;
+}
+const TOTAL_LEVELS = 5;
+let highestUnlocked = 1; // Level 1 always unlocked
+
+function isUnlocked(level) {
+  return level <= highestUnlocked;
+}
+
+function onLevelCompleted(level) {
+  if (level === highestUnlocked && level < TOTAL_LEVELS) {
+    highestUnlocked = level + 1;
+  }
+}
+
+function onLevelSelected(level) {
+  if (!isUnlocked(level)) return; // blocked: do nothing
+  loadLevel(level);
+}
+
+function onOfferSurrender() {
+  alertPartnerPlayer(SURRENDER_OFFERED); // flag value
+}
+let levelSelectShown = false;
+
+function onSetupKeyDown(event) {
+  if (event.key !== "Enter") return;
+  if (levelSelectShown) return; // ignore repeats
+  levelSelectShown = true;
+
+  hideSetupScreen();
+  document.removeEventListener("keydown", onSetupKeyDown);
+  levelSelectDisplay();
+}
+
+function levelSelectDisplay() {
+  const TOTAL_LEVELS = 5;
+  for (let level = 1; level <= TOTAL_LEVELS; level++) {
+    drawLevelOption(level, isUnlocked(level)); // positioned in order
+  }
+}
+
+document.addEventListener("keydown", onSetupKeyDown);
 
     start();
