@@ -1,7 +1,8 @@
 html {
-    background-color: none;
+    background-color: blue;
     overflow: hidden;
     cursor:none;
+    background-image:"/AqDetImport/tempbckgnd.jpg";
 }
     
 canvas {

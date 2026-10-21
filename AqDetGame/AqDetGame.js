@@ -29,14 +29,9 @@ function start(){
         spawn();
     }
     
-    
-    var bckImg = new Image();
-    bckImg.src = "/AqDetImport/tempbckgnd.jpg";
-    background.drawImage(bckImg, 10,10);
-    background.fillStyle("blue");
-    background.fillRect(0, 0, 1000, 1000);
     //requestAnimationFrame(start);
 }
+
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
@@ -49,8 +44,8 @@ const background = bckgrndCanvas.getContext("2d");
 
 
 const rectSize = 60;
-var rectX; //player PlaceHolder
-var rectY;
+var rectX = 100; //player PlaceHolder
+var rectY = 200;
 var gravVector;
 
 var RESPAWN_X;
@@ -101,14 +96,15 @@ function collidesWithBarrier(x, y, width, height) {
 }
 
 function spawn(){
-    rectX = 10;
-    rectY = (canvas.height/2) - 400;
+    
 
+    findRespawn;
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     drawBarriers();
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    respawn;
 
     
     // canvasTemp = document.getElementById("LayoutDisplay");
@@ -130,7 +126,7 @@ function saveRespawnCoordinates(x, y) {
   RESPAWN_Y = y;
 }
 
-function findRespawn(){
+function findRespawn(){ //Will eventually be upgraded to search for respawn points based on the currently loaded level
     var newResX;
     var newResY;
     if (rectX >= 400){
@@ -216,6 +212,9 @@ window.addEventListener("keydown", (e) =>{
     } else if (e.key == 'c')
     {
         respawn();
+    } else if (e.key == 'o') {
+        alert(rectX);
+        alert(rectY);
     }
     else {}
 })
