@@ -29,11 +29,24 @@ function start(){
         spawn();
     }
     
+    
+    var bckImg = new Image();
+    bckImg.src = "/AqDetImport/tempbckgnd.jpg";
+    background.drawImage(bckImg, 10,10);
+    background.fillStyle("blue");
+    background.fillRect(0, 0, 1000, 1000);
     //requestAnimationFrame(start);
 }
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
+
+const lvlCanvas = document.getElementById('LevelDisplay');
+const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
+
+const bckgrndCanvas = document.getElementById('BackgroundDisplay');
+const background = bckgrndCanvas.getContext("2d");
+
 
 const rectSize = 60;
 var rectX; //player PlaceHolder
@@ -50,6 +63,10 @@ counter = 0;
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+lvlLayout.width = window.innerWidth;
+lvlLayout.height = window.innerHeight;
+background.width = window.innerWidth;
+background.height = window.innerHeight;
 
 let gameStart = false;
 
@@ -62,12 +79,12 @@ const barriers =  [
         height: 600,
         color: "red"
     }
-];
+]; //POSSIBLE OPTION FOR DRAWING LEVEL LAYOUTS: might need to manually script out the "move cursor here, draw a line, move cursor here, draw a line"
 
 function drawBarriers() {
     for (const b of barriers) {
-        playerPH.fillStyle = b.color;
-        playerPH.fillRect(b.x,b.y,b.width,b.height);
+        lvlLayout.fillStyle = b.color;
+        lvlLayout.fillRect(b.x,b.y,b.width,b.height, b.color);
     }
 }
 
@@ -84,8 +101,8 @@ function collidesWithBarrier(x, y, width, height) {
 }
 
 function spawn(){
-    rectX = 23;
-    rectY = canvas.height/2;
+    rectX = 10;
+    rectY = (canvas.height/2) - 400;
 
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     drawBarriers();
