@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //      All natually-occuring events like gravity, enemy movement, and stuff like water currents
 window.main = () => {
     stopMain = window.requestAnimationFrame(main);
-    // alert(counter);
+    // alert(counter);     
     counter++;
     // updatePhysics();
     
@@ -36,7 +36,7 @@ const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
 
 const rectSize = 60;
-var replayerPH; //player PlaceHolder
+var rectX; //player PlaceHolder
 var rectY;
 var gravVector;
 
@@ -84,14 +84,14 @@ function collidesWithBarrier(x, y, width, height) {
 }
 
 function spawn(){
-    replayerPH = 23;
+    rectX = 23;
     rectY = canvas.height/2;
 
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     drawBarriers();
 
     playerPH.fillStyle = "green";
-    playerPH.fillRect(replayerPH, rectY, rectSize, rectSize);
+    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 
     
     // canvasTemp = document.getElementById("LayoutDisplay");
@@ -103,7 +103,7 @@ function spawn(){
 function respawn(){
     findRespawn();
     removeOldCharacter();
-    replayerPH = RESPAWN_X;
+    rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
     reRender(0, 0);
 }
@@ -116,10 +116,10 @@ function saveRespawnCoordinates(x, y) {
 function findRespawn(){
     var newResX;
     var newResY;
-    if (replayerPH >= 400){
+    if (rectX >= 400){
         newResX = 700;
     }
-    else if (replayerPH < 400){
+    else if (rectX < 400){
         newResX = 100;
     }
 
@@ -129,7 +129,7 @@ function findRespawn(){
     else if (rectY < 500){
         newResY = 100;
     }
-    saveRespawnCoordinates(newResX, newResY);
+    saveRespawnCoordinates(newResX, newResY);//AFTER CHANGE: By-level decision, CALL a function that changes based on what level is loaded
 }
 
 function removeOldCharacter() {
@@ -142,35 +142,35 @@ function removeOldCharacter() {
 //   // take it out of the game and release the reference
 //   removeFromEntityList(player);
 //   player = null;
-  playerPH.clearRect(replayerPH, rectY, canvas.width, canvas.height);
+  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
 //   respawn();
 }
 
 
 function reRender(movePosX, movePosY){
     
-    if (collidesWithBarrier(replayerPH + movePosX, rectY + movePosX)) {
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
         return;
     }
     
-    playerPH.clearRect(replayerPH, rectY, rectSize, rectSize);
-    replayerPH += movePosX;
+    playerPH.clearRect(rectX, rectY, rectSize, rectSize);
+    rectX += movePosX;
     rectY += movePosY;
 
      drawBarriers();
 
     playerPH.fillStyle = "green";
-    playerPH.fillRect(replayerPH, rectY, rectSize, rectSize);
+    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 }
 
 function pcInteract()
 {   
-        alert(replayerPH);
-        alert(rectY);
+        // alert(rectX);
+        // alert(rectY);
         alert("Interact Key Pressed!");
 }
 
-function move(moveKey){
+function move(moveKey) {
     if (moveKey.key == "w"){
         reRender(0, -moveDistance);
     } else if (moveKey.key == "a"){
@@ -182,8 +182,10 @@ function move(moveKey){
     }
 }
 
-window.addEventListener("keydown", (e) =>{
-    main();
+window.addEventListener("keydown", (e) =>{ 
+    main(); //infinite loop
+    
+    //Fix to allow caps letters and multiple buttons being pressed
     if(e.key === "Enter" && !gameStart){
         gameStart = true; 
         spawn();
@@ -201,7 +203,7 @@ window.addEventListener("keydown", (e) =>{
     else {}
 })
 
-//DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction
+//DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
 // function gravUpdate() {
 //     if (rectY < 1400) {
 //         gravVector = 10;
@@ -268,6 +270,7 @@ function onLevelCompleted(level) {
   if (level === highestUnlocked && level < TOTAL_LEVELS) {
     highestUnlocked = level + 1;
   }
+  //DISPLAY AN HTML POP_UP WINDOW THAT GIVES THE PLAYER CONTINUATINO OPTIONS
 }
 
 function onLevelSelected(level) {
@@ -297,6 +300,6 @@ function levelSelectDisplay() {
   }
 }
 
-document.addEventListener("keydown", onSetupKeyDown);
+// document.addEventListener("keydown", onSetupKeyDown);
 
-    start();
+start() 
