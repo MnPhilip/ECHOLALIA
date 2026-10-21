@@ -1,6 +1,7 @@
 html {
     background-color: blue;
-    
+    overflow: hidden;
+    cursor:none;
 }
     
 canvas {
