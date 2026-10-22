@@ -44,7 +44,10 @@ var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
-const moveDistance = 15; 
+const NO_MOVEMENT = 0;
+const STANDARD_MOVEMENT = 15; 
+
+const pressedKeys = new Set();
 
 counter = 0;
 
@@ -55,13 +58,29 @@ let gameStart = false;
 
 // Barriers 
 const barriers =  [
-    { 
+    /*
+    { // test barrier
         x: 400, 
         y: 0, 
         width: 20, 
         height: 600,
         color: "red"
-    }
+    },
+    */
+    { // top barrier
+        x: 0,
+        y: 450,
+        width: canvas.width,
+        height: 20,
+        color: "green"
+    }, 
+    { // bottom barrier
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: 20,
+        color: "green"
+    }, 
 ];
 
 function drawBarriers() {
@@ -81,6 +100,10 @@ function collidesWithBarrier(x, y, width, height) {
             }
     }
     return false;
+}
+
+function populateLevel1MapScreen1() {
+
 }
 
 function spawn(){
@@ -170,38 +193,47 @@ function pcInteract()
         alert("Interact Key Pressed!");
 }
 
-function move(moveKey) {
-    if (moveKey.key == "w"){
-        reRender(0, -moveDistance);
-    } else if (moveKey.key == "a"){
-	reRender(-moveDistance, 0);
-    } else if (moveKey.key == "s"){
-	reRender(0, moveDistance);
-    } else if (moveKey.key == "d"){
-	reRender(moveDistance, 0);
+function moveCharacterWASD(moveKeys) {
+    moveDistanceX = NO_MOVEMENT;
+    moveDistanceY = NO_MOVEMENT;
+    if (moveKeys.has('w')){
+        moveDistanceY -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('a')){
+	    moveDistanceX -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('s')){
+        moveDistanceY += STANDARD_MOVEMENT;
+    } else if (moveKeys.has('d')){
+        moveDistanceX += STANDARD_MOVEMENT;
     }
+    //alert(moveDistanceX + " " + moveDistanceY);
+    reRender(moveDistanceX, moveDistanceY);
 }
 
 window.addEventListener("keydown", (e) =>{ 
     main(); //infinite loop
-    
+    pressedKeys.add(e.key.toLowerCase());
     //Fix to allow caps letters and multiple buttons being pressed
     if(e.key === "Enter" && !gameStart){
         gameStart = true; 
         spawn();
-    } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
-    	e.key == "d"){
-        move(e);
+    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
+    pressedKeys.has('s') || pressedKeys.has('d')){
+        moveCharacterWASD(pressedKeys);
     } else if (e.key === " ") { //Space Entered - call jump
         // reRender(0, -50);Jump no longer needed
-    } else if (e.key == "e") { //'e' key pressed, call enter
+    } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
         pcInteract();
-    } else if (e.key == 'c')
+    } else if ((e.key).toLowerCase == 'c')
     {
         respawn();
     }
     else {}
 })
+
+window.addEventListener('keyup', (event) => {
+    // Remove the key from the Set when released
+    pressedKeys.delete(event.key.toLowerCase());
+});
 
 //DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
 // function gravUpdate() {
