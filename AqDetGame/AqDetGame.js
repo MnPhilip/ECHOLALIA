@@ -55,8 +55,8 @@ const interactableLoc = [
 const pushBlock = 11;
 const bubble = 22;
 const signalFlare = 33;
-
-
+var interactActive = false;
+var currObj = -1;
 
 const moveDistance = 15; 
 
@@ -75,7 +75,6 @@ function renderInit() {
     drawBarriers();
     // drawBackground();
     drawInteractables();
-    alert("here");    
     playerPH.fillStyle = "green";
     
     gameStart = true; 
@@ -222,6 +221,12 @@ function reRender(movePosX, movePosY){
     rectX += movePosX;
     rectY += movePosY;
     drawBarriers();
+    for (obj of interactableLoc){
+        if (obj.activated) {
+            obj.x += movePosX;
+            obj.y += movePosY;
+        }
+    }
     drawInteractables();
 
     playerPH.fillStyle = "green";
@@ -230,33 +235,42 @@ function reRender(movePosX, movePosY){
 
 function pcInteract()
 {   
+    var objType;
+    
+    if (!interactActive){
+        objType = interactCheck();
         alert("Interact Key Pressed!");
-        var objType = interactCheck();
-        if (objType < 0)
-        {
-            return;
-        }
-        else if (objType == pushBlock) {
-            alert("Grabbed his ass");
-        }//PushBlock found
-        else if (objType == bubble) {}//Bubble found
-        else if (objType == signalFlare){} //Signal Flare found
+    } else {
+        interactActive = !interactActive;
+        interactableLoc[currObj].activated = false;
+        currObj = -1;
+        objType = -1;
+    }
+
+    if (objType < 0)
+    {
+        alert("No object found or object unbound");
+        return;
+    }
+    else if (objType == pushBlock) {
+        alert("push block active");
+    }//PushBlock found
+    else if (objType == bubble) {}//Bubble found
+    else if (objType == signalFlare){} //Signal Flare found
 }
 
 //CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
 //      and set the "activated" boolean of that interactable to 'true'
 function interactCheck(){
-    for (const obj of interactableLoc){
-        if ((rectX-moveDistance) < obj.x || (rectX+rectSize+moveDistance) > (obj.x+interactableSize)){ //Checks to the left and right of the player object
-            alert('x checked');
-            obj.activated = true;
-        }
-        
-        if ((rectY+rectSize+moveDistance) > obj.y+interactableSize || (rectY-moveDistance) < obj.y) {//Checks above and below the player object
-            obj.activated = true;
-            alert('y checked');
+    var count = 0;
+    for (var obj of interactableLoc){
+        if (true){//Checks above and below the player object
+            interactActive = true;  //Allows other functions to know an interaction is active
+            obj.activated = true;   //Toggles the state of the specific interactable, allowing it to be drawn where it needs to be moved to
+            currObj = count;
             return obj.type;
         }
+        count++;
     }
 }
 
