@@ -55,6 +55,8 @@ function renderInit() {
     drawBackground();
     
     playerPH.fillStyle = "green";
+    
+    gameStart = true; 
 }
 
 function start(){
@@ -68,7 +70,7 @@ function start(){
 
         renderInit();
     } else{
-        spawn();
+        spawn(); //Initial Rendering and Spawning of Player Character
     }
     
     //requestAnimationFrame(start);
@@ -112,24 +114,19 @@ function drawBackground() {
     background.drawImage(backImg, 0, 0);  
 }
 
-function spawn(){
+
+//Exclusively for first spawns of a level when the level is rendered, anything else should be done via Respawn()
+function spawn(){ 
     
-    findRespawn;
-    drawBarriers();
-
+    drawBarriers(); //Can be replaced with a function to draw a level and its layout
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    // playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-
-    respawn();
-
-    // canvasTemp = document.getElementById("LayoutDisplay");
-    // playerPHTEMP = canvasTemp.getContext("2d"); 
-    // playerPHTEMP.fillStyle("red");
-    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
+    respawn(); 
 }
 
+
+//Any spawning done AFTER initial level setup, 
 function respawn(){
-    findRespawn();
+    findRespawn(); //Allows player to get spawn coordinates without hardcoding
     removeOldCharacter();
     rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
@@ -160,8 +157,10 @@ function findRespawn(){ //Will eventually be upgraded to search for respawn poin
     saveRespawnCoordinates(newResX, newResY);//AFTER CHANGE: By-level decision, CALL a function that changes based on what level is loaded
 }
 
+
+//Currently a shorthand funtion, can eventually be used to house animations associated with respawning
 function removeOldCharacter() {
-  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
+  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height); //Shorthand to clear old character instance, SHOULD BE CALLED BEFORE RECTX OR RECTY ARE MODIFIED
 }
 
 
@@ -170,8 +169,7 @@ function reRender(movePosX, movePosY){
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
         return;
     }
-    
-    playerPH.clearRect(rectX, rectY, rectSize, rectSize);
+    removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
     rectX += movePosX;
     rectY += movePosY;
     drawBarriers();
@@ -203,8 +201,7 @@ window.addEventListener("keydown", (e) =>{
     main(); //infinite loop
     
     //Fix to allow caps letters and multiple buttons being pressed
-    if(e.key === "Enter" && !gameStart){
-        gameStart = true; 
+    if(e.key == "Enter" && !gameStart){
         spawn();
     } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
     	e.key == "d"){
@@ -213,10 +210,10 @@ window.addEventListener("keydown", (e) =>{
         // reRender(0, -50);Jump no longer needed
     } else if (e.key == "e") { //'e' key pressed, call enter
         pcInteract();
-    } else if (e.key == 'c')
+    } else if (e.key == 'c') //Respawn keybind
     {
         respawn();
-    } else if (e.key == 'o') {
+    } else if (e.key == 'o') { //DEBUG: Prints current location of the PC
         alert(rectX);
         alert(rectY);
     }
