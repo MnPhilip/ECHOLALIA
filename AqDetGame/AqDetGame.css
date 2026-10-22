@@ -2,11 +2,12 @@ html {
     background-color: blue;
     overflow: hidden;
     cursor:none;
-    background-image:"/AqDetImport/tempbckgnd.jpg";
+    /* background-image: url("test.jpg"); */
 }
     
 canvas {
     font-size: 200%;
+    position:absolute;
 }
 
 

@@ -17,21 +17,6 @@ window.main = () => {
     
 }
 
-function start(){
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    if(!gameStart){
-        playerPH.fillStyle = "Black";
-        playerPH.font = "80px Arial";
-        playerPH.textAlign = "center";
-        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
-    } else{
-        spawn();
-    }
-    
-    //requestAnimationFrame(start);
-}
-
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
@@ -58,12 +43,36 @@ counter = 0;
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-lvlLayout.width = window.innerWidth;
-lvlLayout.height = window.innerHeight;
-background.width = window.innerWidth;
-background.height = window.innerHeight;
+lvlCanvas.width = window.innerWidth;
+lvlCanvas.height = window.innerHeight;
+bckgrndCanvas.width = window.innerWidth;
+bckgrndCanvas.height = window.innerHeight;
 
 let gameStart = false;
+
+function renderInit() {
+    drawBarriers();
+    drawBackground();
+    
+    playerPH.fillStyle = "green";
+}
+
+function start(){
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        playerPH.fillStyle = "Yellow";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+
+        renderInit();
+    } else{
+        spawn();
+    }
+    
+    //requestAnimationFrame(start);
+}
 
 // Barriers 
 const barriers =  [
@@ -77,9 +86,10 @@ const barriers =  [
 ]; //POSSIBLE OPTION FOR DRAWING LEVEL LAYOUTS: might need to manually script out the "move cursor here, draw a line, move cursor here, draw a line"
 
 function drawBarriers() {
+    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of barriers) {
-        lvlLayout.fillStyle = b.color;
-        lvlLayout.fillRect(b.x,b.y,b.width,b.height, b.color);
+        lvlLayout.strokeStyle = "red"; //b.color;
+        lvlLayout.strokeRect(400, 0, 20, 600); //(b.x,b.y,b.width,b.height, b.color);
     }
 }
 
@@ -95,18 +105,23 @@ function collidesWithBarrier(x, y, width, height) {
     return false;
 }
 
+function drawBackground() {
+    background.clearRect(0, 0, canvas.width, canvas.height);
+    var backImg = new Image();
+    backImg.src = url('test.jpg');
+    background.drawImage(backImg, 0, 0);  
+}
+
 function spawn(){
     
-
     findRespawn;
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
     drawBarriers();
 
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-    respawn;
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    // playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 
-    
+    respawn();
+
     // canvasTemp = document.getElementById("LayoutDisplay");
     // playerPHTEMP = canvasTemp.getContext("2d"); 
     // playerPHTEMP.fillStyle("red");
@@ -146,17 +161,7 @@ function findRespawn(){ //Will eventually be upgraded to search for respawn poin
 }
 
 function removeOldCharacter() {
-//   if (!player) return; // nothing to remove
-
-//   // stop anything still running on the old PC
-//   player.stopAnimations();
-//   player.detachInputHandlers();
-
-//   // take it out of the game and release the reference
-//   removeFromEntityList(player);
-//   player = null;
   playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
-//   respawn();
 }
 
 
@@ -169,8 +174,7 @@ function reRender(movePosX, movePosY){
     playerPH.clearRect(rectX, rectY, rectSize, rectSize);
     rectX += movePosX;
     rectY += movePosY;
-
-     drawBarriers();
+    drawBarriers();
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
