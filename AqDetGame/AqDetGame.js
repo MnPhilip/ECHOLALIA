@@ -31,11 +31,23 @@ const background = bckgrndCanvas.getContext("2d");
 const rectSize = 60;
 var rectX = 100; //player PlaceHolder
 var rectY = 200;
+//0,0 of PlayerPH is bottom left of the canvas/square
 var gravVector;
 
 var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
+
+const interactableSize = 50;
+const interactableLoc = [[[]]]; //[Xorigin][Yorigin][type_constant]
+const barrierLoc = [[]];
+
+//Interactable Type Constants
+const pushBlock = 11;
+const bubble = 22;
+const signalFlare = 33;
+
+
 
 const moveDistance = 15; 
 
@@ -52,8 +64,9 @@ let gameStart = false;
 
 function renderInit() {
     drawBarriers();
-    drawBackground();
-    
+    // drawBackground();
+    drawInteractables();
+    alert("here");    
     playerPH.fillStyle = "green";
     
     gameStart = true; 
@@ -87,10 +100,10 @@ const barriers =  [
     },
 
     {
-        x: 800,
-        y: 0,
-        width: 20,
-        height: 400, 
+        x: 200,
+        y: 600,
+        width: 200,
+        height: 40, 
         color: "yellow"
     }
 ]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
@@ -119,6 +132,14 @@ function drawBackground() {
     var backImg = new Image();
     backImg.src = url('test.jpg');
     background.drawImage(backImg, 0, 0);  
+}
+
+//Draws Push Blocks, Flares, and Bubbles - Will need integration to get applicable data from a file with Level-specific layouts
+function drawInteractables() {
+    lvlLayout.fillStyle = "purple";
+    lvlLayout.fillRect(70, 800, interactableSize, interactableSize);
+    interactableLoc[0][0] = 70;
+    interactableLoc[0][1] = 800;
 }
 
 
@@ -180,6 +201,7 @@ function reRender(movePosX, movePosY){
     rectX += movePosX;
     rectY += movePosY;
     drawBarriers();
+    drawInteractables();
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
@@ -190,6 +212,18 @@ function pcInteract()
         // alert(rectX);
         // alert(rectY);
         alert("Interact Key Pressed!");
+        var objType = interactCheck();
+        if (objType < 0)
+        {
+            return;
+        }
+        else if (objType == pushBlock) {}//PushBlock found
+        else if (objType == bubble) {}//Bubble found
+        else if (objType == signalFlare){} //Signal Flare found
+}
+
+function interactCheck(){
+    if ((rectX + movementSpeed) == interactableLoc[0][0])
 }
 
 function move(moveKey) {
