@@ -39,8 +39,17 @@ var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
 const interactableSize = 50;
-const interactableLoc = [[[]]]; //[Xorigin][Yorigin][type_constant]
-const barrierLoc = [[]];
+const interactableLoc = [
+    {
+        x: 80,
+        y: 800,
+        width: interactableSize,
+        height: interactableSize,
+        color: "purple",
+        type: 0,
+        activated: false
+    }
+]; //[Xorigin][Yorigin][type_constant]
 
 //Interactable Type Constants
 const pushBlock = 11;
@@ -83,6 +92,7 @@ function start(){
 
         renderInit();
     } else{
+        playerPH.fillText("", canvas.width, canvas.height);
         spawn(); //Initial Rendering and Spawning of Player Character
     }
     
@@ -105,6 +115,14 @@ const barriers =  [
         width: 200,
         height: 40, 
         color: "yellow"
+    }, 
+
+    {
+        x: interactableLoc[0].x,
+        y: interactableLoc[0].y,
+        width:interactableSize,
+        height: interactableSize,
+        color: "pink"
     }
 ]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
 function drawBarriers() {
@@ -136,10 +154,13 @@ function drawBackground() {
 
 //Draws Push Blocks, Flares, and Bubbles - Will need integration to get applicable data from a file with Level-specific layouts
 function drawInteractables() {
-    lvlLayout.fillStyle = "purple";
-    lvlLayout.fillRect(70, 800, interactableSize, interactableSize);
-    interactableLoc[0][0] = 70;
-    interactableLoc[0][1] = 800;
+    //TESTING STATEMENT AND LOOP
+    interactableLoc[0].type = pushBlock;
+    for (const obj of interactableLoc)
+    {
+        lvlLayout.fillStyle = obj.color;
+        lvlLayout.fillRect(obj.x, obj.y, obj.width, obj.height);
+    }
 }
 
 
@@ -209,21 +230,34 @@ function reRender(movePosX, movePosY){
 
 function pcInteract()
 {   
-        // alert(rectX);
-        // alert(rectY);
         alert("Interact Key Pressed!");
         var objType = interactCheck();
         if (objType < 0)
         {
             return;
         }
-        else if (objType == pushBlock) {}//PushBlock found
+        else if (objType == pushBlock) {
+            alert("Grabbed his ass");
+        }//PushBlock found
         else if (objType == bubble) {}//Bubble found
         else if (objType == signalFlare){} //Signal Flare found
 }
 
+//CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
+//      and set the "activated" boolean of that interactable to 'true'
 function interactCheck(){
-    if ((rectX + movementSpeed) == interactableLoc[0][0])
+    for (const obj of interactableLoc){
+        if ((rectX-moveDistance) < obj.x || (rectX+rectSize+moveDistance) > (obj.x+interactableSize)){ //Checks to the left and right of the player object
+            alert('x checked');
+            obj.activated = true;
+        }
+        
+        if ((rectY+rectSize+moveDistance) > obj.y+interactableSize || (rectY-moveDistance) < obj.y) {//Checks above and below the player object
+            obj.activated = true;
+            alert('y checked');
+            return obj.type;
+        }
+    }
 }
 
 function move(moveKey) {
