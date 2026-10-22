@@ -17,27 +17,20 @@ window.main = () => {
     
 }
 
-function start(){
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    if(!gameStart){
-        playerPH.fillStyle = "Black";
-        playerPH.font = "80px Arial";
-        playerPH.textAlign = "center";
-        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
-    } else{
-        spawn();
-    }
-    
-    //requestAnimationFrame(start);
-}
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
 
+const lvlCanvas = document.getElementById('LevelDisplay');
+const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
+
+const bckgrndCanvas = document.getElementById('BackgroundDisplay');
+const background = bckgrndCanvas.getContext("2d");
+
+
 const rectSize = 60;
-var rectX; //player PlaceHolder
-var rectY;
+var rectX = 100; //player PlaceHolder
+var rectY = 200;
 var gravVector;
 
 var RESPAWN_X;
@@ -50,8 +43,38 @@ counter = 0;
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+lvlCanvas.width = window.innerWidth;
+lvlCanvas.height = window.innerHeight;
+bckgrndCanvas.width = window.innerWidth;
+bckgrndCanvas.height = window.innerHeight;
 
 let gameStart = false;
+
+function renderInit() {
+    drawBarriers();
+    drawBackground();
+    
+    playerPH.fillStyle = "green";
+    
+    gameStart = true; 
+}
+
+function start(){
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        playerPH.fillStyle = "Yellow";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+
+        renderInit();
+    } else{
+        spawn(); //Initial Rendering and Spawning of Player Character
+    }
+    
+    //requestAnimationFrame(start);
+}
 
 // Barriers 
 const barriers =  [
@@ -61,13 +84,21 @@ const barriers =  [
         width: 20, 
         height: 600,
         color: "red"
-    }
-];
+    },
 
+    {
+        x: 800,
+        y: 0,
+        width: 20,
+        height: 400, 
+        color: "yellow"
+    }
+]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
 function drawBarriers() {
+    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of barriers) {
-        playerPH.fillStyle = b.color;
-        playerPH.fillRect(b.x,b.y,b.width,b.height);
+        lvlLayout.strokeStyle = b.color;
+        lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
     }
 }
 
@@ -83,25 +114,26 @@ function collidesWithBarrier(x, y, width, height) {
     return false;
 }
 
-function spawn(){
-    rectX = 23;
-    rectY = canvas.height/2;
-
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    drawBarriers();
-
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-
-    
-    // canvasTemp = document.getElementById("LayoutDisplay");
-    // playerPHTEMP = canvasTemp.getContext("2d"); 
-    // playerPHTEMP.fillStyle("red");
-    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
+function drawBackground() {
+    background.clearRect(0, 0, canvas.width, canvas.height);
+    var backImg = new Image();
+    backImg.src = url('test.jpg');
+    background.drawImage(backImg, 0, 0);  
 }
 
+
+//Exclusively for first spawns of a level when the level is rendered, anything else should be done via Respawn()
+function spawn(){ 
+    
+    drawBarriers(); //Can be replaced with a function to draw a level and its layout
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    respawn(); 
+}
+
+
+//Any spawning done AFTER initial level setup, 
 function respawn(){
-    findRespawn();
+    findRespawn(); //Allows player to get spawn coordinates without hardcoding
     removeOldCharacter();
     rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
@@ -113,7 +145,7 @@ function saveRespawnCoordinates(x, y) {
   RESPAWN_Y = y;
 }
 
-function findRespawn(){
+function findRespawn(){ //Will eventually be upgraded to search for respawn points based on the currently loaded level
     var newResX;
     var newResY;
     if (rectX >= 400){
@@ -132,18 +164,10 @@ function findRespawn(){
     saveRespawnCoordinates(newResX, newResY);//AFTER CHANGE: By-level decision, CALL a function that changes based on what level is loaded
 }
 
+
+//Currently a shorthand funtion, can eventually be used to house animations associated with respawning
 function removeOldCharacter() {
-//   if (!player) return; // nothing to remove
-
-//   // stop anything still running on the old PC
-//   player.stopAnimations();
-//   player.detachInputHandlers();
-
-//   // take it out of the game and release the reference
-//   removeFromEntityList(player);
-//   player = null;
-  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
-//   respawn();
+  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height); //Shorthand to clear old character instance, SHOULD BE CALLED BEFORE RECTX OR RECTY ARE MODIFIED
 }
 
 
@@ -152,12 +176,10 @@ function reRender(movePosX, movePosY){
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
         return;
     }
-    
-    playerPH.clearRect(rectX, rectY, rectSize, rectSize);
+    removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
     rectX += movePosX;
     rectY += movePosY;
-
-     drawBarriers();
+    drawBarriers();
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
@@ -186,8 +208,7 @@ window.addEventListener("keydown", (e) =>{
     main(); //infinite loop
     
     //Fix to allow caps letters and multiple buttons being pressed
-    if(e.key === "Enter" && !gameStart){
-        gameStart = true; 
+    if(e.key == "Enter" && !gameStart){
         spawn();
     } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
     	e.key == "d"){
@@ -196,9 +217,12 @@ window.addEventListener("keydown", (e) =>{
         // reRender(0, -50);Jump no longer needed
     } else if (e.key == "e") { //'e' key pressed, call enter
         pcInteract();
-    } else if (e.key == 'c')
+    } else if (e.key == 'c') //Respawn keybind
     {
         respawn();
+    } else if (e.key == 'o') { //DEBUG: Prints current location of the PC
+        alert(rectX);
+        alert(rectY);
     }
     else {}
 })
