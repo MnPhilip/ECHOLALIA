@@ -84,14 +84,22 @@ const barriers =  [
         width: 20, 
         height: 600,
         color: "red"
+    },
+
+    {
+        x: 800,
+        y: 0,
+        width: 20,
+        height: 400, 
+        color: "yellow"
     }
 ]; //POSSIBLE OPTION FOR DRAWING LEVEL LAYOUTS: might need to manually script out the "move cursor here, draw a line, move cursor here, draw a line"
 
 function drawBarriers() {
     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of barriers) {
-        lvlLayout.strokeStyle = "red"; //b.color;
-        lvlLayout.strokeRect(400, 0, 20, 600); //(b.x,b.y,b.width,b.height, b.color);
+        lvlLayout.strokeStyle = b.color;
+        lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
     }
 }
 
