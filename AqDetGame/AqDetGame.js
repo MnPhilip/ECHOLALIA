@@ -93,8 +93,7 @@ const barriers =  [
         height: 400, 
         color: "yellow"
     }
-]; //POSSIBLE OPTION FOR DRAWING LEVEL LAYOUTS: might need to manually script out the "move cursor here, draw a line, move cursor here, draw a line"
-
+]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
 function drawBarriers() {
     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of barriers) {
