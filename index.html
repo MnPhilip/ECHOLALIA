@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="AqDetGame/AqDetGame.css?v=20261023-start-button">
+    <link rel="stylesheet" type="text/css" href="AqDetGame/AqDetGame.css?v=20261023-surrender-pending">
     <style>
     </style>
 
@@ -75,16 +75,15 @@
     </div>
   </section>
 
-  <section class="completion-menu" id="surrenderMenu" role="dialog" aria-modal="true" aria-labelledby="surrenderTitle" hidden>
-    <div class="completion-menu__panel">
-      <h2 id="surrenderTitle">Offer surrender?</h2>
-      <div class="completion-menu__actions">
-        <button type="button" data-surrender-option="surrender">Surrender</button>
-        <button type="button" data-surrender-option="continue">Continue</button>
-      </div>
+  <section class="surrender-pending" id="surrenderMenu" role="dialog" aria-modal="true" aria-labelledby="surrenderTitle" aria-describedby="surrenderDescription" hidden>
+    <div class="surrender-pending__panel">
+      <h2 id="surrenderTitle">Surrender offer sent to partner!</h2>
+      <p id="surrenderDescription">Your partner is currently deciding whether to surrender this current level.</p>
+      <p class="surrender-pending__waiting" role="status" aria-live="polite">Waiting...</p>
+      <button class="surrender-pending__cancel" id="cancelSurrenderOffer" type="button">Cancel offer</button>
     </div>
   </section>
 
-  <script src="AqDetGame/AqDetGame.js?v=20261023-6" type="text/javascript"></script>
+  <script src="AqDetGame/AqDetGame.js?v=20261023-7" type="text/javascript"></script>
 </body>
 </html>

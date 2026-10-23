@@ -35,6 +35,7 @@ const gameScreen = document.getElementById("gameScreen");
 const completionMenu = document.getElementById("completionMenu");
 const completionWaiting = document.getElementById("completionWaiting");
 const surrenderMenu = document.getElementById("surrenderMenu");
+const cancelSurrenderOfferButton = document.getElementById("cancelSurrenderOffer");
 const currentLevelTitle = document.getElementById("currentLevelTitle");
 const offerSurrenderButton = document.getElementById("offerSurrender");
 
@@ -241,6 +242,8 @@ window.addEventListener("keydown", (e) => {
 let chosenOption = null;
 let currentLevel = 1;
 const SURRENDER_OFFERED = "surrender-offered";
+const SURRENDER_OFFER_CANCELLED = "surrender-offer-cancelled";
+let surrenderOfferPending = false;
 
 function levelCompleted() {
   onLevelCompleted(currentLevel);
@@ -271,6 +274,11 @@ function alertPartnerPlayer(flag) {
 }
 
 function onAlternatePlayerResponse() {
+  if (surrenderOfferPending) {
+    surrenderOfferPending = false;
+    surrenderMenu.hidden = true;
+    return;
+  }
   if (chosenOption === null) return;
   const responseOption = chosenOption;
   chosenOption = null;
@@ -349,17 +357,18 @@ window.levelCompleted = levelCompleted;
 window.onAlternatePlayerResponse = onAlternatePlayerResponse;
 
 function onOfferSurrender() {
+  if (surrenderOfferPending) return;
+  surrenderOfferPending = true;
   surrenderMenu.hidden = false;
+  alertPartnerPlayer(SURRENDER_OFFERED);
 }
 
 offerSurrenderButton.addEventListener("click", onOfferSurrender);
-surrenderMenu.querySelectorAll("[data-surrender-option]").forEach((button) => {
-  button.addEventListener("click", () => {
-    surrenderMenu.hidden = true;
-    if (button.dataset.surrenderOption === "surrender") {
-      alertPartnerPlayer(SURRENDER_OFFERED);
-    }
-  });
+cancelSurrenderOfferButton.addEventListener("click", () => {
+  if (!surrenderOfferPending) return;
+  surrenderOfferPending = false;
+  surrenderMenu.hidden = true;
+  alertPartnerPlayer(SURRENDER_OFFER_CANCELLED);
 });
 
 let levelSelectShown = false;
