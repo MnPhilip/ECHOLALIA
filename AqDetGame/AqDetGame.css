@@ -15,3 +15,217 @@ canvas {
     object-position: 0px 400px;
     /* float:top; */
 }
+
+/* Level Select screen — based on Figma frame "2f Level Select" (1440 x 900).
+   Use data-theme="blue" on .level-select (blue is also the default if no
+   data-theme is set). A green palette is available with data-theme="green". */
+
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@700&display=swap");
+
+.level-select,
+.level-select[data-theme="blue"] {
+  /* Palette: blue, thumbnails darken with later levels */
+  --screen-bg: #2620e4;
+  --panel-bg: #5cb2f0;
+  --tab-bg: #1739e8;
+  --text: #000000;
+
+  --level-1: #0c76f7;
+  --level-2: hsl(214, 80%, 43%);
+  --level-3: hsl(214, 75%, 35%);
+  --level-4: hsl(214, 70%, 27%);
+  --level-5: hsl(214, 65%, 19%);
+
+  /* Label colors: white on the darker thumbnails for readability */
+  --label-light: #000000;
+  --label-dark: #ffffff;
+
+  --locked-bg: #b3b3b3;
+  --locked-text: #4d4d4d;
+  --highlight: #0d1a59;
+
+  /* Sizes (from Figma, scaled down on narrow screens) */
+  --thumb-w: clamp(140px, 19.5vw, 281px);
+  --thumb-gap: clamp(24px, 9.7vw, 140px);
+  --row-gap: clamp(32px, 9.8vw, 142px);
+  --radius: 12px;
+
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 46px 47px 47px;
+  background: var(--screen-bg);
+  color: var(--text);
+  font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
+}
+
+/* Green palette (current values in Figma) */
+.level-select[data-theme="green"] {
+  --screen-bg: #d3e1dd;
+  --panel-bg: #94caab;
+  --tab-bg: #79de85;
+  --level-1: #ffffff;
+  --level-2: #ddffd0;
+  --level-3: #a7f986;
+  --level-4: #92ff67;
+  --level-5: #48ff00;
+  --label-dark: #000000;
+  --highlight: #0f3d1e;
+}
+
+/* Title tab, top-left */
+.level-select__title {
+  position: absolute;
+  top: 20px;
+  left: 27px;
+  z-index: 1;
+  box-sizing: border-box;
+  min-width: min(439px, 60vw);
+  height: 89px;
+  padding: 0 25px;
+  display: flex;
+  align-items: center;
+  background: var(--tab-bg);
+  border-radius: var(--radius);
+  font-size: clamp(24px, 2.8vw, 40px);
+  margin: 0;
+}
+
+/* Offer Surrender button, top-right */
+.level-select__surrender {
+  position: absolute;
+  top: 20px;
+  right: 27px;
+  z-index: 1;
+  padding: 18px 28px;
+  background: var(--tab-bg);
+  color: var(--text);
+  border: 0;
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: clamp(16px, 1.5vw, 22px);
+  cursor: pointer;
+}
+
+.level-select__surrender:hover { filter: brightness(0.95); }
+.level-select__surrender:active { filter: brightness(0.88); }
+
+/* Main panel */
+.level-select__panel {
+  box-sizing: border-box;
+  min-height: 807px;
+  padding: 118px 40px 60px;
+  background: var(--panel-bg);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--row-gap);
+}
+
+/* 3 thumbnails on top, 2 centered below */
+.level-select__row {
+  display: flex;
+  justify-content: center;
+  gap: var(--thumb-gap);
+  width: 100%;
+}
+
+/* Level thumbnail (use a <button> for keyboard and click support) */
+.level {
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: var(--thumb-w);
+  aspect-ratio: 281 / 180;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  /* No transition: highlight must follow key presses with no delay */
+  transition: none;
+}
+
+.level[data-level="1"] { background: var(--level-1); }
+.level[data-level="2"] { background: var(--level-2); }
+.level[data-level="3"] { background: var(--level-3); }
+.level[data-level="4"] { background: var(--level-4); }
+.level[data-level="5"] { background: var(--level-5); }
+
+.level__thumbnail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.level[data-level="1"] .level__label {
+  padding-top: 22px;
+  color: #ffffff;
+  background: linear-gradient(transparent, rgb(0 0 0 / 65%));
+}
+
+.level[data-level="3"] .level__label,
+.level[data-level="4"] .level__label,
+.level[data-level="5"] .level__label { color: var(--label-dark); }
+
+/* Locked levels keep dark grey labels on the grey background */
+.level.is-locked .level__label,
+.level[aria-disabled="true"] .level__label { color: var(--locked-text); }
+
+.level__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 8px 8px;
+  font-size: 16px;
+}
+
+/* Highlighted (currently selected) level — exactly one at a time */
+.level.is-highlighted,
+.level:focus-visible {
+  outline: 6px solid var(--highlight);
+  outline-offset: 0;
+}
+
+/* Locked level: greyed out and unresponsive.
+   Use aria-disabled="true" (or the .is-locked class) when the level's
+   unlocked boolean is false. */
+.level[aria-disabled="true"],
+.level.is-locked {
+  background: var(--locked-bg);
+  color: var(--locked-text);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* A locked level can still hold the highlight (keyboard focus),
+   so the outline is applied by class, not by pointer interaction. */
+.level.is-locked.is-highlighted,
+.level[aria-disabled="true"].is-highlighted {
+  outline: 6px solid var(--highlight);
+}
+
+/* Narrow screens: let thumbnails wrap into rows */
+@media (max-width: 720px) {
+  .level-select { padding: 16px; }
+  .level-select__title { position: static; margin-bottom: 12px; }
+  .level-select__surrender { top: 24px; right: 24px; }
+  .level-select__panel { padding: 24px 16px; min-height: 0; }
+  .level-select__row { flex-wrap: wrap; gap: 20px; }
+  .level { --thumb-w: min(44vw, 281px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-select * { transition: none !important; animation: none !important; }
+}
