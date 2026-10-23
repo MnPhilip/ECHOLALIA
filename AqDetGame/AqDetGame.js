@@ -35,6 +35,18 @@ function start(){
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
 
+
+const SPRITES = [];
+const UrchinImage = new Image();
+UrchinImage.src = "AqDetImport/UrchinEnemy.png"; //TEMP ASSET, will be replaced with a more appropriate asset later
+//Note the hitbox for the enemy is 50x50, so the asset should be scaled to that size for proper collision detection.
+
+UrchinImage.onload = () => {
+    SPRITES.push(UrchinImage);
+    console.log("Urchin image loaded successfully.");
+}
+
+
 const rectSize = 60;
 var rectX; //player PlaceHolder
 var rectY;
@@ -71,6 +83,23 @@ function drawBarriers() {
     }
 }
 
+const enemy = {
+    x: 200,
+    y: 500,
+    width: 50,
+    height: 50,
+    color: "purple"
+};
+
+function drawEnemy() {
+    if( UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
+        playerPH.drawImage(UrchinImage, enemy.x, enemy.y, enemy.width, enemy.height);
+    } else {
+        playerPH.fillStyle = enemy.color;
+    playerPH.fillRect(enemy.x, enemy.y, enemy.width, enemy.height); //Default loading if the asset art fails to load
+    }
+}
+
 function collidesWithBarrier(x, y, width, height) {
     for (const b of barriers) {
         if (x < b.x + b.width &&
@@ -79,6 +108,16 @@ function collidesWithBarrier(x, y, width, height) {
             y + rectSize > b.y) {
             return true;
             }
+    }
+    return false;
+}
+
+function collidesWithEnemy(x, y) {
+    if (x < enemy.x + enemy.width &&
+        x + rectSize > enemy.x &&
+        y < enemy.y + enemy.height &&
+        y + rectSize > enemy.y) {
+        return true;
     }
     return false;
 }
@@ -93,6 +132,7 @@ function spawn(){
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 
+    drawEnemy();
     
     // canvasTemp = document.getElementById("LayoutDisplay");
     // playerPHTEMP = canvasTemp.getContext("2d"); 
@@ -112,6 +152,7 @@ function saveRespawnCoordinates(x, y) {
   RESPAWN_X = x;
   RESPAWN_Y = y;
 }
+
 
 function findRespawn(){
     var newResX;
@@ -152,12 +193,18 @@ function reRender(movePosX, movePosY){
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
         return;
     }
+    if (collidesWithEnemy(rectX + movePosX, rectY + movePosY)) {
+        alert("You have collided with an enemy!"); //JUST FOR TESING ENEMY COLLISION.
+        respawn();
+        return;
+    }
     
     playerPH.clearRect(rectX, rectY, rectSize, rectSize);
     rectX += movePosX;
     rectY += movePosY;
 
      drawBarriers();
+     drawEnemy();
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
