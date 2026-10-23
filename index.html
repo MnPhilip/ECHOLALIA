@@ -4,14 +4,18 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="AqDetGame/AqDetGame.css">
+    <link rel="stylesheet" type="text/css" href="AqDetGame/AqDetGame.css?v=20261023-start-button">
     <style>
     </style>
 
 </head>
 <body>
   <main class="initial-setup" id="initialSetup" aria-label="Initial setup">
-    <p>Press Enter to start</p>
+    <div class="initial-setup__visual" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <h1>Aquatic Detour</h1>
+    <button class="initial-setup__begin" id="beginGame" type="button">Press Enter to Begin</button>
   </main>
 
   <main class="level-select" data-theme="blue" hidden>
@@ -22,14 +26,17 @@
       <div class="level-select__row">
         <button class="level" type="button" data-level="1" aria-label="Level 1">
           <img class="level__thumbnail" src="levelselectimages/level-1.jpg" alt="">
+          <img class="level__lock" src="levelselectimages/lock.svg" alt="" aria-hidden="true" hidden>
           <span class="level__label">Level 1</span>
         </button>
         <button class="level is-locked" type="button" data-level="2" disabled aria-disabled="true" aria-label="Level 2 locked">
           <img class="level__thumbnail" src="levelselectimages/level-2.jpg" alt="">
+          <img class="level__lock" src="levelselectimages/lock.svg" alt="" aria-hidden="true">
           <span class="level__label">Level 2</span>
         </button>
         <button class="level is-locked" type="button" data-level="3" disabled aria-disabled="true" aria-label="Level 3 locked">
           <img class="level__thumbnail" src="levelselectimages/level-3.jpg" alt="">
+          <img class="level__lock" src="levelselectimages/lock.svg" alt="" aria-hidden="true">
           <span class="level__label">Level 3</span>
         </button>
       </div>
@@ -37,10 +44,12 @@
       <div class="level-select__row">
         <button class="level is-locked" type="button" data-level="4" disabled aria-disabled="true" aria-label="Level 4 locked">
           <img class="level__thumbnail" src="levelselectimages/level-4.jpg" alt="">
+          <img class="level__lock" src="levelselectimages/lock.svg" alt="" aria-hidden="true">
           <span class="level__label">Level 4</span>
         </button>
         <button class="level is-locked" type="button" data-level="5" disabled aria-disabled="true" aria-label="Level 5 locked">
           <img class="level__thumbnail" src="levelselectimages/level-5.jpg" alt="">
+          <img class="level__lock" src="levelselectimages/lock.svg" alt="" aria-hidden="true">
           <span class="level__label">Level 5</span>
         </button>
       </div>
@@ -76,6 +85,6 @@
     </div>
   </section>
 
-  <script src="AqDetGame/AqDetGame.js?v=20261023-4" type="text/javascript"></script>
+  <script src="AqDetGame/AqDetGame.js?v=20261023-6" type="text/javascript"></script>
 </body>
 </html>
