@@ -25,23 +25,6 @@ canvas {
   font: 700 24px system-ui, sans-serif;
 }
 
-.game-screen__surrender {
-  position: absolute;
-  top: 20px;
-  right: 27px;
-  z-index: 1;
-  padding: 12px 20px;
-  border: 0;
-  border-radius: 8px;
-  background: #1c5b96;
-  color: #ffffff;
-  font: 700 16px system-ui, sans-serif;
-  cursor: pointer;
-}
-
-.game-screen__surrender:hover { filter: brightness(1.1); }
-.game-screen__surrender:active { filter: brightness(0.9); }
-
 .completion-menu {
   position: fixed;
   inset: 0;
@@ -261,7 +244,8 @@ canvas {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  object-fit: fill;
+  object-fit: cover;
+  z-index: 0;
 }
 
 .level[data-level="1"] .level__label {
@@ -304,6 +288,11 @@ canvas {
   color: var(--locked-text);
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.level[aria-disabled="true"] .level__thumbnail,
+.level.is-locked .level__thumbnail {
+  filter: grayscale(1) brightness(0.6);
 }
 
 /* A locked level can still hold the highlight (keyboard focus),
