@@ -91,7 +91,6 @@ function start(){
 
         renderInit();
     } else{
-        playerPH.fillText("", canvas.width, canvas.height);
         spawn(); //Initial Rendering and Spawning of Player Character
     }
     
@@ -127,6 +126,7 @@ const barriers =  [
         color: "yellow"
     }, 
 ]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
+
 function drawBarriers() {
     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of barriers) {
@@ -137,11 +137,11 @@ function drawBarriers() {
 
 function drawObjectBarriers() {
     // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-
     for (const obj of interactableLoc) {
         lvlLayout.strokeStyle = obj.color;
         lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
     }
+    
 }
 
 function collidesWithBarrier(x, y, width, height) {
@@ -157,16 +157,16 @@ function collidesWithBarrier(x, y, width, height) {
 }
 
 //Checks if an interactable will collide with a barrer
-function objectCollidesWithBarrier() {
-    // for (const obj of objBarriers) {
-    //     if (x < b.x + b.width &&
-    //         x + rectSize > b.x &&
-    //         y < b.y + b.height &&
-    //         y + rectSize > b.y) {
-    //         return true;
-    //         }
-    // }
-    // return false;
+function objectCollidesWithBarrier(x, y, width, height) {
+    for (const b of objBarriers) {
+        if (x < b.x + b.width &&
+            x + rectSize > b.x &&
+            y < b.y + b.height &&
+            y + rectSize > b.y) {
+            return true;
+            }
+    }
+    return false;
 }
 
 function drawBackground() {
@@ -179,7 +179,7 @@ function drawBackground() {
 //Draws Push Blocks, Flares, and Bubbles - Will need integration to get applicable data from a file with Level-specific layouts
 function drawInteractables() {
     //TESTING STATEMENT AND LOOP
-    interactableLoc[0].type = pushBlock;
+    interactableLoc[0].type = pushBlock; //Will need to be removed
     for (const obj of interactableLoc)
     {
         lvlLayout.textAlign = "center";
@@ -189,15 +189,16 @@ function drawInteractables() {
         lvlLayout.fillStyle = obj.color;
         lvlLayout.fillRect(obj.x, obj.y, obj.width, obj.height);
     }
-    // drawBarriers();
+    
+    drawObjectBarriers();
 }
 
 
 //Exclusively for first spawns of a level when the level is rendered, anything else should be done via Respawn()
 function spawn(){ 
-    
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
     drawBarriers(); //Can be replaced with a function to draw a level and its layout
-    drawObjectBarriers();
+    drawInteractables();
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     respawn(); 
 }
@@ -209,7 +210,10 @@ function respawn(){
     removeOldCharacter();
     rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
+    
     reRender(0, 0);
+    
+    
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -245,22 +249,24 @@ function removeOldCharacter() {
 
 function reRender(movePosX, movePosY){
     
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) ||
-        objectCollidesWithBarrier()) {
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || objectCollidesWithBarrier(rectX+movePosX, rectY+movePosY)) {
         return;
     }
+    
     removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
     rectX += movePosX;
     rectY += movePosY;
     drawBarriers();
+    
     for (obj of interactableLoc){
         if (obj.activated) {
             obj.x += movePosX;
             obj.y += movePosY;
         }
     }
-    drawInteractables();
-    drawObjectBarriers();
+    
+    drawInteractables();    
+    
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
@@ -308,6 +314,7 @@ function interactCheck(){
 }
 
 function move(moveKey) {
+    
     if (moveKey.key == "w"){
         reRender(0, -moveDistance);
     } else if (moveKey.key == "a"){
