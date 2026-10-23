@@ -238,26 +238,46 @@ window.addEventListener("keydown", (e) =>{
 //     gravUpdate();
 // }
 let chosenOption = null;
+let currentLevel = 1;
 
 function levelCompleted() {
+  onLevelCompleted(currentLevel);
   chosenOption = null;
-  showCompletionMenu(); // Continue and Exit buttons
+  completionMenu.hidden = false;
+  completionMenu.classList.remove("is-waiting");
+  completionWaiting.hidden = true;
+  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+    button.disabled = false;
+  });
 }
 
-function onOptionPressed(option) { // "continue" or "exit"
-  if (chosenOption !== null) return; // ignore repeat presses
+function onOptionPressed(option) {
+  if (chosenOption !== null || !["continue", "exit"].includes(option)) return;
   chosenOption = option;
-  darkenMenu();
-  showMessage("Waiting");
-  alertAlternatePlayer(option); // placeholder, see questions
+  completionMenu.classList.add("is-waiting");
+  completionWaiting.hidden = false;
+  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+    button.disabled = true;
+  });
+  alertAlternatePlayer(option);
 }
 
-function onAlternatePlayerResponse() { // called when the signal arrives
-  hideMessage();
-  closeMenu();
-  if (chosenOption === "continue") loadNextLevel();
-  else if (chosenOption === "exit") loadLevelSelect();
+function alertAlternatePlayer(option) {
+  window.dispatchEvent(new CustomEvent("echolalia:alternate-player-alert", {
+    detail: { option }
+  }));
+}
+
+function onAlternatePlayerResponse() {
+  if (chosenOption === null) return;
+  const responseOption = chosenOption;
   chosenOption = null;
+  completionMenu.hidden = true;
+  completionMenu.classList.remove("is-waiting");
+  completionWaiting.hidden = true;
+
+  if (responseOption === "continue") loadNextLevel();
+  else loadLevelSelect();
 }
 const TOTAL_LEVELS = 5;
 let highestUnlocked = 1; // Level 1 always unlocked
@@ -270,13 +290,59 @@ function onLevelCompleted(level) {
   if (level === highestUnlocked && level < TOTAL_LEVELS) {
     highestUnlocked = level + 1;
   }
-  //DISPLAY AN HTML POP_UP WINDOW THAT GIVES THE PLAYER CONTINUATINO OPTIONS
+  updateLevelSelectButtons();
 }
 
 function onLevelSelected(level) {
   if (!isUnlocked(level)) return; // blocked: do nothing
   loadLevel(level);
 }
+
+function updateLevelSelectButtons() {
+  document.querySelectorAll(".level[data-level]").forEach((button) => {
+    const unlocked = isUnlocked(Number(button.dataset.level));
+    button.classList.toggle("is-locked", !unlocked);
+    button.setAttribute("aria-disabled", String(!unlocked));
+    if (!unlocked) button.setAttribute("aria-label", `Level ${button.dataset.level} locked`);
+    else button.setAttribute("aria-label", `Level ${button.dataset.level}`);
+  });
+}
+
+function loadLevel(level) {
+  currentLevel = level;
+  levelSelectScreen.hidden = true;
+  gameScreen.hidden = false;
+  currentLevelTitle.textContent = `Level ${level}`;
+  gameStart = true;
+  spawn();
+}
+
+function loadNextLevel() {
+  if (currentLevel < TOTAL_LEVELS) {
+    loadLevel(currentLevel + 1);
+  } else {
+    loadLevelSelect();
+  }
+}
+
+function loadLevelSelect() {
+  gameScreen.hidden = true;
+  levelSelectScreen.hidden = false;
+  gameStart = false;
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+document.querySelectorAll(".level[data-level]").forEach((button) => {
+  button.addEventListener("click", () => onLevelSelected(Number(button.dataset.level)));
+});
+
+completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+  button.addEventListener("click", () => onOptionPressed(button.dataset.completionOption));
+});
+
+window.addEventListener("echolalia:alternate-player-response", onAlternatePlayerResponse);
+window.levelCompleted = levelCompleted;
+window.onAlternatePlayerResponse = onAlternatePlayerResponse;
 
 function onOfferSurrender() {
   alertPartnerPlayer(SURRENDER_OFFERED); // flag value

@@ -7,6 +7,102 @@ canvas {
     font-size: 200%;
 }
 
+[hidden] {
+  display: none !important;
+}
+
+.game-screen {
+  min-height: 100vh;
+  overflow: hidden;
+  background: #0c2d57;
+}
+
+.game-screen__title {
+  margin: 0;
+  padding: 16px 24px;
+  color: #ffffff;
+  font: 700 24px system-ui, sans-serif;
+}
+
+.game-screen__surrender {
+  position: absolute;
+  top: 20px;
+  right: 27px;
+  z-index: 1;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: #1c5b96;
+  color: #ffffff;
+  font: 700 16px system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.game-screen__surrender:hover { filter: brightness(1.1); }
+.game-screen__surrender:active { filter: brightness(0.9); }
+
+.completion-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 55%);
+}
+
+.completion-menu__panel {
+  width: min(100%, 480px);
+  padding: 32px;
+  border-radius: 12px;
+  background: #347fbd;
+  color: #071d38;
+  text-align: center;
+}
+
+.completion-menu__panel h2 {
+  margin: 0 0 24px;
+}
+
+.completion-menu__actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.completion-menu__actions button {
+  padding: 12px 24px;
+  border: 0;
+  border-radius: 8px;
+  background: #a8d8f5;
+  color: #071d38;
+  font: inherit;
+  cursor: pointer;
+}
+
+.completion-menu.is-waiting::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: rgb(0 0 0 / 70%);
+}
+
+.completion-menu.is-waiting .completion-menu__waiting {
+  position: relative;
+  z-index: 1;
+  margin: 20px 0 0;
+  color: #ffffff;
+}
+
+.completion-menu.is-waiting .completion-menu__actions {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.completion-menu.is-waiting .completion-menu__waiting[hidden] {
+  display: block !important;
+}
+
 
 .debugItem {
     border-style: ridge;
@@ -16,33 +112,31 @@ canvas {
     /* float:top; */
 }
 
-/* Level Select screen — based on Figma frame "2f Level Select" (1440 x 900).
-   Use data-theme="blue" on .level-select (blue is also the default if no
-   data-theme is set). A green palette is available with data-theme="green". */
+/* Level Select screen — based on Figma frame "2f Level Select" (1440 x 900). */
 
 @import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@700&display=swap");
 
 .level-select,
 .level-select[data-theme="blue"] {
   /* Palette: blue, thumbnails darken with later levels */
-  --screen-bg: #2620e4;
-  --panel-bg: #5cb2f0;
-  --tab-bg: #1739e8;
-  --text: #000000;
+  --screen-bg: #0c2d57;
+  --panel-bg: #347fbd;
+  --tab-bg: #1c5b96;
+  --text: #071d38;
 
-  --level-1: #0c76f7;
-  --level-2: hsl(214, 80%, 43%);
-  --level-3: hsl(214, 75%, 35%);
-  --level-4: hsl(214, 70%, 27%);
-  --level-5: hsl(214, 65%, 19%);
+  --level-1: #a8d8f5;
+  --level-2: #79b9e5;
+  --level-3: #4d91c9;
+  --level-4: #286fa9;
+  --level-5: #164f82;
 
   /* Label colors: white on the darker thumbnails for readability */
   --label-light: #000000;
   --label-dark: #ffffff;
 
-  --locked-bg: #b3b3b3;
-  --locked-text: #4d4d4d;
-  --highlight: #0d1a59;
+  --locked-bg: #999999;
+  --locked-text: #444444;
+  --highlight: #bfe7ff;
 
   /* Sizes (from Figma, scaled down on narrow screens) */
   --thumb-w: clamp(140px, 19.5vw, 281px);
@@ -63,18 +157,18 @@ canvas {
   font-weight: 700;
 }
 
-/* Aquatic palette */
-.level-select[data-theme="green"] {
-  --screen-bg: #d9f2ef;
-  --panel-bg: #64c4c5;
-  --tab-bg: #167f99;
-  --level-1: #e8fbf8;
-  --level-2: #c9e9dd;
-  --level-3: #247d83;
-  --level-4: #176b7d;
-  --level-5: #0c536b;
+/* Blue palette */
+.level-select[data-theme="blue"] {
+  --screen-bg: #0c2d57;
+  --panel-bg: #347fbd;
+  --tab-bg: #1c5b96;
+  --level-1: #a8d8f5;
+  --level-2: #79b9e5;
+  --level-3: #4d91c9;
+  --level-4: #286fa9;
+  --level-5: #164f82;
   --label-dark: #ffffff;
-  --highlight: #063f4b;
+  --highlight: #bfe7ff;
 }
 
 /* Title tab, top-left */
@@ -159,6 +253,20 @@ canvas {
 .level[data-level="3"] { background: var(--level-3); }
 .level[data-level="4"] { background: var(--level-4); }
 .level[data-level="5"] { background: var(--level-5); }
+
+.level.is-locked[data-level="3"] {
+  --locked-bg: #7eadd5;
+}
+
+.level.is-locked[data-level="4"] {
+  --locked-bg: #4d80b2;
+  --locked-text: #ffffff;
+}
+
+.level.is-locked[data-level="5"] {
+  --locked-bg: #285e91;
+  --locked-text: #ffffff;
+}
 
 .level__thumbnail {
   position: absolute;
