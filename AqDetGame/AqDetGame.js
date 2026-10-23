@@ -1,9 +1,3 @@
-//alert("Test of JS file worksssss");
-document.addEventListener('DOMContentLoaded', () => {
-    alert("DEBUG SPACE LOADED");
-})
-
-
 //Consider this function the Main of the entire game AND the infinite "While loop" that will call
 //      All natually-occuring events like gravity, enemy movement, and stuff like water currents
 window.main = () => {
@@ -33,7 +27,13 @@ function start(){
 }
 
 const canvas = document.getElementById('PlrDisplay');
-const playerPH = canvas.getContext("2d"); 
+const playerPH = canvas.getContext("2d");
+const levelSelectScreen = document.querySelector(".level-select");
+const gameScreen = document.getElementById("gameScreen");
+const completionMenu = document.getElementById("completionMenu");
+const completionWaiting = document.getElementById("completionWaiting");
+const currentLevelTitle = document.getElementById("currentLevelTitle");
+const offerSurrenderButton = document.getElementById("offerSurrender");
 
 const rectSize = 60;
 var rectX; //player PlaceHolder
@@ -239,6 +239,7 @@ window.addEventListener("keydown", (e) =>{
 // }
 let chosenOption = null;
 let currentLevel = 1;
+const SURRENDER_OFFERED = "surrender-offered";
 
 function levelCompleted() {
   onLevelCompleted(currentLevel);
@@ -259,12 +260,12 @@ function onOptionPressed(option) {
   completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
     button.disabled = true;
   });
-  alertAlternatePlayer(option);
+  alertPartnerPlayer(option);
 }
 
-function alertAlternatePlayer(option) {
+function alertPartnerPlayer(flag) {
   window.dispatchEvent(new CustomEvent("echolalia:alternate-player-alert", {
-    detail: { option }
+    detail: { option: flag, flag }
   }));
 }
 
@@ -345,8 +346,10 @@ window.levelCompleted = levelCompleted;
 window.onAlternatePlayerResponse = onAlternatePlayerResponse;
 
 function onOfferSurrender() {
-  alertPartnerPlayer(SURRENDER_OFFERED); // flag value
+  alertPartnerPlayer(SURRENDER_OFFERED);
 }
+
+offerSurrenderButton.addEventListener("click", onOfferSurrender);
 let levelSelectShown = false;
 
 function onSetupKeyDown(event) {

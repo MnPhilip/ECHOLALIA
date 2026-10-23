@@ -12,6 +12,7 @@ canvas {
 }
 
 .game-screen {
+  position: relative;
   min-height: 100vh;
   overflow: hidden;
   background: #0c2d57;
@@ -253,20 +254,6 @@ canvas {
 .level[data-level="3"] { background: var(--level-3); }
 .level[data-level="4"] { background: var(--level-4); }
 .level[data-level="5"] { background: var(--level-5); }
-
-.level.is-locked[data-level="3"] {
-  --locked-bg: #7eadd5;
-}
-
-.level.is-locked[data-level="4"] {
-  --locked-bg: #4d80b2;
-  --locked-text: #ffffff;
-}
-
-.level.is-locked[data-level="5"] {
-  --locked-bg: #285e91;
-  --locked-text: #ffffff;
-}
 
 .level__thumbnail {
   position: absolute;

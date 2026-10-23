@@ -12,26 +12,31 @@
 <body>
   <main class="level-select" data-theme="blue">
     <h1 class="level-select__title">Level Select</h1>
+    <button class="level-select__surrender" id="offerSurrender" type="button">Offer Surrender</button>
 
     <section class="level-select__panel" aria-label="Level selection">
       <div class="level-select__row">
         <button class="level" type="button" data-level="1" aria-label="Level 1">
-          <img class="level__thumbnail" src="level-1.jpg" alt="">
+          <img class="level__thumbnail" src="levelselectimages/level-1.jpg" alt="">
           <span class="level__label">Level 1</span>
         </button>
-        <button class="level is-locked" type="button" data-level="2" aria-label="Level 2">
+        <button class="level is-locked" type="button" data-level="2" aria-disabled="true" aria-label="Level 2 locked">
+          <img class="level__thumbnail" src="levelselectimages/level-2.jpg" alt="">
           <span class="level__label">Level 2</span>
         </button>
-        <button class="level is-locked" type="button" data-level="3" aria-label="Level 3">
+        <button class="level is-locked" type="button" data-level="3" aria-disabled="true" aria-label="Level 3 locked">
+          <img class="level__thumbnail" src="levelselectimages/level-3.jpg" alt="">
           <span class="level__label">Level 3</span>
         </button>
       </div>
 
       <div class="level-select__row">
         <button class="level is-locked" type="button" data-level="4" aria-label="Level 4">
+          <img class="level__thumbnail" src="levelselectimages/level-4.jpg" alt="">
           <span class="level__label">Level 4</span>
         </button>
         <button class="level is-locked" type="button" data-level="5" aria-disabled="true" aria-label="Level 5 locked">
+          <img class="level__thumbnail" src="levelselectimages/level-5.jpg" alt="">
           <span class="level__label">Level 5</span>
         </button>
       </div>
@@ -40,7 +45,6 @@
 
   <section class="game-screen" id="gameScreen" aria-label="Game" hidden>
     <h1 class="game-screen__title" id="currentLevelTitle">Level 1</h1>
-    <button class="game-screen__surrender" id="offerSurrender" type="button">Offer Surrender</button>
     <canvas id='BackgroundDisplay'></canvas>
     <canvas id='PlrDisplay'></canvas>
     <canvas id='LevelDisplay'></canvas>
