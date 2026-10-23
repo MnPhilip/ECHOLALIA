@@ -11,6 +11,20 @@ canvas {
   display: none !important;
 }
 
+.initial-setup {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #0c2d57;
+  color: #ffffff;
+  font: 700 clamp(28px, 5vw, 64px) system-ui, sans-serif;
+  text-align: center;
+}
+
+.initial-setup p {
+  margin: 24px;
+}
+
 .game-screen {
   position: relative;
   min-height: 100vh;
@@ -46,6 +60,11 @@ canvas {
 
 .completion-menu__panel h2 {
   margin: 0 0 24px;
+}
+
+.completion-menu__message {
+  margin: -12px 0 24px;
+  font-size: 24px;
 }
 
 .completion-menu__actions {
@@ -104,7 +123,7 @@ canvas {
 .level-select[data-theme="blue"] {
   /* Palette: blue, thumbnails darken with later levels */
   --screen-bg: #0c2d57;
-  --panel-bg: #347fbd;
+  --panel-bg: #eaf1f6;
   --tab-bg: #1c5b96;
   --text: #071d38;
 
@@ -135,7 +154,8 @@ canvas {
   min-height: 100vh;
   margin: 0 auto;
   padding: 46px 47px 47px;
-  background: var(--screen-bg);
+  background-color: transparent;
+  background-image: none;
   color: var(--text);
   font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   font-weight: 700;

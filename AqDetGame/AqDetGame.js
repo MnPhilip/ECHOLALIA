@@ -28,10 +28,12 @@ function start(){
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d");
+const initialSetupScreen = document.getElementById("initialSetup");
 const levelSelectScreen = document.querySelector(".level-select");
 const gameScreen = document.getElementById("gameScreen");
 const completionMenu = document.getElementById("completionMenu");
 const completionWaiting = document.getElementById("completionWaiting");
+const surrenderMenu = document.getElementById("surrenderMenu");
 const currentLevelTitle = document.getElementById("currentLevelTitle");
 const offerSurrenderButton = document.getElementById("offerSurrender");
 
@@ -182,14 +184,12 @@ function move(moveKey) {
     }
 }
 
-window.addEventListener("keydown", (e) =>{ 
-    main(); //infinite loop
+window.addEventListener("keydown", (e) => {
+    if (!gameStart || gameScreen.hidden || !completionMenu.hidden) return;
+    main();
     
     //Fix to allow caps letters and multiple buttons being pressed
-    if(e.key === "Enter" && !gameStart){
-        gameStart = true; 
-        spawn();
-    } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
+    if(e.key == "w" || e.key == "a" || e.key == "s" ||
     	e.key == "d"){
         move(e);
     } else if (e.key === " ") { //Space Entered - call jump
@@ -303,6 +303,7 @@ function updateLevelSelectButtons() {
   document.querySelectorAll(".level[data-level]").forEach((button) => {
     const unlocked = isUnlocked(Number(button.dataset.level));
     button.classList.toggle("is-locked", !unlocked);
+    button.disabled = !unlocked;
     button.setAttribute("aria-disabled", String(!unlocked));
     if (!unlocked) button.setAttribute("aria-label", `Level ${button.dataset.level} locked`);
     else button.setAttribute("aria-label", `Level ${button.dataset.level}`);
@@ -328,7 +329,7 @@ function loadNextLevel() {
 
 function loadLevelSelect() {
   gameScreen.hidden = true;
-  levelSelectScreen.hidden = false;
+  levelSelectDisplay();
   gameStart = false;
   playerPH.clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -346,29 +347,34 @@ window.levelCompleted = levelCompleted;
 window.onAlternatePlayerResponse = onAlternatePlayerResponse;
 
 function onOfferSurrender() {
-  alertPartnerPlayer(SURRENDER_OFFERED);
+  surrenderMenu.hidden = false;
 }
 
 offerSurrenderButton.addEventListener("click", onOfferSurrender);
+surrenderMenu.querySelectorAll("[data-surrender-option]").forEach((button) => {
+  button.addEventListener("click", () => {
+    surrenderMenu.hidden = true;
+    if (button.dataset.surrenderOption === "surrender") {
+      alertPartnerPlayer(SURRENDER_OFFERED);
+    }
+  });
+});
+
 let levelSelectShown = false;
 
 function onSetupKeyDown(event) {
   if (event.key !== "Enter") return;
   if (levelSelectShown) return; // ignore repeats
   levelSelectShown = true;
-
-  hideSetupScreen();
-  document.removeEventListener("keydown", onSetupKeyDown);
   levelSelectDisplay();
 }
 
 function levelSelectDisplay() {
-  const TOTAL_LEVELS = 5;
-  for (let level = 1; level <= TOTAL_LEVELS; level++) {
-    drawLevelOption(level, isUnlocked(level)); // positioned in order
-  }
+  updateLevelSelectButtons();
+  initialSetupScreen.hidden = true;
+  levelSelectScreen.hidden = false;
 }
 
-// document.addEventListener("keydown", onSetupKeyDown);
+document.addEventListener("keydown", onSetupKeyDown);
 
-start() 
+window.levelSelectDisplay = levelSelectDisplay;
