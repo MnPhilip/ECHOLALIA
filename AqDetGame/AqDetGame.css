@@ -145,6 +145,7 @@ canvas {
   padding: 0;
   border: 0;
   border-radius: var(--radius);
+  overflow: hidden;
   color: var(--text);
   font: inherit;
   text-align: left;
@@ -165,7 +166,7 @@ canvas {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  object-fit: cover;
+  object-fit: fill;
 }
 
 .level[data-level="1"] .level__label {
@@ -187,6 +188,7 @@ canvas {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 1;
   padding: 0 8px 8px;
   font-size: 16px;
 }
