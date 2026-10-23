@@ -10,7 +10,11 @@
 
 </head>
 <body>
-  <main class="level-select" data-theme="blue">
+  <main class="initial-setup" id="initialSetup" aria-label="Initial setup">
+    <p>Press Enter to start</p>
+  </main>
+
+  <main class="level-select" data-theme="blue" hidden>
     <h1 class="level-select__title">Level Select</h1>
     <button class="level-select__surrender" id="offerSurrender" type="button">Offer Surrender</button>
 
@@ -20,22 +24,22 @@
           <img class="level__thumbnail" src="levelselectimages/level-1.jpg" alt="">
           <span class="level__label">Level 1</span>
         </button>
-        <button class="level is-locked" type="button" data-level="2" aria-disabled="true" aria-label="Level 2 locked">
+        <button class="level is-locked" type="button" data-level="2" disabled aria-disabled="true" aria-label="Level 2 locked">
           <img class="level__thumbnail" src="levelselectimages/level-2.jpg" alt="">
           <span class="level__label">Level 2</span>
         </button>
-        <button class="level is-locked" type="button" data-level="3" aria-disabled="true" aria-label="Level 3 locked">
+        <button class="level is-locked" type="button" data-level="3" disabled aria-disabled="true" aria-label="Level 3 locked">
           <img class="level__thumbnail" src="levelselectimages/level-3.jpg" alt="">
           <span class="level__label">Level 3</span>
         </button>
       </div>
 
       <div class="level-select__row">
-        <button class="level is-locked" type="button" data-level="4" aria-label="Level 4">
+        <button class="level is-locked" type="button" data-level="4" disabled aria-disabled="true" aria-label="Level 4 locked">
           <img class="level__thumbnail" src="levelselectimages/level-4.jpg" alt="">
           <span class="level__label">Level 4</span>
         </button>
-        <button class="level is-locked" type="button" data-level="5" aria-disabled="true" aria-label="Level 5 locked">
+        <button class="level is-locked" type="button" data-level="5" disabled aria-disabled="true" aria-label="Level 5 locked">
           <img class="level__thumbnail" src="levelselectimages/level-5.jpg" alt="">
           <span class="level__label">Level 5</span>
         </button>
@@ -53,6 +57,7 @@
   <section class="completion-menu" id="completionMenu" role="dialog" aria-modal="true" aria-labelledby="completionTitle" hidden>
     <div class="completion-menu__panel">
       <h2 id="completionTitle">Level Complete</h2>
+      <p class="completion-menu__message">Excellent Job!!</p>
       <div class="completion-menu__actions">
         <button type="button" data-completion-option="continue">Continue</button>
         <button type="button" data-completion-option="exit">Exit</button>
@@ -61,6 +66,16 @@
     </div>
   </section>
 
-  <script src="AqDetGame/AqDetGame.js" type="text/javascript"></script>
+  <section class="completion-menu" id="surrenderMenu" role="dialog" aria-modal="true" aria-labelledby="surrenderTitle" hidden>
+    <div class="completion-menu__panel">
+      <h2 id="surrenderTitle">Offer surrender?</h2>
+      <div class="completion-menu__actions">
+        <button type="button" data-surrender-option="surrender">Surrender</button>
+        <button type="button" data-surrender-option="continue">Continue</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="AqDetGame/AqDetGame.js?v=20261023-4" type="text/javascript"></script>
 </body>
 </html>
