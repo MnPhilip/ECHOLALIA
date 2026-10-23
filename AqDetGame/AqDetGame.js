@@ -38,8 +38,9 @@ var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
+
 const interactableSize = 50;
-const interactableLoc = [
+var interactableLoc = [
     {
         x: 80,
         y: 800,
@@ -133,6 +134,7 @@ function drawBarriers() {
         lvlLayout.strokeStyle = b.color;
         lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
     }
+    drawObjectBarriers();
 }
 
 function drawObjectBarriers() {
@@ -157,7 +159,10 @@ function collidesWithBarrier(x, y, width, height) {
 }
 
 //Checks if an interactable will collide with a barrer
-function objectCollidesWithBarrier(x, y, width, height) {
+function collidesWithObject(x, y, width, height) {
+    if (interactActive) {
+        return false;
+    }
     for (const b of objBarriers) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
@@ -190,13 +195,14 @@ function drawInteractables() {
         lvlLayout.fillRect(obj.x, obj.y, obj.width, obj.height);
     }
     
-    drawObjectBarriers();
+    // drawObjectBarriers();
 }
 
 
 //Exclusively for first spawns of a level when the level is rendered, anything else should be done via Respawn()
 function spawn(){ 
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     drawBarriers(); //Can be replaced with a function to draw a level and its layout
     drawInteractables();
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
@@ -248,8 +254,9 @@ function removeOldCharacter() {
 
 
 function reRender(movePosX, movePosY){
+    var count = 0;
     
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || objectCollidesWithBarrier(rectX+movePosX, rectY+movePosY)) {
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
         return;
     }
     
@@ -262,7 +269,10 @@ function reRender(movePosX, movePosY){
         if (obj.activated) {
             obj.x += movePosX;
             obj.y += movePosY;
+            objBarriers[count].x = obj.x; //These two lines allow barriers to be moved with their interactions
+            objBarriers[count].y = obj.y;
         }
+        count++;
     }
     
     drawInteractables();    
