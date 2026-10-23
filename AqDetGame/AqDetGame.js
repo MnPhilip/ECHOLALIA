@@ -98,7 +98,18 @@ function start(){
     //requestAnimationFrame(start);
 }
 
-// Barriers 
+//Dynamic Barriers
+const objBarriers = [
+    {
+        x: interactableLoc[0].x,
+        y: interactableLoc[0].y,
+        width:interactableSize,
+        height: interactableSize,
+        color: "pink"
+    },
+];
+
+// Static Barriers 
 const barriers =  [
     { 
         x: 400, 
@@ -115,14 +126,6 @@ const barriers =  [
         height: 40, 
         color: "yellow"
     }, 
-
-    {
-        x: interactableLoc[0].x,
-        y: interactableLoc[0].y,
-        width:interactableSize,
-        height: interactableSize,
-        color: "pink"
-    }
 ]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
 function drawBarriers() {
     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
@@ -132,8 +135,17 @@ function drawBarriers() {
     }
 }
 
+function drawObjectBarriers() {
+    // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const obj of interactableLoc) {
+        lvlLayout.strokeStyle = obj.color;
+        lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
+    }
+}
+
 function collidesWithBarrier(x, y, width, height) {
-    for (const b of barriers) {
+    for (const b of barriers) { //Checks if player is running into a barrier
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
             y < b.y + b.height &&
@@ -142,6 +154,19 @@ function collidesWithBarrier(x, y, width, height) {
             }
     }
     return false;
+}
+
+//Checks if an interactable will collide with a barrer
+function objectCollidesWithBarrier() {
+    // for (const obj of objBarriers) {
+    //     if (x < b.x + b.width &&
+    //         x + rectSize > b.x &&
+    //         y < b.y + b.height &&
+    //         y + rectSize > b.y) {
+    //         return true;
+    //         }
+    // }
+    // return false;
 }
 
 function drawBackground() {
@@ -157,9 +182,14 @@ function drawInteractables() {
     interactableLoc[0].type = pushBlock;
     for (const obj of interactableLoc)
     {
+        lvlLayout.textAlign = "center";
+        lvlLayout.textBaseline = "middle";
+        lvlLayout.font = "12px Arial";
+        lvlLayout.fillText = "PB";
         lvlLayout.fillStyle = obj.color;
         lvlLayout.fillRect(obj.x, obj.y, obj.width, obj.height);
     }
+    // drawBarriers();
 }
 
 
@@ -167,6 +197,7 @@ function drawInteractables() {
 function spawn(){ 
     
     drawBarriers(); //Can be replaced with a function to draw a level and its layout
+    drawObjectBarriers();
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     respawn(); 
 }
@@ -214,7 +245,8 @@ function removeOldCharacter() {
 
 function reRender(movePosX, movePosY){
     
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) ||
+        objectCollidesWithBarrier()) {
         return;
     }
     removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
@@ -228,6 +260,7 @@ function reRender(movePosX, movePosY){
         }
     }
     drawInteractables();
+    drawObjectBarriers();
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
