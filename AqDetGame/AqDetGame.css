@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Comfortaa:wght@600;700&display=swap");
+
 html {
     background-color: blue;
     
@@ -12,17 +14,72 @@ canvas {
 }
 
 .initial-setup {
+  position: relative;
+  isolation: isolate;
   display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 24px;
   min-height: 100vh;
-  place-items: center;
-  background: #0c2d57;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 110%, rgb(24 148 189 / 66%), transparent 48%),
+    linear-gradient(145deg, #041832 4%, #0b3763 52%, #071f43);
   color: #ffffff;
-  font: 700 clamp(28px, 5vw, 64px) system-ui, sans-serif;
+  font: 700 clamp(28px, 5vw, 64px) "Comfortaa", system-ui, sans-serif;
   text-align: center;
 }
 
-.initial-setup p {
-  margin: 24px;
+.initial-setup::before,
+.initial-setup::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.initial-setup::before {
+  background:
+    linear-gradient(112deg, transparent 18%, rgb(173 237 255 / 16%) 34%, transparent 48%),
+    linear-gradient(76deg, transparent 54%, rgb(173 237 255 / 12%) 64%, transparent 76%);
+}
+
+.initial-setup::after {
+  background:
+    radial-gradient(circle, transparent 0 32px, rgb(190 244 255 / 25%) 34px 36px, transparent 38px) 12% 25% / 150px 150px,
+    radial-gradient(circle, transparent 0 19px, rgb(190 244 255 / 20%) 21px 23px, transparent 25px) 84% 65% / 120px 120px,
+    radial-gradient(circle, rgb(222 250 255 / 70%) 0 4px, transparent 5px) 74% 22% / 110px 140px,
+    radial-gradient(circle, rgb(222 250 255 / 55%) 0 3px, transparent 4px) 22% 72% / 90px 120px;
+  background-repeat: no-repeat;
+  animation: underwater-drift 10s ease-in-out infinite alternate;
+}
+
+.initial-setup h1 {
+  position: relative;
+  text-shadow: 0 0 28px rgb(87 209 238 / 50%);
+  margin: 0;
+}
+
+.initial-setup__begin {
+  position: relative;
+  padding: 16px 28px;
+  border: 1px solid rgb(194 242 255 / 62%);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #1b78a9, #10517f);
+  box-shadow: inset 0 0 18px rgb(158 232 255 / 24%), 0 8px 24px rgb(0 10 30 / 42%);
+  color: #ffffff;
+  font: 700 clamp(16px, 2vw, 22px) "Comfortaa", system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.initial-setup__begin:hover {
+  filter: brightness(1.15);
+}
+
+.initial-setup__begin:focus-visible {
+  outline: 3px solid #bfe7ff;
+  outline-offset: 4px;
 }
 
 .game-screen {
@@ -36,7 +93,7 @@ canvas {
   margin: 0;
   padding: 16px 24px;
   color: #ffffff;
-  font: 700 24px system-ui, sans-serif;
+  font: 700 24px "Comfortaa", system-ui, sans-serif;
 }
 
 .completion-menu {
@@ -55,11 +112,13 @@ canvas {
   border-radius: 12px;
   background: #347fbd;
   color: #071d38;
+  font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
   text-align: center;
 }
 
 .completion-menu__panel h2 {
   margin: 0 0 24px;
+  font-family: "Comfortaa", system-ui, sans-serif;
 }
 
 .completion-menu__message {
@@ -117,8 +176,6 @@ canvas {
 
 /* Level Select screen — based on Figma frame "2f Level Select" (1440 x 900). */
 
-@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@700&display=swap");
-
 .level-select,
 .level-select[data-theme="blue"] {
   /* Palette: blue, thumbnails darken with later levels */
@@ -154,8 +211,13 @@ canvas {
   min-height: 100vh;
   margin: 0 auto;
   padding: 46px 47px 47px;
-  background-color: transparent;
-  background-image: none;
+  background-color: #071f43;
+  background-image:
+    radial-gradient(ellipse at 50% 105%, rgb(24 133 180 / 54%), transparent 58%),
+    repeating-radial-gradient(circle at 8% 82%, transparent 0 68px, rgb(153 224 255 / 12%) 70px 71px, transparent 73px 138px),
+    linear-gradient(112deg, transparent 18%, rgb(174 239 255 / 10%) 34%, transparent 48%),
+    linear-gradient(76deg, transparent 56%, rgb(174 239 255 / 8%) 66%, transparent 78%),
+    linear-gradient(160deg, #061a36, #0b3763 55%, #07234b);
   color: var(--text);
   font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   font-weight: 700;
@@ -190,6 +252,8 @@ canvas {
   background: var(--tab-bg);
   border-radius: var(--radius);
   font-size: clamp(24px, 2.8vw, 40px);
+  font-family: "Comfortaa", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
   margin: 0;
 }
 
@@ -204,7 +268,8 @@ canvas {
   color: var(--text);
   border: 0;
   border-radius: var(--radius);
-  font: inherit;
+  font-family: "Comfortaa", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
   font-size: clamp(16px, 1.5vw, 22px);
   cursor: pointer;
 }
@@ -214,15 +279,61 @@ canvas {
 
 /* Main panel */
 .level-select__panel {
+  position: relative;
+  isolation: isolate;
   box-sizing: border-box;
   min-height: 807px;
   padding: 118px 40px 60px;
-  background: var(--panel-bg);
+  overflow: hidden;
+  background-color: #15578a;
+  background-image:
+    radial-gradient(ellipse at 50% 115%, #39a8ca 0, rgb(35 137 183 / 74%) 22%, transparent 60%),
+    linear-gradient(112deg, transparent 20%, rgb(167 239 255 / 21%) 32%, transparent 42%),
+    linear-gradient(76deg, transparent 45%, rgb(167 239 255 / 17%) 55%, transparent 66%),
+    linear-gradient(145deg, #0b3b70, #16669a 55%, #104779);
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--row-gap);
+}
+
+.level-select__panel::before,
+.level-select__panel::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.level-select__panel::before {
+  background:
+    radial-gradient(circle, transparent 0 34px, rgb(190 244 255 / 24%) 35px 37px, transparent 38px) 8% 18% / 130px 130px,
+    radial-gradient(circle, transparent 0 23px, rgb(190 244 255 / 18%) 24px 26px, transparent 27px) 91% 68% / 100px 100px,
+    radial-gradient(circle, rgb(222 250 255 / 72%) 0 3px, transparent 4px) 17% 63% / 90px 120px,
+    radial-gradient(circle, rgb(222 250 255 / 62%) 0 4px, transparent 5px) 84% 28% / 120px 150px;
+  background-repeat: no-repeat;
+  animation: underwater-drift 12s ease-in-out infinite alternate;
+}
+
+.level-select__panel::after {
+  inset: auto 0 0;
+  height: 32%;
+  background:
+    radial-gradient(ellipse at 15% 100%, rgb(74 190 203 / 50%), transparent 55%),
+    radial-gradient(ellipse at 88% 100%, rgb(70 165 197 / 46%), transparent 54%),
+    linear-gradient(0deg, rgb(3 33 70 / 50%), transparent);
+}
+
+.level-select__panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes underwater-drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12px); }
 }
 
 /* 3 thumbnails on top, 2 centered below */
@@ -241,13 +352,14 @@ canvas {
   width: var(--thumb-w);
   aspect-ratio: 281 / 180;
   padding: 0;
-  border: 0;
+  border: 1px solid rgb(194 242 255 / 62%);
   border-radius: var(--radius);
   overflow: hidden;
   color: var(--text);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  box-shadow: inset 0 0 18px rgb(158 232 255 / 24%), 0 8px 22px rgb(3 27 57 / 28%);
   /* No transition: highlight must follow key presses with no delay */
   transition: none;
 }
@@ -266,6 +378,37 @@ canvas {
   border-radius: inherit;
   object-fit: cover;
   z-index: 0;
+}
+
+.level__lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: clamp(28px, 3.4vw, 44px);
+  height: auto;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 5px rgb(0 0 0 / 55%));
+  pointer-events: none;
+}
+
+.level::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    linear-gradient(125deg, rgb(218 248 255 / 20%), transparent 35% 72%, rgb(137 222 255 / 10%));
+  content: "";
+  pointer-events: none;
+}
+
+.level:not(.is-locked):hover {
+  box-shadow: inset 0 0 24px rgb(158 232 255 / 38%), 0 10px 28px rgb(3 27 57 / 40%);
+}
+
+.level__label {
+  z-index: 3;
 }
 
 .level[data-level="1"] .level__label {
@@ -287,7 +430,6 @@ canvas {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1;
   padding: 0 8px 8px;
   font-size: 16px;
 }

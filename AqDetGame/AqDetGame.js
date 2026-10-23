@@ -29,6 +29,7 @@ function start(){
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d");
 const initialSetupScreen = document.getElementById("initialSetup");
+const beginGameButton = document.getElementById("beginGame");
 const levelSelectScreen = document.querySelector(".level-select");
 const gameScreen = document.getElementById("gameScreen");
 const completionMenu = document.getElementById("completionMenu");
@@ -305,6 +306,7 @@ function updateLevelSelectButtons() {
     button.classList.toggle("is-locked", !unlocked);
     button.disabled = !unlocked;
     button.setAttribute("aria-disabled", String(!unlocked));
+    button.querySelector(".level__lock").hidden = unlocked;
     if (!unlocked) button.setAttribute("aria-label", `Level ${button.dataset.level} locked`);
     else button.setAttribute("aria-label", `Level ${button.dataset.level}`);
   });
@@ -376,5 +378,6 @@ function levelSelectDisplay() {
 }
 
 document.addEventListener("keydown", onSetupKeyDown);
+beginGameButton.addEventListener("click", levelSelectDisplay);
 
 window.levelSelectDisplay = levelSelectDisplay;
