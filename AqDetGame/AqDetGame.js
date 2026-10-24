@@ -3,18 +3,27 @@ document.addEventListener('DOMContentLoaded', () => {
     alert("DEBUG SPACE LOADED");
 })
 
+let stopMain = null;
+let lastFrameTime = null;
 
 //Consider this function the Main of the entire game AND the infinite "While loop" that will call
 //      All natually-occuring events like gravity, enemy movement, and stuff like water currents
-window.main = () => {
-    stopMain = window.requestAnimationFrame(main);
+window.main = (timestamp = performance.now()) => {
+    if (!gameStart) {
+        stopMain = null;
+        lastFrameTime = null;
+        return;
+    }
+
+    const deltaTime = lastFrameTime === null
+        ? 0 : Math.min((timestamp - lastFrameTime) / 1000, 0.05);
+    lastFrameTime = timestamp;
     // alert(counter);     
     counter++;
-    // updatePhysics();
+    updatePhysics(deltaTime);
+    stopMain = window.requestAnimationFrame(main);
     
-    window.cancelAnimationFrame(stopMain);
-    
-    
+    //window.cancelAnimationFrame(stopMain);
 }
 
 function start(){
@@ -60,6 +69,12 @@ const moveDistance = 15;
 
 counter = 0;
 
+const ELEMENT_WATER_CURRENT = "waterCurrent";
+const CURRENT_TYPES = {
+    gentle: { speed: 60 }, // pixels per second
+    strong: { speed: 120 }
+};
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -91,14 +106,14 @@ const enemy = {
     color: "purple"
 };
 
-const waterCurrents = {
+const waterCurrents = [{
     x: 100,
     y: 200,
     width: 250,
     height: 150,
-    type: "gentle",
+    type: "strong",
     direction: {x: 1, y: 0}, // rightward
-};
+}];
 
 function drawEnemy() {
     if( UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
@@ -112,11 +127,50 @@ function drawEnemy() {
 function drawWaterCurrents() {
     playerPH.save();
     playerPH.strokeStyle = "lightblue";
+    playerPH.fillStyle = "rgba(148, 210, 231, 0.5)"; // light blue with transparency
     playerPH.lineWidth = 3;
     for (const current of waterCurrents) {
         playerPH.strokeRect(current.x, current.y, current.width, current.height);
+        playerPH.fillRect(current.x, current.y, current.width, current.height);
     }
     playerPH.restore();
+}
+
+function WCCollision(deltaTime = 1/60) { // deltaTime is the time elapsed since the last frame, defaulting to 60fps
+    if (!gameStart) return;
+
+    const overlappingCurrents = waterCurrents.filter(current => {
+        return rectX < current.x + current.width &&
+               rectX + rectSize > current.x &&
+               rectY < current.y + current.height &&
+               rectY + rectSize > current.y;
+    });
+
+    for (const current of overlappingCurrents) {
+        const currentType = CURRENT_TYPES[current.type];
+        if (!currentType) continue;
+        elementMovement(ELEMENT_WATER_CURRENT,
+            current.direction,
+            currentType.speed * deltaTime);
+    }
+}
+
+function elementMovement(elementType, direction, movement) {
+    if (elementType !== ELEMENT_WATER_CURRENT) return;
+    if (!direction || !Number.isFinite(direction.x) ||
+        !Number.isFinite(direction.y) || !Number.isFinite(movement) 
+        || movement <= 0) return;
+
+    const length = Math.hypot(direction.x, direction.y);
+    if (length === 0) return;
+
+    const moveX = direction.x / length * movement;
+    const moveY = direction.y / length * movement;
+    
+    const steps = Math.ceil(movement / (rectSize / 2));
+    for (let step = 0; step < steps; step++) {
+        if (!reRender(moveX / steps, moveY / steps)) break;
+    }
 }
 
 function collidesWithBarrier(x, y, width, height) {
@@ -146,6 +200,7 @@ function spawn(){
     rectY = canvas.height/2;
 
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    drawWaterCurrents();
     drawBarriers();
 
     playerPH.fillStyle = "green";
@@ -222,6 +277,7 @@ function reRender(movePosX, movePosY){
     rectX += movePosX;
     rectY += movePosY;
 
+    drawWaterCurrents();
      drawBarriers();
      drawEnemy();
 
@@ -276,7 +332,9 @@ window.addEventListener("keydown", (e) =>{
 //         reRender(0, gravVector);
 //     }
 // }
-
+function updatePhysics(deltaTime) {
+    WCCollision(deltaTime);
+}
 // function updatePhysics() {
 //     // var pcPos = playerPH.rect.x;
 
@@ -368,4 +426,4 @@ function levelSelectDisplay() {
 
 // document.addEventListener("keydown", onSetupKeyDown);
 
-start() 
+start()
