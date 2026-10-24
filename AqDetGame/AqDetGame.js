@@ -91,6 +91,15 @@ const enemy = {
     color: "purple"
 };
 
+const waterCurrents = {
+    x: 100,
+    y: 200,
+    width: 250,
+    height: 150,
+    type: "gentle",
+    direction: {x: 1, y: 0}, // rightward
+};
+
 function drawEnemy() {
     if( UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
         playerPH.drawImage(UrchinImage, enemy.x, enemy.y, enemy.width, enemy.height);
@@ -98,6 +107,16 @@ function drawEnemy() {
         playerPH.fillStyle = enemy.color;
     playerPH.fillRect(enemy.x, enemy.y, enemy.width, enemy.height); //Default loading if the asset art fails to load
     }
+}
+
+function drawWaterCurrents() {
+    playerPH.save();
+    playerPH.strokeStyle = "lightblue";
+    playerPH.lineWidth = 3;
+    for (const current of waterCurrents) {
+        playerPH.strokeRect(current.x, current.y, current.width, current.height);
+    }
+    playerPH.restore();
 }
 
 function collidesWithBarrier(x, y, width, height) {
