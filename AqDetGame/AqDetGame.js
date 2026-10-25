@@ -38,6 +38,7 @@ const playerPH = canvas.getContext("2d");
 var currentLevel = 0;
 var currentScreen = 0;
 
+
 const rectSize = 60;
 var rectX; //player PlaceHolder
 var rectY;
@@ -46,6 +47,9 @@ var gravVector;
 var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
+
+
+
 
 const NO_MOVEMENT = 0;
 const STANDARD_MOVEMENT = 15; 
@@ -58,6 +62,37 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let gameStart = false;
+
+const spawnArr = [
+    {
+        // Level 0
+        spawnPoints: [
+            {
+                screen: 0,
+                x: canvas.width - 100,
+                y: canvas.height / 2
+            },
+            {
+                screen: 1,
+                x: canvas.width - 100,
+                y: canvas.height / 2
+            },
+            {
+                screen: 2,
+                x: canvas.width - 100,
+                y: canvas.height / 2
+            },
+            {
+                screen: 3,
+                x: canvas.width - 100,
+                y: canvas.height / 2
+            }
+        ]
+    }
+];
+let spawnIndex = 0;
+
+
 
 const SEAWEED_SIZE = 40;
 const PUDDLE_SIZE = 50;
@@ -184,11 +219,11 @@ const barriers =  [
         },
         
         { // deep water
-            x: canvas.width / 10,
-            y: canvas.height / 2 - PUDDLE_SIZE * 2.5,
-            width: PUDDLE_SIZE,
-            height: PUDDLE_SIZE * 5,
-            color: "purple"
+           // x: canvas.width / 10,
+           // y: canvas.height / 2 - PUDDLE_SIZE * 2.5,
+           // width: PUDDLE_SIZE,
+           // height: PUDDLE_SIZE * 5,
+           // color: "purple"
         }
     
     ], // end of screen 0
@@ -649,10 +684,23 @@ function reachScreenEnd(rectX) {
     return false;
 }
 
-function spawn(){
-    rectX = canvas.width - 40 - rectSize;
-    rectY = canvas.height/2;
 
+function getSpawnPoint(){
+    return spawnArr[currentLevel].spawnPoints[spawnIndex];
+}
+
+function updateCheckPoint(checknum){
+    if(checknum == spawnIndex +1 && checknum < spawnArr[currentLevel].spawnPoints.length){
+        spawnIndex = checknum;
+    }
+}
+
+function spawn(){
+    const spawnPoint = getSpawnPoint();
+    currentScreen = spawnPoint.screen;
+    rectX = spawnPoint.x;
+   rectY = spawnPoint.y;
+    //alert("X: " + rectX  + "\n Y" + rectY)
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBarriers();
@@ -661,6 +709,7 @@ function spawn(){
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    
 
     
     // canvasTemp = document.getElementById("LayoutDisplay");
@@ -670,11 +719,7 @@ function spawn(){
 }
 
 function respawn(){
-    findRespawn();
-    removeOldCharacter();
-    rectX = RESPAWN_X;
-    rectY = RESPAWN_Y;
-    reRender(0, 0);
+    spawn();
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -716,34 +761,64 @@ function removeOldCharacter() {
 }
 
 
-function reRender(movePosX, movePosY){
-    
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosY)) {
+function reRender(movePosX, movePosY) {
+
+    const newX = rectX + movePosX;
+    const newY = rectY + movePosY;
+
+    // Check if player reached the left edge
+    if (reachScreenEnd(newX)) {
+
+        // Check if this is the last screen
+        if (currentScreen === 3) {
+            alert("Level done");
+            return;
+        }
+
+        // Unlock the next checkpoint
+        updateCheckPoint(currentScreen + 1);
+
+        // Change to next screen
+        currentScreen++;
+
+        // Get new screen coordinates
+        const coordinates =
+            spawnArr[currentLevel].spawnPoints[currentScreen];
+
+        rectX = coordinates.x;
+        rectY = coordinates.y;
+
+        // Draw new screen
+        playerPH.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawBarriers();
+        drawInteractables();
+        drawJumpPuddles();
+
+        playerPH.fillStyle = "green";
+        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+
         return;
     }
 
-    if (reachScreenEnd(rectX + movePosX)) {
-        playerPH.clearRect(0, 0, canvas.width, canvas.height);
-        if (currentScreen == 3) { 
-            // goes to the next level if player reached end of first level
-            currentLevel++;
-            currentScreen = 0;
-        } else {
-            // goes to next screen
-            currentScreen++;
-            spawn();
-            //alert(`POS is: ${rectX}, ${rectY}`);
-        }
+    // Check collisions before normal movement
+    if (collidesWithBarrier(newX, newY)) {
+        return;
     }
-    
+
+    // Clear old player
     playerPH.clearRect(rectX, rectY, rectSize, rectSize);
-    rectX += movePosX;
-    rectY += movePosY;
 
-     drawBarriers();
-     drawInteractables();
-     drawJumpPuddles();
+    // Update position
+    rectX = newX;
+    rectY = newY;
 
+    // Redraw environment
+    drawBarriers();
+    drawInteractables();
+    drawJumpPuddles();
+
+    // Draw player
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 }
