@@ -83,6 +83,28 @@ function collidesWithBarrier(x, y, width, height) {
     return false;
 }
 
+//const TILE = 60; // Size of each tile in pixels
+
+//const tileArt = {
+//   "0": "white", // Empty space
+//    "1": "black", // Wall
+//    "2": "blue"   // Water
+
+//    playerPH.fillStyle = tileArt[tileType];
+//    playerPH.fillRect(x * TILE, y * TILE, TILE, TILE);
+//    playerPH.strokeStyle = "gray";
+//    playerPH.lineWidth = 2;
+
+//    playerPH.beginPath();
+//    playerPH.moveTo(x, y + TILE /2);
+//    playerPH.lineTo(x + TILE, y + TILE /2);
+//    playerPH.moveTo(x + TILE / 2, y);
+//    playerPH.lineTo(x + TILE / 2, y + TILE /2);
+//    playerPH.moveTo(x, y + TILE / 2);
+//    playerPH.lineTo(x, y + TILE);
+//    playerPH.stroke();
+//}
+
 function spawn(){
     rectX = 23;
     rectY = canvas.height/2;
