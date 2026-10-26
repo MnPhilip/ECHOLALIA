@@ -75,7 +75,7 @@ const spawnArr = [
             {
                 screen: 1,
                 x: canvas.width - 100,
-                y: canvas.height / 2
+                y: canvas.height / 5
             },
             {
                 screen: 2,
@@ -807,7 +807,7 @@ function reRender(movePosX, movePosY) {
     }
 
     // Clear old player
-    playerPH.clearRect(rectX, rectY, rectSize, rectSize);
+    playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
 
     // Update position
     rectX = newX;
@@ -861,7 +861,7 @@ window.addEventListener("keydown", (e) =>{
         // reRender(0, -50);Jump no longer needed
     } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
         pcInteract();
-    } else if ((e.key).toLowerCase == 'c')
+    } else if ((e.key).toLowerCase() == 'c')
     {
         respawn();
     }
