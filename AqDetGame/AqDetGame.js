@@ -38,6 +38,12 @@ var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
+//Interactable Type Constants
+const pushBlock = 11;
+const bubble = 22;
+const signalFlare = 33;
+var interactActive = false;
+var currObj = -1;
 
 const interactableSize = 50;
 var interactableLoc = [
@@ -47,17 +53,32 @@ var interactableLoc = [
         width: interactableSize,
         height: interactableSize,
         color: "purple",
-        type: 0,
+        type: pushBlock,
+        activated: false
+    }, 
+
+    {
+        x: 180,
+        y: 800,
+        width: interactableSize,
+        height: interactableSize,
+        color: "aqua",
+        type: bubble,
+        activated: false
+    },
+
+    {
+        x: 280,
+        y: 800,
+        width: interactableSize,
+        height: interactableSize,
+        color: "red",
+        type: pushBlock,
         activated: false
     }
 ]; //[Xorigin][Yorigin][type_constant]
 
-//Interactable Type Constants
-const pushBlock = 11;
-const bubble = 22;
-const signalFlare = 33;
-var interactActive = false;
-var currObj = -1;
+
 
 const moveDistance = 15; 
 
@@ -184,7 +205,7 @@ function drawBackground() {
 //Draws Push Blocks, Flares, and Bubbles - Will need integration to get applicable data from a file with Level-specific layouts
 function drawInteractables() {
     //TESTING STATEMENT AND LOOP
-    interactableLoc[0].type = pushBlock; //Will need to be removed
+
     for (const obj of interactableLoc)
     {
         lvlLayout.textAlign = "center";
