@@ -119,17 +119,6 @@ function start(){
     //requestAnimationFrame(start);
 }
 
-//Dynamic Barriers
-const objBarriers = [
-    {
-        x: interactableLoc[0].x,
-        y: interactableLoc[0].y,
-        width:interactableSize,
-        height: interactableSize,
-        color: "pink"
-    },
-];
-
 // Static Barriers 
 const barriers =  [
     { 
@@ -184,7 +173,7 @@ function collidesWithObject(x, y, width, height) {
     if (interactActive) {
         return false;
     }
-    for (const b of objBarriers) {
+    for (const b of interactableLoc) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
             y < b.y + b.height &&
@@ -239,8 +228,6 @@ function respawn(){
     rectY = RESPAWN_Y;
     
     reRender(0, 0);
-    
-    
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -290,8 +277,8 @@ function reRender(movePosX, movePosY){
         if (obj.activated) {
             obj.x += movePosX;
             obj.y += movePosY;
-            objBarriers[count].x = obj.x; //These two lines allow barriers to be moved with their interactions
-            objBarriers[count].y = obj.y;
+            // objBarriers[count].x = obj.x; //These two lines allow barriers to be moved with their interactions
+            // objBarriers[count].y = obj.y;
         }
         count++;
     }
@@ -334,7 +321,8 @@ function pcInteract()
 function interactCheck(){
     var count = 0;
     for (var obj of interactableLoc){
-        if (true){//Checks above and below the player object
+        if (directionalCheck())
+        {//Checks above and below the player object
             interactActive = true;  //Allows other functions to know an interaction is active
             obj.activated = true;   //Toggles the state of the specific interactable, allowing it to be drawn where it needs to be moved to
             currObj = count;
@@ -342,6 +330,11 @@ function interactCheck(){
         }
         count++;
     }
+}
+
+//PURPOSE: Will check all four directions around the player and return 
+function directionalCheck(){
+
 }
 
 function move(moveKey) {
