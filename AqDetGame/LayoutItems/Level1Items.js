@@ -1,5 +1,6 @@
+/*
 const barriersSub =  [
-    /*
+    
     { // test barrier
         x: 400, 
         y: 0, 
@@ -7,7 +8,7 @@ const barriersSub =  [
         height: 600,
         color: "red"
     },
-    */
+    
     { // bottom barrier
         x: 0,
         y: canvas.height - 20,
@@ -30,4 +31,35 @@ const barriersSub =  [
         color: "purple"
     },
 
+];
+
+*/
+
+const level1spawn = [
+    
+        // Level 0
+       
+            {
+                screen: 0,
+                x: window.innerWidth - 100,
+                y: window.innerHeight / 2
+            },
+            {
+                screen: 1,
+                 x: window.innerWidth - 100,
+                y: window.innerHeight / 2
+               
+            },
+            {
+                screen: 2,
+                 x: window.innerWidth - 100,
+                y: window.innerHeight / 2
+            },
+            {
+                screen: 3,
+              x: window.innerWidth - 100,
+                y: window.innerHeight / 2
+            }
+        
+    
 ];

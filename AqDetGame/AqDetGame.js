@@ -65,31 +65,10 @@ let gameStart = false;
 
 const spawnArr = [
     {
-        // Level 0
-        spawnPoints: [
-            {
-                screen: 0,
-                x: canvas.width - 100,
-                y: canvas.height / 2
-            },
-            {
-                screen: 1,
-                x: canvas.width - 100,
-                y: canvas.height / 5
-            },
-            {
-                screen: 2,
-                x: canvas.width - 100,
-                y: canvas.height / 2
-            },
-            {
-                screen: 3,
-                x: canvas.width - 100,
-                y: canvas.height / 2
-            }
-        ]
+        spawnPoints: level1spawn
     }
 ];
+
 let spawnIndex = 0;
 
 
@@ -705,7 +684,7 @@ function spawn(){
 
     drawBarriers();
     drawInteractables();
-    drawJumpPuddles();
+    drawJumpPuddles();//draw movement element
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
