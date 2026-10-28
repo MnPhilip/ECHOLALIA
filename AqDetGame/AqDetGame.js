@@ -79,6 +79,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let gameStart = false;
+let teleportState = null;
 
 // Barriers 
 const barriers =  [
@@ -104,16 +105,44 @@ const enemy = {
     width: 50,
     height: 50,
     color: "purple"
-};
+}; //color is a default, as the enemies will have pngs mapped to them
 
-const waterCurrents = [{
+const waterCurrents = [
+    {
     x: 100,
     y: 200,
     width: 250,
     height: 150,
     type: "strong",
-    direction: {x: 1, y: 0}, // rightward
-}];
+    direction: {x: 1, y: 0}, // rightward   (y: -1 up, y: 1 down)
+    }
+];
+
+const tunnels = [
+    {
+        id: "A",
+        partnerId: "B",
+        x: 100,
+        y: canvas.height - 45,
+        width: 90,
+        height: 25
+    },
+
+    {
+        id: "B",
+        partnerId: "A",
+        x: 400,
+        y: canvas.height - 45,
+        width: 90,
+        height: 25
+    }
+];
+
+const TUNNEL_TIMING = {
+    enteringTime: 0.15,
+    hiddenTime: 1,
+    exitingTime: 0.15
+};
 
 function drawEnemy() {
     if( UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
