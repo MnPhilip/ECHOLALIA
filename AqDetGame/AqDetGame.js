@@ -303,11 +303,13 @@ function onLevelCompleted(level) {
   updateLevelSelectButtons();
 }
 
+// Level selection logic
 function onLevelSelected(level) {
   if (!isUnlocked(level)) return; // blocked: do nothing
   loadLevel(level);
 }
 
+// Update the level select buttons to reflect which levels are unlocked
 function updateLevelSelectButtons() {
   document.querySelectorAll(".level[data-level]").forEach((button) => {
     const unlocked = isUnlocked(Number(button.dataset.level));
@@ -346,7 +348,8 @@ function loadLevelSelect() {
 
 document.querySelectorAll(".level[data-level]").forEach((button) => {
   button.addEventListener("click", () => onLevelSelected(Number(button.dataset.level)));
-});
+}); 
+
 
 completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
   button.addEventListener("click", () => onOptionPressed(button.dataset.completionOption));
