@@ -343,7 +343,7 @@ function directionalCheck(){
   //RectX, RectY -> RectX+move, RectY
   if (lastKeyPressed == "w"){ //CHECK UP, NEG Y
     for (var obj of interactableLoc){
-      if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize)) {
+      if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance) {
         currObj = count;
         return true;
       }
@@ -351,7 +351,7 @@ function directionalCheck(){
     }
   } else if (lastKeyPressed == "a"){ //CHECK LEFT, NEG X
     for (var obj of interactableLoc){
-      if ((obj.x < rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize)) {
+      if ((obj.x < rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance) {
         currObj = count;
         return true;
       }
@@ -359,7 +359,7 @@ function directionalCheck(){
     }
   } else if (lastKeyPressed == "s"){ //CHECK DOWN, POS Y
     for (var obj of interactableLoc){
-      if ((obj.y < rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) < obj.y+interactableSize)) {
+      if ((obj.y < rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) < obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance) {
         currObj = count;
         return true;
       }
@@ -367,7 +367,7 @@ function directionalCheck(){
     }
   } else if (lastKeyPressed == "d"){ //CHECK RIGHT, POS X
     for (var obj of interactableLoc) {
-      if ((obj.x+interactableSize >= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) > obj.x)) {
+      if ((obj.x >= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) > obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance) {
         currObj = count;
         return true;
       }
