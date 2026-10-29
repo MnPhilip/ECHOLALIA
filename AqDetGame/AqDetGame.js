@@ -79,10 +79,16 @@ const ROCKET_SIZE = 70;
 const BUBBLE_SIZE = 80;
 const PUSH_ROCK_SIZE = PUDDLE_SIZE;
 
+
+const barriers = createBarrier(canvas);
+const interactableItems = createInteractables(canvas);
+
+
 // Barriers 
+/*
 const barriers =  [
     [ // screen 0
-        /*
+        
         { // test barrier
             x: 400, 
             y: 0, 
@@ -90,7 +96,7 @@ const barriers =  [
             height: 600,
             color: "red"
         },
-    */
+    
         { // bottom barrier
             x: 0,
             y: canvas.height - SEAWEED_SIZE,
@@ -495,6 +501,9 @@ const barriers =  [
          },
     ] // end of screen 3
 ];
+*/
+
+
 
 function drawBarriers() {
     for (const b of barriers[currentScreen]) {
@@ -574,6 +583,7 @@ function drawJumpPuddles() {
     }
 }
 
+/*
 const interactableItems = [
     [ // screen 0
         { // bubble
@@ -648,6 +658,7 @@ const interactableItems = [
     ]
 ]
 
+*/
 function drawInteractables() {
     for (const d of interactableItems[currentScreen]) {
         playerPH.fillStyle = d.color;
