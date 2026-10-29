@@ -66,7 +66,6 @@ var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
 const moveDistance = 15; 
-
 counter = 0;
 
 const ELEMENT_WATER_CURRENT = "waterCurrent";
@@ -80,6 +79,7 @@ canvas.height = window.innerHeight;
 
 let gameStart = false;
 let teleportState = null;
+let firstTimeTunnel = true;
 
 // Barriers 
 const barriers =  [
@@ -127,7 +127,6 @@ const tunnels = [
         width: 90,
         height: 25
     },
-
     {
         id: "B",
         partnerId: "A",
@@ -161,6 +160,30 @@ function drawWaterCurrents() {
     for (const current of waterCurrents) {
         playerPH.strokeRect(current.x, current.y, current.width, current.height);
         playerPH.fillRect(current.x, current.y, current.width, current.height);
+    }
+    playerPH.restore();
+}
+
+function drawTunnels() {
+    playerPH.lineWidth = 4;
+    playerPH.font = "14px Arial";
+    playerPH.textAlign = "center";
+    playerPH.textBaseline = "bottom";
+
+    for(const tunnel of tunnels) {
+        const centerX = tunnel.x + tunnel.width/2;
+        const centerY = tunnel.y + tunnel.height/2;
+        playerPH.beginPath();
+        playerPH.ellipse(centerX, centerY, tunnel.width/2, tunnel.height/2, 0, 0, Math.PI * 2);
+
+        playerPH.fillStyle = "#147236";
+        playerPH.fill();
+        playerPH.strokeStyle = "orange";
+        playerPH.stroke();
+        if (firstTimeTunnel) {
+            playerPH.fillText(`Press E to teleport`, centerX, tunnel.y - 8);
+            firstTimeTunnel = false;
+        }
     }
     playerPH.restore();
 }
@@ -229,6 +252,7 @@ function spawn(){
     rectY = canvas.height/2;
 
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    drawTunnels();
     drawWaterCurrents();
     drawBarriers();
 
@@ -236,11 +260,6 @@ function spawn(){
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 
     drawEnemy();
-    
-    // canvasTemp = document.getElementById("LayoutDisplay");
-    // playerPHTEMP = canvasTemp.getContext("2d"); 
-    // playerPHTEMP.fillStyle("red");
-    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
 }
 
 function respawn(){
@@ -277,17 +296,8 @@ function findRespawn(){
 }
 
 function removeOldCharacter() {
-//   if (!player) return; // nothing to remove
-
-//   // stop anything still running on the old PC
-//   player.stopAnimations();
-//   player.detachInputHandlers();
-
-//   // take it out of the game and release the reference
-//   removeFromEntityList(player);
-//   player = null;
   playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
-//   respawn();
+
 }
 
 
@@ -307,6 +317,7 @@ function reRender(movePosX, movePosY){
     rectY += movePosY;
 
     drawWaterCurrents();
+    drawTunnels();
      drawBarriers();
      drawEnemy();
 
@@ -354,42 +365,10 @@ window.addEventListener("keydown", (e) =>{
     else {}
 })
 
-//DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
-// function gravUpdate() {
-//     if (rectY < 1400) {
-//         gravVector = 10;
-//         reRender(0, gravVector);
-//     }
-// }
 function updatePhysics(deltaTime) {
     WCCollision(deltaTime);
 }
-// function updatePhysics() {
-//     // var pcPos = playerPH.rect.x;
 
-//     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
-//     // if (rectY + rectSize > canvas.height) {
-//     //     // The square is below the bottom of the canvas
-//     //     rectY = canvas.height - rectSize;
-//     //     // Square stops falling
-//     //     velocityY = 0;
-//     // }
-
-//     // velocityY += gravity;
-//     // if (velocityY > max_fall_speed) {
-//     //     velocityY = max_fall_speed;
-//     // }
-//     // //Update rectY by velocityY
-//     // rectY += velocityY;
-//     // //Keep it from flying off the TOP (rectY < 0)
-//     // if (rectY < 0) {
-//     //     rectY = 0;
-//     //     velocityY = 0;
-//     // }
-
-    
-//     gravUpdate();
-// }
 let chosenOption = null;
 
 function levelCompleted() {
@@ -452,7 +431,5 @@ function levelSelectDisplay() {
     drawLevelOption(level, isUnlocked(level)); // positioned in order
   }
 }
-
-// document.addEventListener("keydown", onSetupKeyDown);
 
 start()
