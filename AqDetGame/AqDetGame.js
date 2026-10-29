@@ -19,7 +19,7 @@ window.main = () => {
 
 function start(){
 	//set canvas size
-    canvas.style.width = '1300px';
+    canvas.style.width = '1308px';
     canvas.style.height = '649px';
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
