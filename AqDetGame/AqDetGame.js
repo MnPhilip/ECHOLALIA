@@ -28,9 +28,9 @@ const bckgrndCanvas = document.getElementById('BackgroundDisplay');
 const background = bckgrndCanvas.getContext("2d");
 
 
-const rectSize = 60;
-var rectX = 100; //player PlaceHolder
-var rectY = 200;
+const rectSize = 50;
+var rectX = 120; //player PlaceHolder
+var rectY = 300;
 //0,0 of PlayerPH is top left of the canvas/square
 var gravVector;
 var lastKeyPressed;
@@ -38,6 +38,8 @@ var lastKeyPressed;
 var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
+var bubbleResX = -1;
+var bubbleResY = -1;
 
 //Interactable Type Constants
 const pushBlock = 11;
@@ -46,7 +48,11 @@ const signalFlare = 33;
 var interactActive = false;
 var currObj = -1;
 
-const interactableSize = 50;
+
+const moveDistance = 25; 
+counter = 0;
+
+const interactableSize = 75;
 var interactableLoc = [
     {
         x: 80,
@@ -81,9 +87,6 @@ var interactableLoc = [
 
 
 
-const moveDistance = 15; 
-
-counter = 0;
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -236,6 +239,7 @@ function saveRespawnCoordinates(x, y) {
   RESPAWN_Y = y;
 }
 
+
 function findRespawn(){ //Will eventually be upgraded to search for respawn points based on the currently loaded level
     var newResX;
     var newResY;
@@ -274,18 +278,37 @@ function reRender(movePosX, movePosY){
     rectY += movePosY;
     drawBarriers();
     
-    for (obj of interactableLoc){
-        if (obj.activated && interactableLoc[currObj].type == pushBlock) {
-            obj.x += movePosX;
-            obj.y += movePosY;
-            // objBarriers[count].x = obj.x; //These two lines allow barriers to be moved with their interactions
-            // objBarriers[count].y = obj.y;
+    if (currObj != -1){
+      if (interactableLoc[currObj].type == pushBlock && interactableLoc[currObj].activated){
+        interactableLoc[currObj].x += movePosX;
+        interactableLoc[currObj].y += movePosY;
+      } else if (interactableLoc[currObj].type == bubble && interactableLoc[currObj].activated){
+        interactableLoc[currObj].x += movePosX;
+        interactableLoc[currObj].y += movePosY;
+        bubbleCounter--;  
+        if (bubbleCounter == 0 && interactableLoc[currObj].type == bubble) {
+          bubblePop();
         }
-        count++;
+      }
     }
+
+
     
+
+    //TO IMPLEMENT: Function for checking if the player character is standing on a kill-you tile
+
+
+    // for (obj of interactableLoc){
+    //     if (obj.activated && interactableLoc[currObj].type == pushBlock) {
+    //         obj.x += movePosX;
+    //         obj.y += movePosY;
+    //         // objBarriers[count].x = obj.x; //These two lines allow barriers to be moved with their interactions
+    //         // objBarriers[count].y = obj.y;
+    //     }
+    //     count++;
+    // }
     drawInteractables();    
-    
+  
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
@@ -305,11 +328,10 @@ function pcInteract()
         objType = -1;
     }
 
-    alert(objType);
 
     if (objType < 0)
     {
-        alert("No object found or object unbound");
+        // alert("No object found or object unbound");
         return;
     }
     else if (objType == pushBlock) {
@@ -317,6 +339,7 @@ function pcInteract()
     }//PushBlock found
     else if (objType == bubble) {
       alert("Bubble Found");
+      activateBubble();
     }//Bubble found
     else if (objType == signalFlare){
       alert("Signal Flare Found");
@@ -343,7 +366,7 @@ function directionalCheck(){
   //RectX, RectY -> RectX+move, RectY
   if (lastKeyPressed == "w"){ //CHECK UP, NEG Y
     for (var obj of interactableLoc){
-      if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance) {
+      if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
         currObj = count;
         return true;
       }
@@ -351,7 +374,7 @@ function directionalCheck(){
     }
   } else if (lastKeyPressed == "a"){ //CHECK LEFT, NEG X
     for (var obj of interactableLoc){
-      if ((obj.x < rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance) {
+      if ((obj.x <= rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*3) {
         currObj = count;
         return true;
       }
@@ -359,7 +382,7 @@ function directionalCheck(){
     }
   } else if (lastKeyPressed == "s"){ //CHECK DOWN, POS Y
     for (var obj of interactableLoc){
-      if ((obj.y < rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) < obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance) {
+      if ((obj.y <= rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
         currObj = count;
         return true;
       }
@@ -367,7 +390,7 @@ function directionalCheck(){
     }
   } else if (lastKeyPressed == "d"){ //CHECK RIGHT, POS X
     for (var obj of interactableLoc) {
-      if ((obj.x >= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) > obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance) {
+      if ((obj.x <= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*2) {
         currObj = count;
         return true;
       }
@@ -377,6 +400,31 @@ function directionalCheck(){
 
   return false;
 }
+
+function activateBubble(){
+  if (interactableLoc[currObj].type == bubble) {
+    bubblePush(interactableLoc[currObj].x, interactableLoc[currObj].y);
+  }
+}
+
+function bubblePush(newX, newY){
+  bubbleCounter = bubble;
+  removeOldCharacter();
+  rectX = newX;
+  bubbleResX = newX;
+  rectY = newY;
+  bubbleResY = newY;
+  reRender(0, 0);
+}
+
+function bubblePop() {
+    interactableLoc[currObj].activated = false;
+    interactableLoc[currObj].x = bubbleResX;
+    interactableLoc[currObj].y = bubbleResY;
+    interactActive = false;
+    pcInteract();
+}
+
 
 function move(moveKey) {
     
