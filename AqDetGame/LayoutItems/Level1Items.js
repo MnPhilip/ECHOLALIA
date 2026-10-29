@@ -459,6 +459,60 @@ return barriers;
 }
 
 
+function createJumpPuddle (canvas){
+const jumpPuddles = [
+    [], // screen 0, no jump puddles
+    [ // screen 1
+        { // left puddle, swaps with [1][1]
+            x: rectSize * 4 + canvas.width / 2,
+            y: canvas.height / 2 + rectSize,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "orange"
+        },
+        { // right puddle, swaps with [1][0]
+            x: canvas.width / 1.2 - SEAWEED_SIZE * 2 + 5,
+            y: canvas.height - rectSize * 4 - SEAWEED_SIZE / 2 - 5,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "orange"
+        }
+    ], 
+    [ // screen 2
+        { // top right puddle, swaps with [2][1]
+            x: canvas.width - rectSize * 2 - SEAWEED_SIZE,
+            y: rectSize,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "orange"
+        },
+        { // bottom right puddle, swaps with [2][0]
+            x: canvas.width - rectSize * 6,
+            y: canvas.height - rectSize * 2,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "orange"
+        }
+    ],
+    [ // screen 3
+        { // right puddle, swaps with [3][1]
+            x: canvas.width - rectSize * 2,
+            y: canvas.height - rectSize * 2,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "orange"
+        },
+        { // left puddle, swaps with [3][0]
+            x: canvas.width / 2,
+            y: canvas.height - rectSize * 2,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "orange"
+        }
+    ]
+];
+ return jumpPuddles;
+}
 
 
 function createInteractables(canvas){
