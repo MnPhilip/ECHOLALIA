@@ -41,6 +41,8 @@ var RESPAWN_Y;
 var bubbleResX = -1;
 var bubbleResY = -1;
 
+var signalFlareIndex = -1;
+
 //Interactable Type Constants
 const pushBlock = 11;
 const bubble = 22;
@@ -228,6 +230,13 @@ function spawn(){
 function respawn(){
     findRespawn(); //Allows player to get spawn coordinates without hardcoding
     removeOldCharacter();
+    if (interactActive){
+      interactActive = !interactActive;
+      interactableLoc[currObj].activated = false;
+      if (interactableLoc[currObj].type == bubble){
+        bubblePop();
+      }
+    }
     rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
     
@@ -343,6 +352,7 @@ function pcInteract()
     }//Bubble found
     else if (objType == signalFlare){
       alert("Signal Flare Found");
+      window.dispatchEvent(flareSent);
     } //Signal Flare found
 }
 
@@ -461,6 +471,16 @@ window.addEventListener("keydown", (e) =>{
         alert(rectY);
     }
     else {}
+})
+
+window.addEventListener("flareSent", () => {
+  interactableLoc[currObj].color = "pink";
+  window.dispatchEvent(flareLanded);
+})
+
+window.addEventListener("flareLanded", (sfx, sfy) => {
+  lvlLayout.fillStyle = "Red";
+  lvlLayout.fillRect(400, 400, rectSize*2, rectSize);
 })
 
 //DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
