@@ -1,4 +1,3 @@
-//alert("Test of JS file worksssss");
 document.addEventListener('DOMContentLoaded', () => {
     alert("DEBUG SPACE LOADED");
 })
@@ -22,8 +21,6 @@ window.main = (timestamp = performance.now()) => {
     counter++;
     updatePhysics(deltaTime);
     stopMain = window.requestAnimationFrame(main);
-    
-    //window.cancelAnimationFrame(stopMain);
 }
 
 function start(){
@@ -123,24 +120,24 @@ const tunnels = [
         id: "A",
         partnerId: "B",
         x: 100,
-        y: canvas.height - 45,
+        y: canvas.height - 400,
         width: 90,
-        height: 25
+        height: 45
     },
     {
         id: "B",
         partnerId: "A",
-        x: 400,
-        y: canvas.height - 45,
+        x: 500,
+        y: canvas.height - 900,
         width: 90,
-        height: 25
+        height: 45
     }
 ];
 
 const TUNNEL_TIMING = {
-    enteringTime: 0.15,
-    hiddenTime: 1,
-    exitingTime: 0.15
+    entering: 0.15,
+    hidden: 1,
+    exiting: 0.15
 };
 
 function drawEnemy() {
@@ -165,6 +162,7 @@ function drawWaterCurrents() {
 }
 
 function drawTunnels() {
+    playerPH.save();
     playerPH.lineWidth = 4;
     playerPH.font = "14px Arial";
     playerPH.textAlign = "center";
@@ -173,19 +171,40 @@ function drawTunnels() {
     for(const tunnel of tunnels) {
         const centerX = tunnel.x + tunnel.width/2;
         const centerY = tunnel.y + tunnel.height/2;
-        playerPH.beginPath();
+        playerPH.beginPath(); //shows connecting paths for the tunnels.
         playerPH.ellipse(centerX, centerY, tunnel.width/2, tunnel.height/2, 0, 0, Math.PI * 2);
 
-        playerPH.fillStyle = "#147236";
+        playerPH.fillStyle = "MediumSpringGreen";
         playerPH.fill();
         playerPH.strokeStyle = "orange";
         playerPH.stroke();
         if (firstTimeTunnel) {
             playerPH.fillText(`Press E to teleport`, centerX, tunnel.y - 8);
-            firstTimeTunnel = false;
         }
     }
     playerPH.restore();
+}
+
+function drawPlayer() {
+    if (teleportState?.phase === "hidden") return;
+    let scale = 1;
+    if (teleportState) {
+        const progress = Math.min(teleportState.elapsed / TUNNEL_TIMING[teleportState.phase], 1);
+        scale = teleportState.phase === "entering" ? 1 - progress : progress;
+    }
+    const size = rectSize * scale;
+    playerPH.fillStyle = "green";
+    playerPH.fillRect(rectX + (rectSize - size) / 2, rectY + (rectSize - size) / 2, size, size);
+}
+
+function drawAll() {
+    playerPH.clearRect(0,0, canvas.width, canvas.height);
+
+    drawWaterCurrents();
+    drawTunnels();
+    drawBarriers();
+    drawEnemy();
+    drawPlayer();
 }
 
 function WCCollision(deltaTime = 1/60) { // deltaTime is the time elapsed since the last frame, defaulting to 60fps
@@ -207,6 +226,12 @@ function WCCollision(deltaTime = 1/60) { // deltaTime is the time elapsed since 
     }
 }
 
+function tunnelExit(tunnel) {
+    return {
+        x: tunnel.x + (tunnel.width - rectSize) / 2,
+        y: tunnel.y - rectSize + 4};
+    }
+
 function elementMovement(elementType, direction, movement) {
     if (elementType !== ELEMENT_WATER_CURRENT) return;
     if (!direction || !Number.isFinite(direction.x) ||
@@ -223,6 +248,40 @@ function elementMovement(elementType, direction, movement) {
     for (let step = 0; step < steps; step++) {
         if (!reRender(moveX / steps, moveY / steps)) break;
     }
+}
+
+function ableToExitTunnel(pcPosition) {
+    return(pcPosition.x >= 0 && pcPosition.y >= 0 &&
+        pcPosition.x + rectSize <= canvas.width &&
+        pcPosition.y + rectSize <= canvas.height &&
+        !collidesWithBarrier(pcPosition.x, pcPosition.y) && 
+        !collidesWithEnemy(pcPosition.x, pcPosition.y)
+    );
+}
+
+function tunnelCollision() {
+    if (!gameStart || teleportState) {
+        return false;
+    }
+    const entrance = tunnels.find(tunnel =>
+        rectX < tunnel.x + tunnel.width && rectX + rectSize > tunnel.x &&
+        rectY < tunnel.y + tunnel.height + 14 && rectY + rectSize > tunnel.y - 14);
+
+    if (!entrance) { return false;}
+
+    const dest = tunnels.find(tunnel => tunnel.id === entrance.partnerId
+        && tunnel.partnerId === entrance.id && tunnel.id !== entrance.id);
+        
+    if(!dest || !ableToExitTunnel(tunnelExit(dest))) { return false; }
+
+    teleportState = {
+        dest,
+        elapsed: 0,
+        sourceX: rectX,
+        sourceY: rectY,
+        phase: "entering",
+    };
+    drawAll();
 }
 
 function collidesWithBarrier(x, y, width, height) {
@@ -248,21 +307,16 @@ function collidesWithEnemy(x, y) {
 }
 
 function spawn(){
+    teleportState = null;
     rectX = 23;
     rectY = canvas.height/2;
 
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    drawTunnels();
-    drawWaterCurrents();
-    drawBarriers();
-
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-
-    drawEnemy();
+    drawAll();
 }
 
 function respawn(){
+    teleportState = null;
     findRespawn();
     removeOldCharacter();
     rectX = RESPAWN_X;
@@ -302,34 +356,29 @@ function removeOldCharacter() {
 
 
 function reRender(movePosX, movePosY){
+    if (teleportState) {return false; }// prevent movement during teleportation
+    const nextX = rectX + movePosX;
+    const nextY = rectY + movePosY;
     
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
-        return;
+        return false;
     }
     if (collidesWithEnemy(rectX + movePosX, rectY + movePosY)) {
-        alert("You have collided with an enemy!"); //JUST FOR TESING ENEMY COLLISION.
         respawn();
-        return;
+        return false;
     }
     
     playerPH.clearRect(rectX, rectY, rectSize, rectSize);
-    rectX += movePosX;
-    rectY += movePosY;
+    rectX = nextX;
+    rectY = nextY;
 
-    drawWaterCurrents();
-    drawTunnels();
-     drawBarriers();
-     drawEnemy();
-
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    drawAll();
+    return true;
 }
 
 function pcInteract()
 {   
-        // alert(rectX);
-        // alert(rectY);
-        alert("Interact Key Pressed!");
+    return tunnelCollision();
 }
 
 function move(moveKey) {
@@ -354,9 +403,7 @@ window.addEventListener("keydown", (e) =>{
     } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
     	e.key == "d"){
         move(e);
-    } else if (e.key === " ") { //Space Entered - call jump
-        // reRender(0, -50);Jump no longer needed
-    } else if (e.key == "e") { //'e' key pressed, call enter
+    } else if (e.key == "e" && !e.repeat) {
         pcInteract();
     } else if (e.key == 'c')
     {
@@ -366,7 +413,40 @@ window.addEventListener("keydown", (e) =>{
 })
 
 function updatePhysics(deltaTime) {
+    if (teleportState) {
+        updateTeleport(deltaTime);
+        return;
+    }
     WCCollision(deltaTime);
+}
+
+function updateTeleport(deltaTime) {
+    if(!teleportState) return;
+
+    teleportState.elapsed += deltaTime;
+    while (teleportState && teleportState.elapsed >= TUNNEL_TIMING[teleportState.phase]) {
+        teleportState.elapsed -= TUNNEL_TIMING[teleportState.phase];
+        if (teleportState.phase === "entering") {
+            teleportState.phase = "hidden";
+        }
+        else if (teleportState.phase === "hidden") {
+            const exit = tunnelExit(teleportState.dest);
+
+            if (ableToExitTunnel(exit)) {
+                rectX = exit.x;
+                rectY = exit.y;
+            }
+            else {
+                rectX = teleportState.sourceX;
+                rectY = teleportState.sourceY;
+            }
+            teleportState.phase = "exiting";
+        }
+        else { 
+            teleportState = null; 
+        }
+    }
+    drawAll();
 }
 
 let chosenOption = null;
