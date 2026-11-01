@@ -16,8 +16,7 @@ window.main = (timestamp = performance.now()) => {
 
     const deltaTime = lastFrameTime === null
         ? 0 : Math.min((timestamp - lastFrameTime) / 1000, 0.05);
-    lastFrameTime = timestamp;
-    // alert(counter);     
+    lastFrameTime = timestamp;  
     counter++;
     updatePhysics(deltaTime);
     stopMain = window.requestAnimationFrame(main);
@@ -64,6 +63,8 @@ var RESPAWN_Y;
 
 const moveDistance = 15; 
 counter = 0;
+const playerVelocity = {x: 0, y: 0};
+let activeMovementElement = null;
 
 const ELEMENT_WATER_CURRENT = "waterCurrent";
 const CURRENT_TYPES = {
@@ -115,7 +116,7 @@ const waterCurrents = [
     }
 ];
 
-const tunnels = [
+const tunnels = [ //Value of X and Y will change based on later implementation of each levels tunnels
     {
         id: "A",
         partnerId: "B",
@@ -128,7 +129,7 @@ const tunnels = [
         id: "B",
         partnerId: "A",
         x: 500,
-        y: canvas.height - 900,
+        y: canvas.height - 600,
         width: 90,
         height: 45
     }
@@ -186,19 +187,19 @@ function drawTunnels() {
 }
 
 function drawPlayer() {
-    if (teleportState?.phase === "hidden") return;
-    let scale = 1;
+    if (teleportState?.phase === "hidden") return; //dont draw player if their state is hidden
+    let scale = 1; //scaler for teleporting animation
     if (teleportState) {
-        const progress = Math.min(teleportState.elapsed / TUNNEL_TIMING[teleportState.phase], 1);
+        const progress = Math.min(teleportState.elapsed / TUNNEL_TIMING[teleportState.phase], 1); //shrinks / grows player based on elapsed state
         scale = teleportState.phase === "entering" ? 1 - progress : progress;
     }
-    const size = rectSize * scale;
+    const size = rectSize * scale; // updates player size based on previously defined size
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX + (rectSize - size) / 2, rectY + (rectSize - size) / 2, size, size);
 }
 
 function drawAll() {
-    playerPH.clearRect(0,0, canvas.width, canvas.height);
+    playerPH.clearRect(0,0, canvas.width, canvas.height); // clear player so they dont duplicate at the starting teleporter
 
     drawWaterCurrents();
     drawTunnels();
@@ -207,22 +208,20 @@ function drawAll() {
     drawPlayer();
 }
 
-function WCCollision(deltaTime = 1/60) { // deltaTime is the time elapsed since the last frame, defaulting to 60fps
+function WCCollision() {
     if (!gameStart) return;
 
-    const overlappingCurrents = waterCurrents.filter(current => {
-        return rectX < current.x + current.width &&
+     const overlappingCurrents = waterCurrents.filter(current => {
+        return rectX < current.x + current.width && //boundary check for whether the player is in a current
                rectX + rectSize > current.x &&
                rectY < current.y + current.height &&
                rectY + rectSize > current.y;
     });
 
     for (const current of overlappingCurrents) {
-        const currentType = CURRENT_TYPES[current.type];
+        const currentType = CURRENT_TYPES[current.type]; //apply movement to player based on the defined speed tyoe for current 
         if (!currentType) continue;
-        elementMovement(ELEMENT_WATER_CURRENT,
-            current.direction,
-            currentType.speed * deltaTime);
+        elementMovement(ELEMENT_WATER_CURRENT, current.direction, currentType.speed); //defines movement speed of player based on the kind of current type
     }
 }
 
@@ -232,26 +231,44 @@ function tunnelExit(tunnel) {
         y: tunnel.y - rectSize + 4};
     }
 
-function elementMovement(elementType, direction, movement) {
-    if (elementType !== ELEMENT_WATER_CURRENT) return;
-    if (!direction || !Number.isFinite(direction.x) ||
-        !Number.isFinite(direction.y) || !Number.isFinite(movement) 
-        || movement <= 0) return;
+function elementMovement(elementType, direction, speed) {
+    //Check if speed is valid or current is being passed
+    if (elementType !== ELEMENT_WATER_CURRENT || !Number.isInteger(speed) || speed <= 0) return false;
 
-    const length = Math.hypot(direction.x, direction.y);
-    if (length === 0) return;
-
-    const moveX = direction.x / length * movement;
-    const moveY = direction.y / length * movement;
-    
-    const steps = Math.ceil(movement / (rectSize / 2));
-    for (let step = 0; step < steps; step++) {
-        if (!reRender(moveX / steps, moveY / steps)) break;
+    let directionVector;
+    if (typeof direction === "string") {
+        const normalizedDirection = direction.toLocaleLowerCase(); //
+        const directions = {
+            up: {x: 0, y: -1},
+            down: {x: 0, y: 1},
+            left: {x: -1, y: 0},
+            right: {x: 1, y: 0}
+        };
+        directionVector = directions[normalizedDirection];
     }
+    else if (direction && Number.isFinite(direction.x) && Number.isFinite(direction.y)) { //Validates nums are in bounds
+        directionVector = direction;
+    }
+    if (!directionVector) {return false;}
+
+    const length = Math.hypot(directionVector.x, directionVector.y);
+    if (length === 0) return false;
+
+    //Determine player velocity given the parameters
+    playerVelocity.x += directionVector.x / length * speed;
+    playerVelocity.y += directionVector.y / length * speed;
+
+    //For future use when we implement animations for interactables and other objects
+    //Calls only when a movement element becomes active rather than every frame
+    if (activeMovementElement !== elementType) {
+        activeMovementElement = elementType;
+        //alert("Animation Called"); Commented out for sake of it not appearing everytime for testing, specified in task #249
+    }
+    return true;
 }
 
-function ableToExitTunnel(pcPosition) {
-    return(pcPosition.x >= 0 && pcPosition.y >= 0 &&
+function ableToExitTunnel(pcPosition) { //Ensures exit teleport isnt in a barrier or enemy
+    return(pcPosition.x >= 0 && pcPosition.y >= 0 && 
         pcPosition.x + rectSize <= canvas.width &&
         pcPosition.y + rectSize <= canvas.height &&
         !collidesWithBarrier(pcPosition.x, pcPosition.y) && 
@@ -265,14 +282,14 @@ function tunnelCollision() {
     }
     const entrance = tunnels.find(tunnel =>
         rectX < tunnel.x + tunnel.width && rectX + rectSize > tunnel.x &&
-        rectY < tunnel.y + tunnel.height + 14 && rectY + rectSize > tunnel.y - 14);
+        rectY < tunnel.y + tunnel.height + 14 && rectY + rectSize > tunnel.y - 14); //define the entrance tunnel location and validate it
 
     if (!entrance) { return false;}
 
-    const dest = tunnels.find(tunnel => tunnel.id === entrance.partnerId
+    const dest = tunnels.find(tunnel => tunnel.id === entrance.partnerId // validate destination tunnel and its partner match
         && tunnel.partnerId === entrance.id && tunnel.id !== entrance.id);
         
-    if(!dest || !ableToExitTunnel(tunnelExit(dest))) { return false; }
+    if(!dest || !ableToExitTunnel(tunnelExit(dest))) { return false; } //check if player can exit from destination tunnel
 
     teleportState = {
         dest,
@@ -284,7 +301,7 @@ function tunnelCollision() {
     drawAll();
 }
 
-function collidesWithBarrier(x, y, width, height) {
+function collidesWithBarrier(x, y) {
     for (const b of barriers) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
@@ -356,7 +373,7 @@ function removeOldCharacter() {
 
 
 function reRender(movePosX, movePosY){
-    if (teleportState) {return false; }// prevent movement during teleportation
+    if (teleportState) {return false; } // prevent movement during teleportation
     const nextX = rectX + movePosX;
     const nextY = rectY + movePosY;
     
@@ -417,27 +434,36 @@ function updatePhysics(deltaTime) {
         updateTeleport(deltaTime);
         return;
     }
-    WCCollision(deltaTime);
+    playerVelocity.x = 0; //reflect updates from elementMovement()
+    playerVelocity.y = 0;
+    WCCollision(deltaTime); // players velocity doesnt effect the currents ability to move player, so only use deltaTime
+
+    if (playerVelocity.x !== 0 || playerVelocity.y !== 0) { // only rerender if the velocity is changing or player is not stationary
+        reRender(playerVelocity.x * deltaTime, playerVelocity.y * deltaTime);
+    }
+    else {
+        activeMovementElement = null;
+    }
 }
 
 function updateTeleport(deltaTime) {
     if(!teleportState) return;
 
     teleportState.elapsed += deltaTime;
-    while (teleportState && teleportState.elapsed >= TUNNEL_TIMING[teleportState.phase]) {
+    while (teleportState && teleportState.elapsed >= TUNNEL_TIMING[teleportState.phase]) { // Checks progress of each state of teleporting
         teleportState.elapsed -= TUNNEL_TIMING[teleportState.phase];
         if (teleportState.phase === "entering") {
             teleportState.phase = "hidden";
         }
-        else if (teleportState.phase === "hidden") {
+        else if (teleportState.phase === "hidden") { // update player location based on the respective exit tunnel
             const exit = tunnelExit(teleportState.dest);
 
-            if (ableToExitTunnel(exit)) {
+            if (ableToExitTunnel(exit)) { // if player is able to exit dest tunnel, update player location vars
                 rectX = exit.x;
                 rectY = exit.y;
             }
             else {
-                rectX = teleportState.sourceX;
+                rectX = teleportState.sourceX; 
                 rectY = teleportState.sourceY;
             }
             teleportState.phase = "exiting";
