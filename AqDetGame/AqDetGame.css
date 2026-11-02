@@ -2,11 +2,14 @@
 
 html {
     background-color: blue;
-    
+    overflow: hidden;
+    cursor:none;
+    /* background-image: url("test.jpg"); */
 }
     
 canvas {
     font-size: 200%;
+    position:absolute;
 }
 
 [hidden] {

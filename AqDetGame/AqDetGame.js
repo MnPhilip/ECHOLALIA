@@ -1,3 +1,52 @@
+//alert("Test of JS file worksssss");
+document.addEventListener('DOMContentLoaded', () => {
+    alert("DEBUG SPACE LOADED");
+})
+
+
+//Consider this function the Main of the entire game AND the infinite "While loop" that will call
+//      All natually-occuring events like gravity, enemy movement, and stuff like water currents
+window.main = () => {
+    stopMain = window.requestAnimationFrame(main);
+    // alert(counter);     
+    counter++;
+    // updatePhysics();
+    
+    window.cancelAnimationFrame(stopMain);
+    
+    
+}
+
+function start(){
+    //set canvas size
+    canvas.style.width = '1308px';
+    canvas.style.height = '649px';
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        playerPH.fillStyle = "Black";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+    } else{
+        spawn();
+    }
+    
+    //requestAnimationFrame(start);
+}
+
+const canvas = document.getElementById('PlrDisplay');
+const playerPH = canvas.getContext("2d"); 
+
+const lvlCanvas = document.getElementById('LevelDisplay');
+const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
+
+const bckgrndCanvas = document.getElementById('BackgroundDisplay');
+const background = bckgrndCanvas.getContext("2d");
+
+
+var currentLevel = 0;
+var currentScreen = 0;
 const canvas = document.getElementById("PlrDisplay");
 canvas.width = 1308;
 canvas.height = 649;
@@ -23,9 +72,76 @@ let counter = 0;
 const TOTAL_LEVELS = 5;
 const STANDARD_MOVEMENT = 15;
 const rectSize = 60;
+var rectX; //player PlaceHolder
+var rectY;
+var gravVector;
+var lastKeyPressed;
+
+var RESPAWN_X;
+var RESPAWN_Y;
+//0,0, IS TOP LEFT
+var bubbleResX = -1;
+var bubbleResY = -1;
+
+var signalFlareIndex = -1;
 const moveDistance = 15;
 const NO_MOVEMENT = 0;
 const pressedKeys = new Set();
+
+//Interactable Type Constants
+const pushBlock = 11;
+const bubble = 22;
+const signalFlare = 33;
+var interactActive = false;
+var currObj = -1;
+
+
+const moveDistance = 25; 
+counter = 0;
+
+const interactableSize = 75;
+var interactableLoc = [
+    {
+        x: 80,
+        y: 700,
+        width: interactableSize,
+        height: interactableSize,
+        color: "purple",
+        type: pushBlock,
+        activated: false
+    }, 
+
+    {
+        x: 380,
+        y: 800,
+        width: interactableSize,
+        height: interactableSize,
+        color: "aqua",
+        type: bubble,
+        activated: false
+    },
+
+    {
+        x: 680,
+        y: 800,
+        width: interactableSize,
+        height: interactableSize,
+        color: "red",
+        type: signalFlare,
+        activated: false
+    }
+]; //[Xorigin][Yorigin][type_constant]
+
+
+
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+lvlCanvas.width = window.innerWidth;
+lvlCanvas.height = window.innerHeight;
+bckgrndCanvas.width = window.innerWidth;
+bckgrndCanvas.height = window.innerHeight;
+
 const playerVelocity = { x: 0, y: 0 };
 let activeMovementElement = null;
 
@@ -53,6 +169,56 @@ const TUNNEL_TIMING = {
   exiting: 0.15,
 };
 
+function renderInit() {
+    drawBarriers();
+    // drawBackground();
+    drawInteractables();
+    playerPH.fillStyle = "green";
+    
+    gameStart = true; 
+}
+
+function start(){
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        playerPH.fillStyle = "Yellow";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+
+        renderInit();
+    } else{
+        spawn(); //Initial Rendering and Spawning of Player Character
+    }
+    
+    //requestAnimationFrame(start);
+}
+
+// Static Barriers 
+const barriers =  [
+    { 
+        x: 400, 
+        y: 0, 
+        width: 20, 
+        height: 600,
+        color: "red"
+    },
+
+    {
+        x: 200,
+        y: 600,
+        width: 200,
+        height: 40, 
+        color: "yellow"
+    }, 
+]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
+
+function drawBarriers() {
+    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+    for (const b of barriers) {
+        lvlLayout.strokeStyle = b.color;
+        lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
 const SEAWEED_SIZE = 40;
 const PUDDLE_SIZE = 50;
 const ROCKET_SIZE = 70;
@@ -66,6 +232,21 @@ const level1spawn = [
   { screen: 3, x: 120, y: 190 },
 ];
 
+function drawBarriers() {
+    for (const b of barriers[currentScreen]) {
+        playerPH.fillStyle = b.color;
+        playerPH.fillRect(b.x,b.y,b.width,b.height);
+    }
+    drawObjectBarriers();
+}
+
+function drawObjectBarriers() {
+    // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+    for (const obj of interactableLoc) {
+        lvlLayout.strokeStyle = 'green';
+        lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
+    }
+    
 const spawnArr = [{ spawnPoints: level1spawn }];
 
 const SPRITES = [];
@@ -153,6 +334,61 @@ function createInteractables() {
   ];
 }
 
+//Checks if an interactable will collide with a barrer
+function collidesWithObject(x, y, width, height) {
+    if (interactActive) {
+        return false;
+    }
+    for (const b of interactableLoc) {
+        if (x < b.x + b.width &&
+            x + rectSize > b.x &&
+            y < b.y + b.height &&
+            y + rectSize > b.y) {
+            return true;
+            }
+    }
+    return false;
+}
+
+function drawBackground() {
+    background.clearRect(0, 0, canvas.width, canvas.height);
+    var backImg = new Image();
+    backImg.src = url('test.jpg');
+    background.drawImage(backImg, 0, 0);  
+}
+const jumpPuddles = [
+    [], // screen 0, no jump puddles
+    [ // screen 1
+        { // left puddle, swaps with [1][1]
+            x: rectSize * 4 + canvas.width / 2,
+            y: canvas.height / 2 + rectSize,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        },
+        { // right puddle, swaps with [1][0]
+            x: canvas.width / 1.2 - SEAWEED_SIZE * 2 + 5,
+            y: canvas.height - rectSize * 4 - SEAWEED_SIZE / 2 - 5,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        }
+    ], 
+    [ // screen 2
+        { // top right puddle, swaps with [2][1]
+            x: canvas.width - rectSize * 2 - SEAWEED_SIZE,
+            y: rectSize,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        },
+        { // bottom right puddle, swaps with [2][0]
+            x: canvas.width - rectSize * 6,
+            y: canvas.height - rectSize * 2,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        }
 function createJumpPuddle() {
   return [
     [
@@ -423,34 +659,71 @@ function saveRespawnCoordinates(x, y) {
   RESPAWN_Y = y;
 }
 
-function findRespawn() {
-  let newResX = 120;
-  let newResY = 480;
+
+function findRespawn(){ //Will eventually be upgraded to search for respawn points based on the currently loaded level
+    var newResX;
+    var newResY;
+    if (rectX >= 400){
+        newResX = 700;
+    }
+    else if (rectX < 400){
+        newResX = 100;
+    }
 
   if (rectX >= 400) newResX = 700;
   else if (rectX < 400) newResX = 100;
 
+
+//Currently a shorthand funtion, can eventually be used to house animations associated with respawning
+function removeOldCharacter() {
+  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height); //Shorthand to clear old character instance, SHOULD BE CALLED BEFORE RECTX OR RECTY ARE MODIFIED
   if (rectY >= 500) newResY = 900;
   else if (rectY < 500) newResY = 100;
 
   saveRespawnCoordinates(newResX, newResY);
 }
 
-function removeOldCharacter() {
-  playerPH.clearRect(rectX, rectY, rectSize, rectSize);
-}
 
 function reRender(movePosX, movePosY) {
   if (teleportState) return false;
 
-  const nextX = rectX + movePosX;
-  const nextY = rectY + movePosY;
+function reRender(movePosX, movePosY){
+    var count = 0;
+    
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
+        return;
+    }
 
   if (reachScreenEnd(nextX)) {
     if (currentScreen === 3) {
       levelCompleted();
       return;
     }
+    
+    removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
+    rectX += movePosX;
+    rectY += movePosY;
+    drawBarriers();
+    
+    if (currObj != -1){
+      if (interactableLoc[currObj].type == pushBlock && interactableLoc[currObj].activated){
+        interactableLoc[currObj].x += movePosX;
+        interactableLoc[currObj].y += movePosY;
+      } else if (interactableLoc[currObj].type == bubble && interactableLoc[currObj].activated){
+        interactableLoc[currObj].x += movePosX;
+        interactableLoc[currObj].y += movePosY;
+        bubbleCounter--;  
+        if (bubbleCounter == 0 && interactableLoc[currObj].type == bubble) {
+          bubblePop();
+        }
+      }
+    }
+
+
+    
+
+    //TO IMPLEMENT: Function for checking if the player character is standing on a kill-you tile
+
 
     updateCheckPoint(currentScreen + 1);
     currentScreen += 1;
@@ -479,6 +752,183 @@ function reRender(movePosX, movePosY) {
   return true;
 }
 
+function pcInteract()
+{   
+    var objType;
+    
+    if (!interactActive){
+        objType = interactCheck();
+        // alert("Interact Key Pressed!");
+    } else {
+        interactActive = !interactActive;
+        interactableLoc[currObj].activated = false;
+        currObj = -1;
+        objType = -1;
+    }
+
+
+    if (objType < 0)
+    {
+        // alert("No object found or object unbound");
+        return;
+    }
+    else if (objType == pushBlock) {
+        alert("push block active");
+    }//PushBlock found
+    else if (objType == bubble) {
+      alert("Bubble Found");
+      activateBubble();
+    }//Bubble found
+    else if (objType == signalFlare){
+      alert("Signal Flare Found");
+      window.dispatchEvent(flareSent);
+    } //Signal Flare found
+}
+
+//CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
+//      and set the "activated" boolean of that interactable to 'true'
+function interactCheck(){
+    if (directionalCheck()) {//Checks above and below the player object
+        // alert(directionalCheck());
+        interactActive = true;  //Allows other functions to know an interaction is active
+        interactableLoc[currObj].activated = true;
+        return interactableLoc[currObj].type;
+    }
+}
+
+//PURPOSE: Will check all four directions around the player and find if an interactable is accessible 
+function directionalCheck(){
+  count = 0;
+  //RectX, RectY+move -> RectX+move, RectY+move
+  //
+  //
+  //RectX, RectY -> RectX+move, RectY
+  if (lastKeyPressed == "w"){ //CHECK UP, NEG Y
+    for (var obj of interactableLoc){
+      if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
+        currObj = count;
+        return true;
+      }
+      count++;
+    }
+  } else if (lastKeyPressed == "a"){ //CHECK LEFT, NEG X
+    for (var obj of interactableLoc){
+      if ((obj.x <= rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*3) {
+        currObj = count;
+        return true;
+      }
+    count++;
+    }
+  } else if (lastKeyPressed == "s"){ //CHECK DOWN, POS Y
+    for (var obj of interactableLoc){
+      if ((obj.y <= rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
+        currObj = count;
+        return true;
+      }
+    count++;
+    }
+  } else if (lastKeyPressed == "d"){ //CHECK RIGHT, POS X
+    for (var obj of interactableLoc) {
+      if ((obj.x <= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*2) {
+        currObj = count;
+        return true;
+      }
+      count++;
+    }
+  } else {return false;}
+
+  return false;
+}
+
+function activateBubble(){
+  if (interactableLoc[currObj].type == bubble) {
+    bubblePush(interactableLoc[currObj].x, interactableLoc[currObj].y);
+  }
+}
+
+function bubblePush(newX, newY){
+  bubbleCounter = bubble;
+  removeOldCharacter();
+  rectX = newX;
+  bubbleResX = newX;
+  rectY = newY;
+  bubbleResY = newY;
+  reRender(0, 0);
+}
+
+function bubblePop() {
+    interactableLoc[currObj].activated = false;
+    interactableLoc[currObj].x = bubbleResX;
+    interactableLoc[currObj].y = bubbleResY;
+    interactActive = false;
+    pcInteract();
+}
+
+
+// function move(moveKey) {
+    
+//   lastKeyPressed = moveKey.key;
+//     if (moveKey.key == "w"){
+//         reRender(0, -moveDistance);
+//     } else if (moveKey.key == "a"){
+// 	reRender(-moveDistance, 0);
+//     } else if (moveKey.key == "s"){
+// 	reRender(0, moveDistance);
+//     } else if (moveKey.key == "d"){
+// 	reRender(moveDistance, 0);
+// moves the player a fixed amount, depending on the key pressed (WASD)
+function moveCharacterWASD(moveKeys) {
+    moveDistanceX = NO_MOVEMENT;
+    moveDistanceY = NO_MOVEMENT;
+    if (moveKeys.has('w')){
+        moveDistanceY -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('a')){
+	    moveDistanceX -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('s')){
+        moveDistanceY += STANDARD_MOVEMENT;
+    } else if (moveKeys.has('d')){
+        moveDistanceX += STANDARD_MOVEMENT;
+    }
+    //alert(moveDistanceX + " " + moveDistanceY);
+    reRender(moveDistanceX, moveDistanceY);
+}
+
+window.addEventListener("keydown", (e) =>{ 
+    main(); //infinite loop
+    pressedKeys.add(e.key.toLowerCase());
+    //Fix to allow caps letters and multiple buttons being pressed
+    if(e.key == "Enter" && !gameStart){
+        spawn();
+    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
+    pressedKeys.has('s') || pressedKeys.has('d')){
+        moveCharacterWASD(pressedKeys);
+    } else if (e.key === " ") { //Space Entered - call jump
+        // reRender(0, -50);Jump no longer needed
+    } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
+        pcInteract();
+    } else if ((e.key).toLowerCase == 'c')
+    {
+        respawn();
+    } else if (e.key == 'o') { //DEBUG: Prints current location of the PC
+        alert(rectX);
+        alert(rectY);
+    }
+    else {}
+})
+
+window.addEventListener("flareSent", () => {
+  interactableLoc[currObj].color = "pink";
+  window.dispatchEvent(flareLanded);
+})
+
+window.addEventListener("flareLanded", (sfx, sfy) => {
+  lvlLayout.fillStyle = "Red";
+  lvlLayout.fillRect(400, 400, rectSize*2, rectSize);
+})
+window.addEventListener('keyup', (event) => {
+    // Remove the key from the Set when released
+    pressedKeys.delete(event.key.toLowerCase());
+});
 function pcInteract() {
   return tunnelCollision();
 }
