@@ -18,6 +18,7 @@ window.main = () => {
 }
 
 function start(){
+    playerPH.imageSmoothingEnabled = false;
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
         playerPH.fillStyle = "Black";
@@ -53,34 +54,71 @@ canvas.height = window.innerHeight;
 
 let gameStart = false;
 
-// Barriers 
-const barriers =  [
-    { 
-        x: 400, 
-        y: 0, 
-        width: 20, 
-        height: 600,
-        color: "red"
-    }
-];
+const TILE = 60;
 
-function drawBarriers() {
-    for (const b of barriers) {
-        playerPH.fillStyle = b.color;
-        playerPH.fillRect(b.x,b.y,b.width,b.height);
-    }
+// Images
+const tileSheet = new Image();
+tileSheet.src = "tilesheet.png";
+const playerSheet = new Image();
+playerSheet.src = "playersheet.png";
+
+// Column of each tile in tilesheet.png
+const TILE_INDEX = {
+    floor: 0, floor_alt: 1, wall: 2, background: 3, pit: 4,
+    pit_cliff: 5, edge_up: 6, edge_down: 7, edge_left: 8, edge_right: 9
+};
+// Row of each direction in playersheet.png
+const DIR_ROW = { down: 0, up: 1, left: 2, right: 3 };
+
+let facing = "down";
+let walkFrame = 0;   // 0 idle, 1 walk0, 2 walk1
+let stepCount = 0;
+
+// Level: 1 character = 1 tile
+const levelMap = [
+    "##############",
+    "#............#",
+    "#..,.........#",
+    "#.......#....#",
+    "#.......#....#",
+    "#.....~~~....#",
+    "#.....___..,.#",
+    "#............#",
+    "##############",
+];
+const CHAR_TO_TILE = { "#": "wall", ".": "floor", ",": "floor_alt", "_": "pit", "~": "pit_cliff", " ": "background" };
+const SOLID = new Set(["#", "_", "~", " "]);
+
+function drawTile(name, col, row) {
+    const i = TILE_INDEX[name];
+    playerPH.drawImage(tileSheet, i * TILE, 0, TILE, TILE, col * TILE, row * TILE, TILE, TILE);
 }
 
-function collidesWithBarrier(x, y, width, height) {
-    for (const b of barriers) {
-        if (x < b.x + b.width &&
-            x + rectSize > b.x &&
-            y < b.y + b.height &&
-            y + rectSize > b.y) {
-            return true;
-            }
-    }
-    return false;
+function drawMap() {
+    for (let row = 0; row < levelMap.length; row++)
+        for (let col = 0; col < levelMap[row].length; col++)
+            drawTile(CHAR_TO_TILE[levelMap[row][col]] || "background", col, row);
+}
+
+function drawPlayer() {
+    playerPH.drawImage(playerSheet, walkFrame * TILE, DIR_ROW[facing] * TILE, TILE, TILE, rectX, rectY, TILE, TILE);
+}
+
+function draw() {
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    drawMap();
+    drawPlayer();
+}
+
+function tileAt(px, py) {
+    const col = Math.floor(px / TILE), row = Math.floor(py / TILE);
+    if (row < 0 || row >= levelMap.length || col < 0 || col >= levelMap[row].length) return " ";
+    return levelMap[row][col];
+}
+
+function isBlocked(x, y) {
+    const corners = [[x, y], [x + rectSize - 1, y], [x, y + rectSize - 1], [x + rectSize - 1, y + rectSize - 1]];
+    return corners.some(([cx, cy]) => SOLID.has(tileAt(cx, cy)));
 }
 
 //const TILE = 60; // Size of each tile in pixels
@@ -105,29 +143,21 @@ function collidesWithBarrier(x, y, width, height) {
 //    playerPH.stroke();
 //}
 
-function spawn(){
-    rectX = 23;
-    rectY = canvas.height/2;
-
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    drawBarriers();
-
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-
-    
-    // canvasTemp = document.getElementById("LayoutDisplay");
-    // playerPHTEMP = canvasTemp.getContext("2d"); 
-    // playerPHTEMP.fillStyle("red");
-    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
+function spawn() {
+    rectX = 1 * TILE;
+    rectY = 1 * TILE;
+    facing = "down";
+    walkFrame = 0;
+    draw();
 }
 
 function respawn(){
     findRespawn();
-    removeOldCharacter();
     rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
-    reRender(0, 0);
+    facing = "down";
+    walkFrame = 0;
+    draw();
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -169,20 +199,17 @@ function removeOldCharacter() {
 }
 
 
-function reRender(movePosX, movePosY){
-    
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
+function reRender(movePosX, movePosY) {
+    if (isBlocked(rectX + movePosX, rectY + movePosY)) {
+        walkFrame = 0;
+        draw();
         return;
     }
-    
-    playerPH.clearRect(rectX, rectY, rectSize, rectSize);
     rectX += movePosX;
     rectY += movePosY;
-
-     drawBarriers();
-
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    stepCount++;
+    walkFrame = (Math.floor(stepCount / 2) % 2) + 1;
+    draw();
 }
 
 function pcInteract()
@@ -193,15 +220,10 @@ function pcInteract()
 }
 
 function move(moveKey) {
-    if (moveKey.key == "w"){
-        reRender(0, -moveDistance);
-    } else if (moveKey.key == "a"){
-	reRender(-moveDistance, 0);
-    } else if (moveKey.key == "s"){
-	reRender(0, moveDistance);
-    } else if (moveKey.key == "d"){
-	reRender(moveDistance, 0);
-    }
+if (moveKey.key == "w"){ facing = "up";    reRender(0, -moveDistance); }
+else if (moveKey.key == "a"){ facing = "left";  reRender(-moveDistance, 0); }
+else if (moveKey.key == "s"){ facing = "down";  reRender(0, moveDistance); }
+else if (moveKey.key == "d"){ facing = "right"; reRender(moveDistance, 0); }
 }
 
 window.addEventListener("keydown", (e) =>{ 
@@ -211,8 +233,8 @@ window.addEventListener("keydown", (e) =>{
     if(e.key === "Enter" && !gameStart){
         gameStart = true; 
         spawn();
-    } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
-    	e.key == "d"){
+    } else if(gameStart && (e.key == "w" || e.key == "a" || e.key == "s" || 
+    	e.key == "d")){
         move(e);
     } else if (e.key === " ") { //Space Entered - call jump
         // reRender(0, -50);Jump no longer needed
@@ -224,6 +246,13 @@ window.addEventListener("keydown", (e) =>{
     }
     else {}
 })
+
+window.addEventListener("keyup", (e) => {
+    if (gameStart && "wasd".includes(e.key)) {
+        walkFrame = 0;
+        draw();
+    }
+});
 
 //DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
 // function gravUpdate() {
@@ -318,10 +347,14 @@ function onSetupKeyDown(event) {
 function levelSelectDisplay() {
   const TOTAL_LEVELS = 5;
   for (let level = 1; level <= TOTAL_LEVELS; level++) {
-    drawLevelOption(level, isUnlocked(level)); // positioned in order
+    drawLevelOption(level, isUnlocked(level));
   }
 }
 
-// document.addEventListener("keydown", onSetupKeyDown);
-
-start() 
+let imagesLoaded = 0;
+function onImageLoaded() {
+    imagesLoaded++;
+    if (imagesLoaded === 2) start();
+}
+tileSheet.onload = onImageLoaded;
+playerSheet.onload = onImageLoaded;
