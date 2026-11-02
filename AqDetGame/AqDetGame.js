@@ -47,7 +47,30 @@ const background = bckgrndCanvas.getContext("2d");
 
 var currentLevel = 0;
 var currentScreen = 0;
+const canvas = document.getElementById("PlrDisplay");
+canvas.width = 1308;
+canvas.height = 649;
+canvas.style.width = "1308px";
+canvas.style.height = "649px";
+const playerPH = canvas.getContext("2d");
 
+const initialSetupScreen = document.getElementById("initialSetup");
+const beginGameButton = document.getElementById("beginGame");
+const levelSelectScreen = document.querySelector(".level-select");
+const gameScreen = document.getElementById("gameScreen");
+const completionMenu = document.getElementById("completionMenu");
+const completionWaiting = document.getElementById("completionWaiting");
+const surrenderMenu = document.getElementById("surrenderMenu");
+const cancelSurrenderOfferButton = document.getElementById("cancelSurrenderOffer");
+const currentLevelTitle = document.getElementById("currentLevelTitle");
+const offerSurrenderButton = document.getElementById("offerSurrender");
+
+let stopMain = null;
+let lastFrameTime = null;
+let counter = 0;
+
+const TOTAL_LEVELS = 5;
+const STANDARD_MOVEMENT = 15;
 const rectSize = 60;
 var rectX; //player PlaceHolder
 var rectY;
@@ -61,9 +84,8 @@ var bubbleResX = -1;
 var bubbleResY = -1;
 
 var signalFlareIndex = -1;
+const moveDistance = 15;
 const NO_MOVEMENT = 0;
-const STANDARD_MOVEMENT = 15; 
-
 const pressedKeys = new Set();
 
 //Interactable Type Constants
@@ -120,7 +142,32 @@ lvlCanvas.height = window.innerHeight;
 bckgrndCanvas.width = window.innerWidth;
 bckgrndCanvas.height = window.innerHeight;
 
+const playerVelocity = { x: 0, y: 0 };
+let activeMovementElement = null;
+
+let currentLevel = 1;
+let currentScreen = 0;
+let rectX = 120;
+let rectY = 500;
+let gravVector = { x: 0, y: 0 };
+let RESPAWN_X = rectX;
+let RESPAWN_Y = rectY;
 let gameStart = false;
+let teleportState = null;
+let firstTimeTunnel = true;
+let spawnIndex = 0;
+
+const ELEMENT_WATER_CURRENT = "waterCurrent";
+const CURRENT_TYPES = {
+  gentle: { speed: 60 },
+  strong: { speed: 120 },
+};
+
+const TUNNEL_TIMING = {
+  entering: 0.15,
+  hidden: 1,
+  exiting: 0.15,
+};
 
 function renderInit() {
     drawBarriers();
@@ -178,416 +225,11 @@ const ROCKET_SIZE = 70;
 const BUBBLE_SIZE = 80;
 const PUSH_ROCK_SIZE = PUDDLE_SIZE;
 
-// Barriers 
-const barriers =  [
-    [ // screen 0
-        { // bottom barrier
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Aqua"
-        }, 
-        { // top barrier
-            x: 0,
-            y: 0,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Green"
-        }, 
-        { // right barrier
-            x: canvas.width - SEAWEED_SIZE,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height,
-            color: "Aqua"
-         },
-
-        // top blocks of seaweed barriers
-        {
-            x: 0,
-            y: SEAWEED_SIZE,
-            width: canvas.width / 2 - SEAWEED_SIZE,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        }, 
-        {
-            x: 0,
-            y: SEAWEED_SIZE * 2,
-            width: canvas.width / 2 - SEAWEED_SIZE * 2,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        },
-        {
-            x: 0,
-            y: SEAWEED_SIZE * 3,
-            width: canvas.width / 2 - SEAWEED_SIZE * 3,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        }, 
-        {
-            x: 0,
-            y: SEAWEED_SIZE * 4,
-            width: canvas.width / 2 - SEAWEED_SIZE * 4,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        },
-
-        // bottoms blocks of seaweed barriers
-        {
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE * 2,
-            width: canvas.width / 2 - SEAWEED_SIZE,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        }, 
-        {
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE * 3,
-            width: canvas.width / 2 - SEAWEED_SIZE * 2,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        },
-        {
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE * 4,
-            width: canvas.width / 2 - SEAWEED_SIZE * 3,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        }, 
-        {
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE * 5,
-            width: canvas.width / 2 - SEAWEED_SIZE * 4,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        },
-
-        
-        // generic beach barriers (shells?)
-        {
-            x: canvas.width / 2 + SEAWEED_SIZE * 3,
-            y: canvas.height / 2,
-            width: SEAWEED_SIZE,
-            height: SEAWEED_SIZE,
-            color: "LightCoral"
-        }, 
-        {
-            x: canvas.width / 4,
-            y: canvas.height / 2 + SEAWEED_SIZE,
-            width: SEAWEED_SIZE,
-            height: SEAWEED_SIZE,
-            color: "LightCoral"
-        }, 
-        {
-            x: canvas.width / 4 + SEAWEED_SIZE * 4,
-            y: canvas.height / 2 - SEAWEED_SIZE * 2,
-            width: SEAWEED_SIZE,
-            height: SEAWEED_SIZE,
-            color: "LightCoral"
-        },
-        /*
-        { // deep water
-            x: canvas.width / 10,
-            y: canvas.height / 2 - PUDDLE_SIZE * 2.5,
-            width: PUDDLE_SIZE,
-            height: PUDDLE_SIZE * 5,
-            color: "DarkBlue"
-        }
-            */
-    
-    ], // end of screen 0
-
-    [ // screen 1
-        { // bottom barrier
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Aqua"
-        }, 
-        { // top barrier
-            x: 0,
-            y: 0,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Green"
-        }, 
-        { // right barrier
-            x: canvas.width - SEAWEED_SIZE,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height,
-            color: "DarkBlue"
-         },
-         { // left barrier
-            x: 0,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 2,
-            color: "DarkBlue"
-         },
-
-         // maze barriers
-         { // vertical barrier to right of rocket
-            x: ROCKET_SIZE * 2,
-            y: SEAWEED_SIZE,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 6 + rectSize / 2,
-            color: "SeaGreen"
-         },
-         { // top left horizontal barrier
-            x: ROCKET_SIZE * 2 + SEAWEED_SIZE,
-            y: canvas.height / 6 + rectSize / 2,
-            width: rectSize * 3,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-         },
-         { // top right horizontal barrier
-            x: canvas.width / 2.5,
-            y: canvas.height / 6 + rectSize / 2,
-            width: canvas.width / 3,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-         },
-         { // right-most vertical barrier
-            x: canvas.width / 2.5 + canvas.width / 3,
-            y: canvas.height / 6 + rectSize / 2,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 2,
-            color: "SeaGreen"
-         },
-         { // horizontal bar under rocket
-            x: 0,
-            y: canvas.height / 2,
-            width: rectSize * 3.5,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-         },
-         { // small vertical barrier attached to horizontal bar under rocket
-            x: rectSize * 3.5,
-            y: canvas.height / 2,
-            width: SEAWEED_SIZE,
-            height: rectSize * 2 + SEAWEED_SIZE,
-            color: "SeaGreen"
-         },
-         { // middle vertical barrier 
-            x: ROCKET_SIZE * 2 + SEAWEED_SIZE + rectSize * 3,
-            y: canvas.height / 6 + rectSize / 2,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 3 - SEAWEED_SIZE,
-            color: "SeaGreen"
-         },
-         { // bottom horizontal maze barrier
-            x: rectSize * 2 + SEAWEED_SIZE,
-            y: canvas.height - SEAWEED_SIZE * 2 - rectSize * 2,
-            width: canvas.width / 1.3,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-         },
-         { // most middle horizontal maze barrier
-            x: ROCKET_SIZE * 2 + SEAWEED_SIZE + rectSize * 3,
-            y: canvas.height / 2 - SEAWEED_SIZE,
-            width: canvas.width / 4,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-         },
-
-         // rock barrier (rocket erases it)
-         { // bottom part of rock
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE * 2,
-            width: rectSize * 2,
-            height: SEAWEED_SIZE,
-            color: "SandyBrown"
-         },
-         { // top part of rock
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE * 2 - rectSize * 2,
-            width: rectSize * 2,
-            height: SEAWEED_SIZE,
-            color: "SandyBrown"
-         },
-         /*
-         { // vertical edge of rock
-            x: rectSize * 2,
-            y: canvas.height - SEAWEED_SIZE * 2 - rectSize * 2,
-            width: SEAWEED_SIZE,
-            height: rectSize * 2 + SEAWEED_SIZE,
-            color: "SandyBrown"
-         }
-            */
-        
-    ], // end of screen 1
-    [ // screen 2
-        { // bottom barrier
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Aqua"
-        }, 
-        { // top barrier
-            x: 0,
-            y: 0,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Green"
-        }, 
-        { // right barrier
-            x: canvas.width - SEAWEED_SIZE,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height,
-            color: "DarkBlue"
-         },
-         { // left barrier
-            x: 0,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 2,
-            color: "DarkBlue"
-         },
-
-         // maze components
-         { // right vertical barrier
-            x: canvas.width - 4 * rectSize,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 1.5,
-            color: "SeaGreen"
-        }, 
-        { // middle right vertical barrier
-            x: canvas.width / 1.5,
-            y: canvas.height / 2.5,
-            width: SEAWEED_SIZE,
-            height: canvas.height - canvas.height / 2.5,
-            color: "SeaGreen"
-        }, 
-        { // middle left vertical barrier
-            x: canvas.width / 2.5,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 1.5,
-            color: "SeaGreen"
-        }, 
-        { // left vertical barrier
-            x: canvas.width / 5,
-            y: canvas.height / 2.5,
-            width: SEAWEED_SIZE,
-            height: canvas.height - canvas.height / 2.5,
-            color: "SeaGreen"
-        }, 
-        { // right-most horizontal barrier
-            x: canvas.width / 1.8,
-            y: canvas.height / 2.5,
-            width: canvas.width / 8,
-            height: SEAWEED_SIZE,
-            color: "SeaGreen"
-        }, 
-
-        /*
-        // deep water barriers
-        { // left-most water
-            x: SEAWEED_SIZE,
-            y: canvas.height / 2.5,
-            width: PUDDLE_SIZE * 4.4,
-            height: PUDDLE_SIZE,
-            color: "DarkBlue"
-        }, 
-        { // middle water
-            x: canvas.width / 5 + SEAWEED_SIZE + 1,
-            y: canvas.height / 2.5,
-            width: PUDDLE_SIZE * 4.4,
-            height: PUDDLE_SIZE,
-            color: "DarkBlue"
-        }, 
-        { // right-most water
-            x: canvas.width / 1.7,
-            y: SEAWEED_SIZE,
-            width: PUDDLE_SIZE,
-            height: PUDDLE_SIZE * 4.4 - 1,
-            color: "DarkBlue"
-        }
-            */
-
-    ], // end of screen 2
-    [ // screen 3
-        { // bottom barrier
-            x: 0,
-            y: canvas.height - SEAWEED_SIZE,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Aqua"
-        }, 
-        { // top barrier
-            x: 0,
-            y: 0,
-            width: canvas.width,
-            height: SEAWEED_SIZE,
-            color: "Green"
-        }, 
-        { // right barrier
-            x: canvas.width - SEAWEED_SIZE,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height,
-            color: "DarkBlue"
-         },
-         { // left barrier
-            x: 0,
-            y: 0,
-            width: SEAWEED_SIZE,
-            height: canvas.height / 2,
-            color: "DarkBlue"
-         },
-        
-         // deep waters
-         { // left deep water
-            x: canvas.width / 6,
-            y: SEAWEED_SIZE,
-            width: PUDDLE_SIZE,
-            height: canvas.height - SEAWEED_SIZE * 2,
-            color: "DarkBlue"
-         },
-         { // middle deep water
-            x: canvas.width / 2.5,
-            y: SEAWEED_SIZE,
-            width: PUDDLE_SIZE,
-            height: canvas.height - SEAWEED_SIZE * 2,
-            color: "DarkBlue"
-         },
-         { // right deep water
-            x: canvas.width - canvas.width / 3.5,
-            y: SEAWEED_SIZE,
-            width: PUDDLE_SIZE,
-            height: canvas.height - SEAWEED_SIZE * 2,
-            color: "DarkBlue"
-         },
-         
-         // rock to explode
-         { // upper rock
-            x: canvas.width / 2.28,
-            y: PUSH_ROCK_SIZE * 2,
-            width: PUSH_ROCK_SIZE * 2,
-            height: PUSH_ROCK_SIZE / 2,
-            color: "SandyBrown"
-         },
-         { // vertical rock
-            x: canvas.width / 2.28 + PUSH_ROCK_SIZE * 2,
-            y: PUSH_ROCK_SIZE * 2,
-            width: PUSH_ROCK_SIZE / 2,
-            height: PUSH_ROCK_SIZE * 2.5,
-            color: "SandyBrown"
-         },
-         { // lower rock
-            x: canvas.width / 2.28,
-            y: PUSH_ROCK_SIZE * 4,
-            width: PUSH_ROCK_SIZE * 2,
-            height: PUSH_ROCK_SIZE / 2,
-            color: "SandyBrown"
-         },
-    ] // end of screen 3
+const level1spawn = [
+  { screen: 0, x: 120, y: 480 },
+  { screen: 1, x: 120, y: 190 },
+  { screen: 2, x: 120, y: 190 },
+  { screen: 3, x: 120, y: 190 },
 ];
 
 function drawBarriers() {
@@ -605,18 +247,91 @@ function drawObjectBarriers() {
         lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
     }
     
+const spawnArr = [{ spawnPoints: level1spawn }];
+
+const SPRITES = [];
+const UrchinImage = new Image();
+UrchinImage.src = "AqDetImport/UrchinEnemy.png";
+UrchinImage.onload = () => {
+  SPRITES.push(UrchinImage);
+};
+
+const enemy = {
+  x: 200,
+  y: 500,
+  width: 50,
+  height: 50,
+  color: "purple",
+};
+
+const waterCurrents = [
+  {
+    x: 100,
+    y: 200,
+    width: 250,
+    height: 150,
+    type: "strong",
+    direction: { x: 1, y: 0 },
+  },
+];
+
+const tunnels = [
+  { id: "A", partnerId: "B", x: 100, y: canvas.height - 400, width: 90, height: 45 },
+  { id: "B", partnerId: "A", x: 500, y: canvas.height - 600, width: 90, height: 45 },
+];
+
+function createBarrier() {
+  return [
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 260, y: 330, width: 120, height: 24, color: "#2a4b5f" },
+    ],
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 420, y: 260, width: 100, height: 26, color: "#2a4b5f" },
+    ],
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 260, y: 210, width: 120, height: 22, color: "#2a4b5f" },
+    ],
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 480, y: 320, width: 140, height: 24, color: "#2a4b5f" },
+    ],
+  ];
 }
 
-function collidesWithBarrier(x, y, width, height) {
-    for (const b of barriers[currentScreen]) {
-        if (x < b.x + b.width &&
-            x + rectSize > b.x &&
-            y < b.y + b.height &&
-            y + rectSize > b.y) {
-            return true;
-            }
-    }
-    return false;
+function createInteractables() {
+  return [
+    [
+      { x: 180, y: 260, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 640, y: 300, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+    [
+      { x: 300, y: 200, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 720, y: 220, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+    [
+      { x: 200, y: 220, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 620, y: 330, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+    [
+      { x: 300, y: 250, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 760, y: 270, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+  ];
 }
 
 //Checks if an interactable will collide with a barrer
@@ -674,175 +389,269 @@ const jumpPuddles = [
             height: PUDDLE_SIZE,
             color: "MediumPurple"
         }
+function createJumpPuddle() {
+  return [
+    [
+      { x: 120, y: 450, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 610, y: 380, width: 55, height: 18, color: "#a1d4d6" },
     ],
-    [ // screen 3
-        { // right puddle, swaps with [3][1]
-            x: canvas.width - rectSize * 2,
-            y: canvas.height - rectSize * 2,
-            width: PUDDLE_SIZE,
-            height: PUDDLE_SIZE,
-            color: "MediumPurple"
-        },
-        { // left puddle, swaps with [3][0]
-            x: canvas.width / 2,
-            y: canvas.height - rectSize * 2,
-            width: PUDDLE_SIZE,
-            height: PUDDLE_SIZE,
-            color: "MediumPurple"
-        }
-    ]
-]
+    [
+      { x: 150, y: 480, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 700, y: 260, width: 55, height: 18, color: "#a1d4d6" },
+    ],
+    [
+      { x: 190, y: 430, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 670, y: 300, width: 55, height: 18, color: "#a1d4d6" },
+    ],
+    [
+      { x: 140, y: 470, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 660, y: 270, width: 55, height: 18, color: "#a1d4d6" },
+    ],
+  ];
+}
+
+const barriers = createBarrier();
+const interactableItems = createInteractables();
+const jumpPuddles = createJumpPuddle();
+
+function drawBarriers() {
+  for (const b of barriers[currentScreen] || []) {
+    playerPH.fillStyle = b.color;
+    playerPH.fillRect(b.x, b.y, b.width, b.height);
+  }
+}
+
+function drawEnemy() {
+  if (UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
+    playerPH.drawImage(UrchinImage, enemy.x, enemy.y, enemy.width, enemy.height);
+    return;
+  }
+  playerPH.fillStyle = enemy.color;
+  playerPH.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+}
+
+function drawWaterCurrents() {
+  playerPH.save();
+  playerPH.strokeStyle = "lightblue";
+  playerPH.fillStyle = "rgba(148, 210, 231, 0.5)";
+  playerPH.lineWidth = 3;
+  for (const current of waterCurrents) {
+    playerPH.strokeRect(current.x, current.y, current.width, current.height);
+    playerPH.fillRect(current.x, current.y, current.width, current.height);
+  }
+  playerPH.restore();
+}
+
+function tunnelExit(tunnel) {
+  return {
+    x: tunnel.x + (tunnel.width - rectSize) / 2,
+    y: tunnel.y - rectSize + 4,
+  };
+}
+
+function drawTunnels() {
+  playerPH.save();
+  playerPH.lineWidth = 4;
+  playerPH.font = "14px Arial";
+  playerPH.textAlign = "center";
+  playerPH.textBaseline = "bottom";
+
+  for (const tunnel of tunnels) {
+    const centerX = tunnel.x + tunnel.width / 2;
+    const centerY = tunnel.y + tunnel.height / 2;
+    playerPH.beginPath();
+    playerPH.ellipse(centerX, centerY, tunnel.width / 2, tunnel.height / 2, 0, 0, Math.PI * 2);
+    playerPH.fillStyle = "MediumSpringGreen";
+    playerPH.fill();
+    playerPH.strokeStyle = "orange";
+    playerPH.stroke();
+    if (firstTimeTunnel) {
+      playerPH.fillText("Press E to teleport", centerX, tunnel.y - 8);
+    }
+  }
+  playerPH.restore();
+}
+
+function drawPlayer() {
+  if (teleportState?.phase === "hidden") return;
+
+  let scale = 1;
+  if (teleportState) {
+    const progress = Math.min(teleportState.elapsed / TUNNEL_TIMING[teleportState.phase], 1);
+    scale = teleportState.phase === "entering" ? 1 - progress : progress;
+  }
+
+  const size = rectSize * scale;
+  playerPH.fillStyle = "green";
+  playerPH.fillRect(rectX + (rectSize - size) / 2, rectY + (rectSize - size) / 2, size, size);
+}
 
 function drawJumpPuddles() {
-    for (const d of jumpPuddles[currentScreen]) {
-        playerPH.fillStyle = d.color;
-        playerPH.fillRect(d.x,d.y,d.width,d.height);
-    }
+  for (const d of jumpPuddles[currentScreen] || []) {
+    playerPH.fillStyle = d.color;
+    playerPH.fillRect(d.x, d.y, d.width, d.height);
+  }
 }
-
-const interactableItems = [
-    [ // screen 0
-        { // bubble
-            x: canvas.width / 6,
-            y: canvas.height / 2 - PUDDLE_SIZE * 2,
-            width: BUBBLE_SIZE,
-            height: BUBBLE_SIZE,
-            color: "PaleTurquoise"
-        }
-    ], 
-    [ // screen 1
-        { // rocket
-            x: rectSize,
-            y: rectSize,
-            width: ROCKET_SIZE,
-            height: ROCKET_SIZE,
-            color: "Red"
-        }
-    ], 
-    [ // screen 2
-        { // right pushable rock
-            x: canvas.width / 1.5,
-            y: rectSize * 2,
-            width: PUSH_ROCK_SIZE,
-            height: PUSH_ROCK_SIZE,
-            color: "Silver"
-        },
-        { // middle pushable rock
-            x: canvas.width / 5 + PUSH_ROCK_SIZE * 3,
-            y: canvas.height / 2,
-            width: PUSH_ROCK_SIZE,
-            height: PUSH_ROCK_SIZE,
-            color: "Silver"
-        },
-        { // left pushable rock
-            x: canvas.width / 6 - PUSH_ROCK_SIZE,
-            y: canvas.height / 3 - PUSH_ROCK_SIZE,
-            width: PUSH_ROCK_SIZE,
-            height: PUSH_ROCK_SIZE,
-            color: "Silver"
-        }
-    ], 
-    [ // screen 3
-        { // pushable rock
-            x: canvas.width / 2.2,
-            y: PUSH_ROCK_SIZE * 2.8,
-            width: PUSH_ROCK_SIZE,
-            height: PUSH_ROCK_SIZE,
-            color: "Silver"
-        },
-        { // left bubble
-            x: canvas.width / 4.5,
-            y: canvas.height / 2,
-            width: BUBBLE_SIZE,
-            height: BUBBLE_SIZE,
-            color: "PaleTurquoise"
-        },
-        { // right bubble
-            x: canvas.width - canvas.width / 4.5,
-            y: canvas.height / 1.5,
-            width: BUBBLE_SIZE,
-            height: BUBBLE_SIZE,
-            color: "PaleTurquoise"
-        },
-        { // rocket
-            x: canvas.width - canvas.width / 5,
-            y: rectSize,
-            width: ROCKET_SIZE,
-            height: ROCKET_SIZE,
-            color: "Red"
-        }
-    ]
-]
 
 function drawInteractables() {
-    for (const d of interactableItems[currentScreen]) {
-        playerPH.fillStyle = d.color;
-        playerPH.fillRect(d.x,d.y,d.width,d.height);
-    }
+  for (const d of interactableItems[currentScreen] || []) {
+    playerPH.fillStyle = d.color;
+    playerPH.fillRect(d.x, d.y, d.width, d.height);
+  }
 }
 
-// returns true if player has reached left-most area, to proceed to the next screen
-function reachScreenEnd(rectX) {
-    if (rectX < 1 && rectX > -20) {
-        return true;
-    }
+function drawAll() {
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+  drawWaterCurrents();
+  drawTunnels();
+  drawBarriers();
+  drawEnemy();
+  drawPlayer();
+  drawInteractables();
+  drawJumpPuddles();
+}
+
+function WCCollision() {
+  if (!gameStart) return;
+
+  const overlappingCurrents = waterCurrents.filter((current) => {
+    return rectX < current.x + current.width &&
+      rectX + rectSize > current.x &&
+      rectY < current.y + current.height &&
+      rectY + rectSize > current.y;
+  });
+
+  for (const current of overlappingCurrents) {
+    const currentType = CURRENT_TYPES[current.type];
+    if (!currentType) continue;
+    elementMovement(ELEMENT_WATER_CURRENT, current.direction, currentType.speed);
+  }
+}
+
+function elementMovement(elementType, direction, speed) {
+  if (elementType !== ELEMENT_WATER_CURRENT || !Number.isInteger(speed) || speed <= 0) return false;
+
+  let directionVector = null;
+  if (typeof direction === "string") {
+    const normalizedDirection = direction.toLocaleLowerCase();
+    const directions = {
+      up: { x: 0, y: -1 },
+      down: { x: 0, y: 1 },
+      left: { x: -1, y: 0 },
+      right: { x: 1, y: 0 },
+    };
+    directionVector = directions[normalizedDirection];
+  } else if (direction && Number.isFinite(direction.x) && Number.isFinite(direction.y)) {
+    directionVector = direction;
+  }
+
+  if (!directionVector) {
     return false;
+  }
+
+  const length = Math.hypot(directionVector.x, directionVector.y);
+  if (length === 0) return false;
+
+  playerVelocity.x += (directionVector.x / length) * speed;
+  playerVelocity.y += (directionVector.y / length) * speed;
+
+  if (activeMovementElement !== elementType) {
+    activeMovementElement = elementType;
+  }
+
+  return true;
 }
 
-function spawn(){
-    rectX = canvas.width - 40 - rectSize;
-    rectY = canvas.height/2;
+function ableToExitTunnel(pcPosition) {
+  return (
+    pcPosition.x >= 0 &&
+    pcPosition.y >= 0 &&
+    pcPosition.x + rectSize <= canvas.width &&
+    pcPosition.y + rectSize <= canvas.height &&
+    !collidesWithBarrier(pcPosition.x, pcPosition.y) &&
+    !collidesWithEnemy(pcPosition.x, pcPosition.y)
+  );
+}
 
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+function tunnelCollision() {
+  if (!gameStart || teleportState) return false;
 
-    drawBarriers();
-    drawInteractables();
-    drawJumpPuddles();
+  const entrance = tunnels.find((tunnel) => {
+    return rectX < tunnel.x + tunnel.width &&
+      rectX + rectSize > tunnel.x &&
+      rectY < tunnel.y + tunnel.height + 14 &&
+      rectY + rectSize > tunnel.y - 14;
+  });
 
-//Draws Push Blocks, Flares, and Bubbles - Will need integration to get applicable data from a file with Level-specific layouts
-function drawInteractables() {
-    //TESTING STATEMENT AND LOOP
+  if (!entrance) return false;
 
-    for (const obj of interactableLoc)
-    {
-        lvlLayout.textAlign = "center";
-        lvlLayout.textBaseline = "middle";
-        lvlLayout.font = "12px Arial";
-        lvlLayout.fillText = "PB";
-        lvlLayout.fillStyle = obj.color;
-        lvlLayout.fillRect(obj.x, obj.y, obj.width, obj.height);
+  const dest = tunnels.find((tunnel) => {
+    return tunnel.id === entrance.partnerId &&
+      tunnel.partnerId === entrance.id &&
+      tunnel.id !== entrance.id;
+  });
+
+  if (!dest || !ableToExitTunnel(tunnelExit(dest))) return false;
+
+  teleportState = {
+    dest,
+    elapsed: 0,
+    sourceX: rectX,
+    sourceY: rectY,
+    phase: "entering",
+  };
+  drawAll();
+  return true;
+}
+
+function collidesWithBarrier(x, y) {
+  for (const b of barriers[currentScreen] || []) {
+    if (x < b.x + b.width && x + rectSize > b.x && y < b.y + b.height && y + rectSize > b.y) {
+      return true;
     }
-    
-    // drawObjectBarriers();
+  }
+  return false;
 }
 
-
-//Exclusively for first spawns of a level when the level is rendered, anything else should be done via Respawn()
-function spawn(){ 
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-    drawBarriers(); //Can be replaced with a function to draw a level and its layout
-    drawInteractables();
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    respawn(); 
+function collidesWithEnemy(x, y) {
+  if (x < enemy.x + enemy.width && x + rectSize > enemy.x && y < enemy.y + enemy.height && y + rectSize > enemy.y) {
+    return true;
+  }
+  return false;
 }
 
+function reachScreenEnd(x) {
+  return x < 1 && x > -20;
+}
 
-//Any spawning done AFTER initial level setup, 
-function respawn(){
-    findRespawn(); //Allows player to get spawn coordinates without hardcoding
-    removeOldCharacter();
-    if (interactActive){
-      interactActive = !interactActive;
-      interactableLoc[currObj].activated = false;
-      if (interactableLoc[currObj].type == bubble){
-        bubblePop();
-      }
-    }
-    rectX = RESPAWN_X;
-    rectY = RESPAWN_Y;
-    
-    reRender(0, 0);
+function getSpawnPoint() {
+  return spawnArr[currentLevel - 1]?.spawnPoints[spawnIndex] ?? { screen: 0, x: 120, y: 480 };
+}
+
+function updateCheckPoint(checknum) {
+  const total = spawnArr[currentLevel - 1]?.spawnPoints.length ?? 0;
+  if (checknum === spawnIndex + 1 && checknum < total) {
+    spawnIndex = checknum;
+  }
+}
+
+function spawn() {
+  teleportState = null;
+  const spawnPoint = getSpawnPoint();
+  currentScreen = spawnPoint.screen;
+  rectX = spawnPoint.x;
+  rectY = spawnPoint.y;
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+  drawAll();
+}
+
+function respawn() {
+  teleportState = null;
+  findRespawn();
+  removeOldCharacter();
+  rectX = RESPAWN_X;
+  rectY = RESPAWN_Y;
+  reRender(0, 0);
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -861,21 +670,22 @@ function findRespawn(){ //Will eventually be upgraded to search for respawn poin
         newResX = 100;
     }
 
-    if (rectY >= 500){
-        newResY = 900;
-    }
-    else if (rectY < 500){
-        newResY = 100;
-    }
-    saveRespawnCoordinates(newResX, newResY);//AFTER CHANGE: By-level decision, CALL a function that changes based on what level is loaded
-}
+  if (rectX >= 400) newResX = 700;
+  else if (rectX < 400) newResX = 100;
 
 
 //Currently a shorthand funtion, can eventually be used to house animations associated with respawning
 function removeOldCharacter() {
   playerPH.clearRect(rectX, rectY, canvas.width, canvas.height); //Shorthand to clear old character instance, SHOULD BE CALLED BEFORE RECTX OR RECTY ARE MODIFIED
+  if (rectY >= 500) newResY = 900;
+  else if (rectY < 500) newResY = 100;
+
+  saveRespawnCoordinates(newResX, newResY);
 }
 
+
+function reRender(movePosX, movePosY) {
+  if (teleportState) return false;
 
 function reRender(movePosX, movePosY){
     var count = 0;
@@ -884,18 +694,10 @@ function reRender(movePosX, movePosY){
         return;
     }
 
-    if (reachScreenEnd(rectX + movePosX)) {
-        playerPH.clearRect(0, 0, canvas.width, canvas.height);
-        if (currentScreen == 3) { 
-            // goes to the next level if player reached end of first level
-            currentLevel++;
-            currentScreen = 0;
-        } else {
-            // goes to next screen
-            currentScreen++;
-            spawn();
-            //alert(`POS is: ${rectX}, ${rectY}`);
-        }
+  if (reachScreenEnd(nextX)) {
+    if (currentScreen === 3) {
+      levelCompleted();
+      return;
     }
     
     removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
@@ -923,12 +725,31 @@ function reRender(movePosX, movePosY){
     //TO IMPLEMENT: Function for checking if the player character is standing on a kill-you tile
 
 
-     drawBarriers();
-     drawInteractables();
-     drawJumpPuddles();
+    updateCheckPoint(currentScreen + 1);
+    currentScreen += 1;
 
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    const coordinates = spawnArr[currentLevel - 1].spawnPoints[currentScreen];
+    rectX = coordinates.x;
+    rectY = coordinates.y;
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    drawAll();
+    return;
+  }
+
+  if (collidesWithBarrier(nextX, nextY)) {
+    return false;
+  }
+
+  if (collidesWithEnemy(nextX, nextY)) {
+    respawn();
+    return false;
+  }
+
+  playerPH.clearRect(rectX, rectY, rectSize, rectSize);
+  rectX = nextX;
+  rectY = nextY;
+  drawAll();
+  return true;
 }
 
 function pcInteract()
@@ -1108,65 +929,121 @@ window.addEventListener('keyup', (event) => {
     // Remove the key from the Set when released
     pressedKeys.delete(event.key.toLowerCase());
 });
+function pcInteract() {
+  return tunnelCollision();
+}
 
-//DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
-// function gravUpdate() {
-//     if (rectY < 1400) {
-//         gravVector = 10;
-//         reRender(0, gravVector);
-//     }
-// }
+function moveCharacterWASD(moveKeys) {
+  let moveDistanceX = NO_MOVEMENT;
+  let moveDistanceY = NO_MOVEMENT;
 
-// function updatePhysics() {
-//     // var pcPos = playerPH.rect.x;
+  if (moveKeys.has("w")) {
+    moveDistanceY -= STANDARD_MOVEMENT;
+  } else if (moveKeys.has("a")) {
+    moveDistanceX -= STANDARD_MOVEMENT;
+  } else if (moveKeys.has("s")) {
+    moveDistanceY += STANDARD_MOVEMENT;
+  } else if (moveKeys.has("d")) {
+    moveDistanceX += STANDARD_MOVEMENT;
+  }
 
-//     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
-//     // if (rectY + rectSize > canvas.height) {
-//     //     // The square is below the bottom of the canvas
-//     //     rectY = canvas.height - rectSize;
-//     //     // Square stops falling
-//     //     velocityY = 0;
-//     // }
+  reRender(moveDistanceX, moveDistanceY);
+}
 
-//     // velocityY += gravity;
-//     // if (velocityY > max_fall_speed) {
-//     //     velocityY = max_fall_speed;
-//     // }
-//     // //Update rectY by velocityY
-//     // rectY += velocityY;
-//     // //Keep it from flying off the TOP (rectY < 0)
-//     // if (rectY < 0) {
-//     //     rectY = 0;
-//     //     velocityY = 0;
-//     // }
+function updatePhysics(deltaTime) {
+  if (teleportState) {
+    updateTeleport(deltaTime);
+    return;
+  }
 
-    
-//     gravUpdate();
-// }
-let chosenOption = null;
+  playerVelocity.x = 0;
+  playerVelocity.y = 0;
+  WCCollision();
+
+  if (playerVelocity.x !== 0 || playerVelocity.y !== 0) {
+    reRender(playerVelocity.x * deltaTime, playerVelocity.y * deltaTime);
+  } else {
+    activeMovementElement = null;
+  }
+}
+
+function updateTeleport(deltaTime) {
+  if (!teleportState) return;
+
+  teleportState.elapsed += deltaTime;
+  while (teleportState && teleportState.elapsed >= TUNNEL_TIMING[teleportState.phase]) {
+    teleportState.elapsed -= TUNNEL_TIMING[teleportState.phase];
+
+    if (teleportState.phase === "entering") {
+      teleportState.phase = "hidden";
+    } else if (teleportState.phase === "hidden") {
+      const exit = tunnelExit(teleportState.dest);
+      if (ableToExitTunnel(exit)) {
+        rectX = exit.x;
+        rectY = exit.y;
+      } else {
+        rectX = teleportState.sourceX;
+        rectY = teleportState.sourceY;
+      }
+      teleportState.phase = "exiting";
+    } else {
+      teleportState = null;
+    }
+  }
+
+  drawAll();
+}
 
 function levelCompleted() {
+  onLevelCompleted(currentLevel);
   chosenOption = null;
-  showCompletionMenu(); // Continue and Exit buttons
+  completionMenu.hidden = false;
+  completionMenu.classList.remove("is-waiting");
+  completionWaiting.hidden = true;
+  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+    button.disabled = false;
+  });
 }
 
-function onOptionPressed(option) { // "continue" or "exit"
-  if (chosenOption !== null) return; // ignore repeat presses
+function onOptionPressed(option) {
+  if (chosenOption !== null || !["continue", "exit"].includes(option)) return;
   chosenOption = option;
-  darkenMenu();
-  showMessage("Waiting");
-  alertAlternatePlayer(option); // placeholder, see questions
+  completionMenu.classList.add("is-waiting");
+  completionWaiting.hidden = false;
+  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+    button.disabled = true;
+  });
+  alertPartnerPlayer(option);
 }
 
-function onAlternatePlayerResponse() { // called when the signal arrives
-  hideMessage();
-  closeMenu();
-  if (chosenOption === "continue") loadNextLevel();
-  else if (chosenOption === "exit") loadLevelSelect();
-  chosenOption = null;
+function alertPartnerPlayer(flag) {
+  window.dispatchEvent(new CustomEvent("echolalia:alternate-player-alert", {
+    detail: { option: flag, flag },
+  }));
 }
-const TOTAL_LEVELS = 5;
-let highestUnlocked = 1; // Level 1 always unlocked
+
+function onAlternatePlayerResponse() {
+  if (surrenderOfferPending) {
+    surrenderOfferPending = false;
+    surrenderMenu.hidden = true;
+    return;
+  }
+
+  if (chosenOption === null) return;
+
+  const responseOption = chosenOption;
+  chosenOption = null;
+  completionMenu.hidden = true;
+  completionMenu.classList.remove("is-waiting");
+  completionWaiting.hidden = true;
+
+  if (responseOption === "continue") loadNextLevel();
+  else loadLevelSelect();
+}
+
+let chosenOption = null;
+let surrenderOfferPending = false;
+let highestUnlocked = 1;
 
 function isUnlocked(level) {
   return level <= highestUnlocked;
@@ -1176,36 +1053,179 @@ function onLevelCompleted(level) {
   if (level === highestUnlocked && level < TOTAL_LEVELS) {
     highestUnlocked = level + 1;
   }
-  //DISPLAY AN HTML POP_UP WINDOW THAT GIVES THE PLAYER CONTINUATINO OPTIONS
+  updateLevelSelectButtons();
 }
 
 function onLevelSelected(level) {
-  if (!isUnlocked(level)) return; // blocked: do nothing
+  if (!isUnlocked(level)) return;
   loadLevel(level);
 }
 
-function onOfferSurrender() {
-  alertPartnerPlayer(SURRENDER_OFFERED); // flag value
-}
-let levelSelectShown = false;
-
-function onSetupKeyDown(event) {
-  if (event.key !== "Enter") return;
-  if (levelSelectShown) return; // ignore repeats
-  levelSelectShown = true;
-
-  hideSetupScreen();
-  document.removeEventListener("keydown", onSetupKeyDown);
-  levelSelectDisplay();
+function updateLevelSelectButtons() {
+  document.querySelectorAll(".level[data-level]").forEach((button) => {
+    const unlocked = isUnlocked(Number(button.dataset.level));
+    button.classList.toggle("is-locked", !unlocked);
+    button.disabled = !unlocked;
+    button.setAttribute("aria-disabled", String(!unlocked));
+    const lock = button.querySelector(".level__lock");
+    if (lock) lock.hidden = unlocked;
+    if (!unlocked) button.setAttribute("aria-label", `Level ${button.dataset.level} locked`);
+    else button.setAttribute("aria-label", `Level ${button.dataset.level}`);
+  });
 }
 
-function levelSelectDisplay() {
-  const TOTAL_LEVELS = 5;
-  for (let level = 1; level <= TOTAL_LEVELS; level++) {
-    drawLevelOption(level, isUnlocked(level)); // positioned in order
+function loadLevel(level) {
+  currentLevel = level;
+  currentScreen = 0;
+  levelSelectScreen.hidden = true;
+  gameScreen.hidden = false;
+  currentLevelTitle.textContent = `Level ${level}`;
+  gameStart = true;
+  spawn();
+  if (stopMain === null) {
+    stopMain = window.requestAnimationFrame(main);
   }
 }
 
-// document.addEventListener("keydown", onSetupKeyDown);
+function loadNextLevel() {
+  if (currentLevel < TOTAL_LEVELS) loadLevel(currentLevel + 1);
+  else loadLevelSelect();
+}
 
-start() 
+function loadLevelSelect() {
+  gameScreen.hidden = true;
+  levelSelectScreen.hidden = false;
+  gameStart = false;
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawLevelOption(level, unlocked) {
+  const button = document.querySelector(`.level[data-level="${level}"]`);
+  if (!button) return;
+  const lock = button.querySelector(".level__lock");
+  button.disabled = !unlocked;
+  button.classList.toggle("is-locked", !unlocked);
+  if (lock) lock.hidden = unlocked;
+}
+
+function levelSelectDisplay() {
+  for (let level = 1; level <= TOTAL_LEVELS; level++) {
+    drawLevelOption(level, isUnlocked(level));
+  }
+  initialSetupScreen.hidden = true;
+  levelSelectScreen.hidden = false;
+}
+
+function onSetupKeyDown(event) {
+  if (event.key !== "Enter") return;
+  if (levelSelectShown) return;
+  levelSelectShown = true;
+  levelSelectDisplay();
+}
+
+window.main = (timestamp = performance.now()) => {
+  if (!gameStart) {
+    stopMain = null;
+    lastFrameTime = null;
+    return;
+  }
+
+  const deltaTime = lastFrameTime === null ? 0 : Math.min((timestamp - lastFrameTime) / 1000, 0.05);
+  lastFrameTime = timestamp;
+  counter += 1;
+  updatePhysics(deltaTime);
+  stopMain = window.requestAnimationFrame(main);
+};
+
+function start() {
+  canvas.style.width = "1308px";
+  canvas.style.height = "649px";
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!gameStart) {
+    playerPH.fillStyle = "Black";
+    playerPH.font = "80px Arial";
+    playerPH.textAlign = "center";
+    playerPH.textBaseline = "middle";
+    playerPH.fillText("PRESS ENTER TO START", canvas.width / 2, canvas.height / 2);
+  } else {
+    spawn();
+  }
+}
+
+function onOfferSurrender() {
+  if (surrenderOfferPending) return;
+  surrenderOfferPending = true;
+  surrenderMenu.hidden = false;
+  alertPartnerPlayer("surrender-offered");
+}
+
+function startLoopFromKeydown() {
+  if (!gameStart || !stopMain) {
+    return;
+  }
+  stopMain = window.requestAnimationFrame(main);
+}
+
+window.addEventListener("keydown", (event) => {
+  const key = event.key.toLowerCase();
+  if (event.key === "Enter" && !gameStart) {
+    gameStart = true;
+    loadLevel(1);
+    return;
+  }
+
+  if (!gameStart || gameScreen.hidden || !completionMenu.hidden) return;
+
+  if (["w", "a", "s", "d"].includes(key)) {
+    pressedKeys.add(key);
+    moveCharacterWASD(pressedKeys);
+  }
+
+  if (key === "e") {
+    pcInteract();
+  } else if (key === "c") {
+    respawn();
+  }
+
+  if (key === " ") {
+    return;
+  }
+});
+
+window.addEventListener("keyup", (event) => {
+  pressedKeys.delete(event.key.toLowerCase());
+});
+
+window.addEventListener("echolalia:alternate-player-response", onAlternatePlayerResponse);
+window.levelCompleted = levelCompleted;
+window.onAlternatePlayerResponse = onAlternatePlayerResponse;
+window.levelSelectDisplay = levelSelectDisplay;
+
+beginGameButton.addEventListener("click", () => {
+  levelSelectDisplay();
+});
+
+document.querySelectorAll(".level[data-level]").forEach((button) => {
+  button.addEventListener("click", () => onLevelSelected(Number(button.dataset.level)));
+});
+
+completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+  button.addEventListener("click", () => onOptionPressed(button.dataset.completionOption));
+});
+
+offerSurrenderButton.addEventListener("click", onOfferSurrender);
+cancelSurrenderOfferButton.addEventListener("click", () => {
+  if (!surrenderOfferPending) return;
+  surrenderOfferPending = false;
+  surrenderMenu.hidden = true;
+  alertPartnerPlayer("surrender-offer-cancelled");
+});
+
+document.addEventListener("keydown", onSetupKeyDown);
+
+let levelSelectShown = false;
+updateLevelSelectButtons();
+initialSetupScreen.hidden = true;
+levelSelectScreen.hidden = false;
+start();
