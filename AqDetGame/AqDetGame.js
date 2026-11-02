@@ -321,7 +321,7 @@ function updateLevelSelectButtons() {
     else button.setAttribute("aria-label", `Level ${button.dataset.level}`);
   });
 }
-
+//level is getting loaded 
 function loadLevel(level) {
   currentLevel = level;
   levelSelectScreen.hidden = true;
