@@ -23,6 +23,8 @@ window.main = (timestamp = performance.now()) => {
 }
 
 function start(){
+    canvas.style.width = '1308px';
+    canvas.style.height = '649px';
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
         playerPH.fillStyle = "Black";
@@ -50,6 +52,8 @@ UrchinImage.onload = () => {
     SPRITES.push(UrchinImage);
     console.log("Urchin image loaded successfully.");
 }
+var currentLevel = 0;
+var currentScreen = 0;
 
 
 const rectSize = 60;
@@ -62,6 +66,9 @@ var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
 const moveDistance = 15; 
+const NO_MOVEMENT = 0;
+const pressedKeys = new Set();
+
 counter = 0;
 const playerVelocity = {x: 0, y: 0};
 let activeMovementElement = null;
@@ -79,19 +86,29 @@ let gameStart = false;
 let teleportState = null;
 let firstTimeTunnel = true;
 
-// Barriers 
-const barriers =  [
-    { 
-        x: 400, 
-        y: 0, 
-        width: 20, 
-        height: 600,
-        color: "red"
+const spawnArr = [
+    {
+        spawnPoints: level1spawn
     }
 ];
 
+let spawnIndex = 0;
+
+
+
+const SEAWEED_SIZE = 40;
+const PUDDLE_SIZE = 50;
+const ROCKET_SIZE = 70;
+const BUBBLE_SIZE = 80;
+const PUSH_ROCK_SIZE = PUDDLE_SIZE;
+
+
+const barriers = createBarrier(canvas);
+const interactableItems = createInteractables(canvas);
+const jumpPuddles = createJumpPuddle(canvas);
+
 function drawBarriers() {
-    for (const b of barriers) {
+    for (const b of barriers[currentScreen]) {
         playerPH.fillStyle = b.color;
         playerPH.fillRect(b.x,b.y,b.width,b.height);
     }
@@ -206,6 +223,8 @@ function drawAll() {
     drawBarriers();
     drawEnemy();
     drawPlayer();
+    drawInteractables();
+    drawJumpPuddles();
 }
 
 function WCCollision() {
@@ -301,8 +320,8 @@ function tunnelCollision() {
     drawAll();
 }
 
-function collidesWithBarrier(x, y) {
-    for (const b of barriers) {
+function collidesWithBarrier(x, y, width, height) {
+    for (const b of barriers[currentScreen]) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
             y < b.y + b.height &&
@@ -318,16 +337,52 @@ function collidesWithEnemy(x, y) {
         x + rectSize > enemy.x &&
         y < enemy.y + enemy.height &&
         y + rectSize > enemy.y) {
+      return true;
+    }
+  return false;
+}
+
+function drawJumpPuddles() {
+    for (const d of jumpPuddles[currentScreen]) {
+        playerPH.fillStyle = d.color;
+        playerPH.fillRect(d.x,d.y,d.width,d.height);
+    }
+}
+
+
+function drawInteractables() {
+    for (const d of interactableItems[currentScreen]) {
+        playerPH.fillStyle = d.color;
+        playerPH.fillRect(d.x,d.y,d.width,d.height);
+    }
+}
+
+// returns true if player has reached left-most area, to proceed to the next screen
+function reachScreenEnd(rectX) {
+    if (rectX < 1 && rectX > -20) {
         return true;
     }
     return false;
 }
 
-function spawn(){
-    teleportState = null;
-    rectX = 23;
-    rectY = canvas.height/2;
 
+function getSpawnPoint(){
+    return spawnArr[currentLevel].spawnPoints[spawnIndex];
+}
+
+function updateCheckPoint(checknum){
+    if(checknum == spawnIndex +1 && checknum < spawnArr[currentLevel].spawnPoints.length){
+        spawnIndex = checknum;
+    }
+}
+
+function spawn(){
+  teleportState = null;
+    const spawnPoint = getSpawnPoint();
+    currentScreen = spawnPoint.screen;
+    rectX = spawnPoint.x;
+   rectY = spawnPoint.y;
+    //alert("X: " + rectX  + "\n Y" + rectY)
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     drawAll();
 }
@@ -376,6 +431,33 @@ function reRender(movePosX, movePosY){
     if (teleportState) {return false; } // prevent movement during teleportation
     const nextX = rectX + movePosX;
     const nextY = rectY + movePosY;
+    if (reachScreenEnd(newX)) {
+
+        // Check if this is the last screen
+        if (currentScreen === 3) {
+            alert("Level done");
+            return;
+        }
+
+        // Unlock the next checkpoint
+        updateCheckPoint(currentScreen + 1);
+
+        // Change to next screen
+        currentScreen++;
+
+        // Get new screen coordinates
+        const coordinates =
+            spawnArr[currentLevel].spawnPoints[currentScreen];
+
+        rectX = coordinates.x;
+        rectY = coordinates.y;
+
+        // Draw new screen
+        playerPH.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawAll();
+        return;
+    }
     
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
         return false;
@@ -398,31 +480,38 @@ function pcInteract()
     return tunnelCollision();
 }
 
-function move(moveKey) {
-    if (moveKey.key == "w"){
-        reRender(0, -moveDistance);
-    } else if (moveKey.key == "a"){
-	reRender(-moveDistance, 0);
-    } else if (moveKey.key == "s"){
-	reRender(0, moveDistance);
-    } else if (moveKey.key == "d"){
-	reRender(moveDistance, 0);
+// moves the player a fixed amount, depending on the key pressed (WASD)
+function moveCharacterWASD(moveKeys) {
+    moveDistanceX = NO_MOVEMENT;
+    moveDistanceY = NO_MOVEMENT;
+    if (moveKeys.has('w')){
+        moveDistanceY -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('a')){
+	    moveDistanceX -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('s')){
+        moveDistanceY += STANDARD_MOVEMENT;
+    } else if (moveKeys.has('d')){
+        moveDistanceX += STANDARD_MOVEMENT;
     }
+    //alert(moveDistanceX + " " + moveDistanceY);
+    reRender(moveDistanceX, moveDistanceY);
 }
 
 window.addEventListener("keydown", (e) =>{ 
     main(); //infinite loop
-    
+    pressedKeys.add(e.key.toLowerCase());
     //Fix to allow caps letters and multiple buttons being pressed
     if(e.key === "Enter" && !gameStart){
         gameStart = true; 
         spawn();
-    } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
-    	e.key == "d"){
-        move(e);
-    } else if (e.key == "e" && !e.repeat) {
+    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
+    pressedKeys.has('s') || pressedKeys.has('d')){
+        moveCharacterWASD(pressedKeys);
+    } else if (e.key === " ") { //Space Entered - call jump
+        // reRender(0, -50);Jump no longer needed
+    } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
         pcInteract();
-    } else if (e.key == 'c')
+    } else if ((e.key).toLowerCase() == 'c')
     {
         respawn();
     }
