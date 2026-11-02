@@ -1,10 +1,259 @@
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Comfortaa:wght@600;700&display=swap");
+
 html {
     background-color: blue;
-    
+    overflow: hidden;
+    cursor:none;
+    /* background-image: url("test.jpg"); */
 }
     
 canvas {
     font-size: 200%;
+    position:absolute;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.initial-setup {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 24px;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 110%, rgb(24 148 189 / 66%), transparent 48%),
+    linear-gradient(145deg, #041832 4%, #0b3763 52%, #071f43);
+  color: #ffffff;
+  font: 700 clamp(28px, 5vw, 64px) "Comfortaa", system-ui, sans-serif;
+  text-align: center;
+}
+
+.initial-setup::before,
+.initial-setup::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.initial-setup::before {
+  background:
+    linear-gradient(112deg, transparent 18%, rgb(173 237 255 / 16%) 34%, transparent 48%),
+    linear-gradient(76deg, transparent 54%, rgb(173 237 255 / 12%) 64%, transparent 76%);
+}
+
+.initial-setup::after {
+  background:
+    radial-gradient(circle, transparent 0 32px, rgb(190 244 255 / 25%) 34px 36px, transparent 38px) 12% 25% / 150px 150px,
+    radial-gradient(circle, transparent 0 19px, rgb(190 244 255 / 20%) 21px 23px, transparent 25px) 84% 65% / 120px 120px,
+    radial-gradient(circle, rgb(222 250 255 / 70%) 0 4px, transparent 5px) 74% 22% / 110px 140px,
+    radial-gradient(circle, rgb(222 250 255 / 55%) 0 3px, transparent 4px) 22% 72% / 90px 120px;
+  background-repeat: no-repeat;
+  animation: underwater-drift 10s ease-in-out infinite alternate;
+}
+
+.initial-setup h1 {
+  position: relative;
+  text-shadow: 0 0 28px rgb(87 209 238 / 50%);
+  margin: 0;
+}
+
+.initial-setup__begin {
+  position: relative;
+  padding: 16px 28px;
+  border: 1px solid rgb(194 242 255 / 62%);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #1b78a9, #10517f);
+  box-shadow: inset 0 0 18px rgb(158 232 255 / 24%), 0 8px 24px rgb(0 10 30 / 42%);
+  color: #ffffff;
+  font: 700 clamp(16px, 2vw, 22px) "Comfortaa", system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.initial-setup__begin:hover {
+  filter: brightness(1.15);
+}
+
+.initial-setup__begin:focus-visible {
+  outline: 3px solid #bfe7ff;
+  outline-offset: 4px;
+}
+
+.game-screen {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #0c2d57;
+}
+
+.game-screen__title {
+  margin: 0;
+  padding: 16px 24px;
+  color: #ffffff;
+  font: 700 24px "Comfortaa", system-ui, sans-serif;
+}
+
+.completion-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 55%);
+}
+
+.completion-menu__panel {
+  width: min(100%, 480px);
+  padding: 32px;
+  border-radius: 12px;
+  background: #347fbd;
+  color: #071d38;
+  font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+  text-align: center;
+}
+
+.completion-menu__panel h2 {
+  margin: 0 0 24px;
+  font-family: "Comfortaa", system-ui, sans-serif;
+}
+
+.completion-menu__message {
+  margin: -12px 0 24px;
+  font-size: 24px;
+}
+
+.completion-menu__actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.completion-menu__actions button {
+  padding: 12px 24px;
+  border: 0;
+  border-radius: 8px;
+  background: #a8d8f5;
+  color: #071d38;
+  font: inherit;
+  cursor: pointer;
+}
+
+.completion-menu.is-waiting::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: rgb(0 0 0 / 70%);
+}
+
+.completion-menu.is-waiting .completion-menu__waiting {
+  position: relative;
+  z-index: 1;
+  margin: 20px 0 0;
+  color: #ffffff;
+}
+
+.completion-menu.is-waiting .completion-menu__actions {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.completion-menu.is-waiting .completion-menu__waiting[hidden] {
+  display: block !important;
+}
+
+.surrender-pending {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(3 20 43 / 74%);
+  backdrop-filter: blur(3px);
+}
+
+.surrender-pending__panel {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: min(100%, 333px);
+  padding: 24px;
+  border: 1px solid rgb(173 237 255 / 62%);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgb(39 153 188 / 35%), transparent 52%),
+    linear-gradient(145deg, #0c3e70, #082749 72%);
+  box-shadow: 0 18px 55px rgb(0 9 26 / 48%), inset 0 1px rgb(255 255 255 / 10%);
+  color: #eefaff;
+  font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+
+.surrender-pending__panel::before {
+  position: absolute;
+  top: -55px;
+  right: -34px;
+  width: 130px;
+  height: 130px;
+  border: 1px solid rgb(180 241 255 / 16%);
+  border-radius: 50%;
+  box-shadow: 0 0 0 15px rgb(180 241 255 / 5%), 0 0 0 32px rgb(180 241 255 / 4%);
+  content: "";
+  pointer-events: none;
+}
+
+.surrender-pending__panel h2 {
+  position: relative;
+  margin: 0 0 10px;
+  color: #ffffff;
+  font-family: "Comfortaa", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.surrender-pending__panel > p:not(.surrender-pending__waiting) {
+  position: relative;
+  margin: 0 0 10px;
+  color: #c1d9ea;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.surrender-pending__waiting,
+.surrender-pending__cancel {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  margin: 0 0 8px;
+  border-radius: 7px;
+  font: 700 12px "Atkinson Hyperlegible", system-ui, sans-serif;
+  text-align: center;
+}
+
+.surrender-pending__waiting {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(160 235 255 / 34%);
+  background: linear-gradient(110deg, #1875a3, #126184);
+  color: #e9faff;
+}
+
+.surrender-pending__cancel {
+  margin-bottom: 0;
+  border: 1px solid rgb(171 222 244 / 46%);
+  background: rgb(5 34 64 / 42%);
+  color: #e7f7ff;
+  cursor: pointer;
+}
+
+.surrender-pending__cancel:hover {
+  background: rgb(36 105 145 / 58%);
 }
 
 
@@ -14,4 +263,308 @@ canvas {
     border-width: 5px;
     object-position: 0px 400px;
     /* float:top; */
+}
+
+/* Level Select screen — based on Figma frame "2f Level Select" (1440 x 900). */
+
+.level-select,
+.level-select[data-theme="blue"] {
+  /* Palette: blue, thumbnails darken with later levels */
+  --screen-bg: #0c2d57;
+  --panel-bg: #eaf1f6;
+  --tab-bg: #1c5b96;
+  --text: #071d38;
+
+  --level-1: #a8d8f5;
+  --level-2: #79b9e5;
+  --level-3: #4d91c9;
+  --level-4: #286fa9;
+  --level-5: #164f82;
+
+  /* Label colors: white on the darker thumbnails for readability */
+  --label-light: #000000;
+  --label-dark: #ffffff;
+
+  --locked-bg: #999999;
+  --locked-text: #444444;
+  --highlight: #bfe7ff;
+
+  /* Sizes (from Figma, scaled down on narrow screens) */
+  --thumb-w: clamp(140px, 19.5vw, 281px);
+  --thumb-gap: clamp(24px, 9.7vw, 140px);
+  --row-gap: clamp(32px, 9.8vw, 142px);
+  --radius: 12px;
+
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 46px 47px 47px;
+  background-color: #071f43;
+  background-image:
+    radial-gradient(ellipse at 50% 105%, rgb(24 133 180 / 54%), transparent 58%),
+    repeating-radial-gradient(circle at 8% 82%, transparent 0 68px, rgb(153 224 255 / 12%) 70px 71px, transparent 73px 138px),
+    linear-gradient(112deg, transparent 18%, rgb(174 239 255 / 10%) 34%, transparent 48%),
+    linear-gradient(76deg, transparent 56%, rgb(174 239 255 / 8%) 66%, transparent 78%),
+    linear-gradient(160deg, #061a36, #0b3763 55%, #07234b);
+  color: var(--text);
+  font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
+}
+
+/* Blue palette */
+.level-select[data-theme="blue"] {
+  --screen-bg: #0c2d57;
+  --panel-bg: #347fbd;
+  --tab-bg: #1c5b96;
+  --level-1: #a8d8f5;
+  --level-2: #79b9e5;
+  --level-3: #4d91c9;
+  --level-4: #286fa9;
+  --level-5: #164f82;
+  --label-dark: #ffffff;
+  --highlight: #bfe7ff;
+}
+
+/* Title tab, top-left */
+.level-select__title {
+  position: absolute;
+  top: 20px;
+  left: 27px;
+  z-index: 1;
+  box-sizing: border-box;
+  min-width: min(439px, 60vw);
+  height: 89px;
+  padding: 0 25px;
+  display: flex;
+  align-items: center;
+  background: var(--tab-bg);
+  border-radius: var(--radius);
+  font-size: clamp(24px, 2.8vw, 40px);
+  font-family: "Comfortaa", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Offer Surrender button, top-right */
+.level-select__surrender {
+  position: absolute;
+  top: 20px;
+  right: 27px;
+  z-index: 1;
+  padding: 18px 28px;
+  background: var(--tab-bg);
+  color: var(--text);
+  border: 0;
+  border-radius: var(--radius);
+  font-family: "Comfortaa", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(16px, 1.5vw, 22px);
+  cursor: pointer;
+}
+
+.level-select__surrender:hover { filter: brightness(0.95); }
+.level-select__surrender:active { filter: brightness(0.88); }
+
+/* Main panel */
+.level-select__panel {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  min-height: 807px;
+  padding: 118px 40px 60px;
+  overflow: hidden;
+  background-color: #15578a;
+  background-image:
+    radial-gradient(ellipse at 50% 115%, #39a8ca 0, rgb(35 137 183 / 74%) 22%, transparent 60%),
+    linear-gradient(112deg, transparent 20%, rgb(167 239 255 / 21%) 32%, transparent 42%),
+    linear-gradient(76deg, transparent 45%, rgb(167 239 255 / 17%) 55%, transparent 66%),
+    linear-gradient(145deg, #0b3b70, #16669a 55%, #104779);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--row-gap);
+}
+
+.level-select__panel::before,
+.level-select__panel::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.level-select__panel::before {
+  background:
+    radial-gradient(circle, transparent 0 34px, rgb(190 244 255 / 24%) 35px 37px, transparent 38px) 8% 18% / 130px 130px,
+    radial-gradient(circle, transparent 0 23px, rgb(190 244 255 / 18%) 24px 26px, transparent 27px) 91% 68% / 100px 100px,
+    radial-gradient(circle, rgb(222 250 255 / 72%) 0 3px, transparent 4px) 17% 63% / 90px 120px,
+    radial-gradient(circle, rgb(222 250 255 / 62%) 0 4px, transparent 5px) 84% 28% / 120px 150px;
+  background-repeat: no-repeat;
+  animation: underwater-drift 12s ease-in-out infinite alternate;
+}
+
+.level-select__panel::after {
+  inset: auto 0 0;
+  height: 32%;
+  background:
+    radial-gradient(ellipse at 15% 100%, rgb(74 190 203 / 50%), transparent 55%),
+    radial-gradient(ellipse at 88% 100%, rgb(70 165 197 / 46%), transparent 54%),
+    linear-gradient(0deg, rgb(3 33 70 / 50%), transparent);
+}
+
+.level-select__panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes underwater-drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12px); }
+}
+
+/* 3 thumbnails on top, 2 centered below */
+.level-select__row {
+  display: flex;
+  justify-content: center;
+  gap: var(--thumb-gap);
+  width: 100%;
+}
+
+/* Level thumbnail (use a <button> for keyboard and click support) */
+.level {
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: var(--thumb-w);
+  aspect-ratio: 281 / 180;
+  padding: 0;
+  border: 1px solid rgb(194 242 255 / 62%);
+  border-radius: var(--radius);
+  overflow: hidden;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 0 18px rgb(158 232 255 / 24%), 0 8px 22px rgb(3 27 57 / 28%);
+  /* No transition: highlight must follow key presses with no delay */
+  transition: none;
+}
+
+.level[data-level="1"] { background: var(--level-1); }
+.level[data-level="2"] { background: var(--level-2); }
+.level[data-level="3"] { background: var(--level-3); }
+.level[data-level="4"] { background: var(--level-4); }
+.level[data-level="5"] { background: var(--level-5); }
+
+.level__thumbnail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.level__lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: clamp(28px, 3.4vw, 44px);
+  height: auto;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 5px rgb(0 0 0 / 55%));
+  pointer-events: none;
+}
+
+.level::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    linear-gradient(125deg, rgb(218 248 255 / 20%), transparent 35% 72%, rgb(137 222 255 / 10%));
+  content: "";
+  pointer-events: none;
+}
+
+.level:not(.is-locked):hover {
+  box-shadow: inset 0 0 24px rgb(158 232 255 / 38%), 0 10px 28px rgb(3 27 57 / 40%);
+}
+
+.level__label {
+  z-index: 3;
+}
+
+.level[data-level="1"] .level__label {
+  padding-top: 22px;
+  color: #ffffff;
+  background: linear-gradient(transparent, rgb(0 0 0 / 65%));
+}
+
+.level[data-level="3"] .level__label,
+.level[data-level="4"] .level__label,
+.level[data-level="5"] .level__label { color: var(--label-dark); }
+
+/* Locked levels keep dark grey labels on the grey background */
+.level.is-locked .level__label,
+.level[aria-disabled="true"] .level__label { color: var(--locked-text); }
+
+.level__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 8px 8px;
+  font-size: 16px;
+}
+
+/* Highlighted (currently selected) level — exactly one at a time */
+.level.is-highlighted,
+.level:focus-visible {
+  outline: 6px solid var(--highlight);
+  outline-offset: 0;
+}
+
+/* Locked level: greyed out and unresponsive.
+   Use aria-disabled="true" (or the .is-locked class) when the level's
+   unlocked boolean is false. */
+.level[aria-disabled="true"],
+.level.is-locked {
+  background: var(--locked-bg);
+  color: var(--locked-text);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.level[aria-disabled="true"] .level__thumbnail,
+.level.is-locked .level__thumbnail {
+  filter: grayscale(1) brightness(0.6);
+}
+
+/* A locked level can still hold the highlight (keyboard focus),
+   so the outline is applied by class, not by pointer interaction. */
+.level.is-locked.is-highlighted,
+.level[aria-disabled="true"].is-highlighted {
+  outline: 6px solid var(--highlight);
+}
+
+/* Narrow screens: let thumbnails wrap into rows */
+@media (max-width: 720px) {
+  .level-select { padding: 16px; }
+  .level-select__title { position: static; margin-bottom: 12px; }
+  .level-select__surrender { top: 24px; right: 24px; }
+  .level-select__panel { padding: 24px 16px; min-height: 0; }
+  .level-select__row { flex-wrap: wrap; gap: 20px; }
+  .level { --thumb-w: min(44vw, 281px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-select * { transition: none !important; animation: none !important; }
 }
