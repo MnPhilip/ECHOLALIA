@@ -22,11 +22,6 @@ function start(){
     canvas.style.height = '649px';
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
-        playerPH.fillStyle = "Black";
-        playerPH.font = "80px Arial";
-        playerPH.textAlign = "center";
-        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
     } else{
         spawn();
     }
@@ -49,9 +44,6 @@ var gravVector;
 var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
-
-
-
 
 const NO_MOVEMENT = 0;
 const STANDARD_MOVEMENT = 15; 
@@ -157,13 +149,6 @@ function spawn(){
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-    
-
-    
-    // canvasTemp = document.getElementById("LayoutDisplay");
-    // playerPHTEMP = canvasTemp.getContext("2d"); 
-    // playerPHTEMP.fillStyle("red");
-    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
 }
 
 function respawn(){
@@ -195,17 +180,7 @@ function findRespawn(){
 }
 
 function removeOldCharacter() {
-//   if (!player) return; // nothing to remove
-
-//   // stop anything still running on the old PC
-//   player.stopAnimations();
-//   player.detachInputHandlers();
-
-//   // take it out of the game and release the reference
-//   removeFromEntityList(player);
-//   player = null;
   playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
-//   respawn();
 }
 
 
@@ -321,40 +296,6 @@ window.addEventListener('keyup', (event) => {
     pressedKeys.delete(event.key.toLowerCase());
 });
 
-//DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
-// function gravUpdate() {
-//     if (rectY < 1400) {
-//         gravVector = 10;
-//         reRender(0, gravVector);
-//     }
-// }
-
-// function updatePhysics() {
-//     // var pcPos = playerPH.rect.x;
-
-//     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
-//     // if (rectY + rectSize > canvas.height) {
-//     //     // The square is below the bottom of the canvas
-//     //     rectY = canvas.height - rectSize;
-//     //     // Square stops falling
-//     //     velocityY = 0;
-//     // }
-
-//     // velocityY += gravity;
-//     // if (velocityY > max_fall_speed) {
-//     //     velocityY = max_fall_speed;
-//     // }
-//     // //Update rectY by velocityY
-//     // rectY += velocityY;
-//     // //Keep it from flying off the TOP (rectY < 0)
-//     // if (rectY < 0) {
-//     //     rectY = 0;
-//     //     velocityY = 0;
-//     // }
-
-    
-//     gravUpdate();
-// }
 let chosenOption = null;
 
 function levelCompleted() {
