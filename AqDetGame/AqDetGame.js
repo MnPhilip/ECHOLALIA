@@ -1,6 +1,6 @@
 //alert("Test of JS file worksssss");
 document.addEventListener('DOMContentLoaded', () => {
-    alert("DEBUG SPACE LOADED");
+    // alert("DEBUG SPACE LOADED");
 })
 
 
@@ -12,9 +12,7 @@ window.main = () => {
     counter++;
     // updatePhysics();
     
-    window.cancelAnimationFrame(stopMain);
-    
-    
+    window.cancelAnimationFrame(stopMain);   
 }
 
 
@@ -54,38 +52,38 @@ var currObj = -1;
 const moveDistance = 25; 
 counter = 0;
 
-const interactableSize = 75;
-var interactableLoc = [
-    {
-        x: 80,
-        y: 700,
-        width: interactableSize,
-        height: interactableSize,
-        color: "purple",
-        type: pushBlock,
-        activated: false
-    }, 
+// const interactableSize = 75;
+// var interactableLoc = [
+//     {
+//         x: 80,
+//         y: 700,
+//         width: interactableSize,
+//         height: interactableSize,
+//         color: "purple",
+//         type: pushBlock,
+//         activated: false
+//     }, 
 
-    {
-        x: 380,
-        y: 800,
-        width: interactableSize,
-        height: interactableSize,
-        color: "aqua",
-        type: bubble,
-        activated: false
-    },
+//     {
+//         x: 380,
+//         y: 800,
+//         width: interactableSize,
+//         height: interactableSize,
+//         color: "aqua",
+//         type: bubble,
+//         activated: false
+//     },
 
-    {
-        x: 680,
-        y: 800,
-        width: interactableSize,
-        height: interactableSize,
-        color: "red",
-        type: signalFlare,
-        activated: false
-    }
-]; //[Xorigin][Yorigin][type_constant]
+//     {
+//         x: 680,
+//         y: 800,
+//         width: interactableSize,
+//         height: interactableSize,
+//         color: "red",
+//         type: signalFlare,
+//         activated: false
+//     }
+// ]; //[Xorigin][Yorigin][type_constant]
 
 
 
@@ -105,7 +103,7 @@ function renderInit() {
     drawInteractables();
     playerPH.fillStyle = "green";
     
-    gameStart = true; 
+    // gameStart = true; 
 }
 
 function start(){
@@ -114,9 +112,10 @@ function start(){
         playerPH.fillStyle = "Yellow";
         playerPH.font = "80px Arial";
         playerPH.textAlign = "center";
+        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
         playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
         playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
-
+        
         renderInit();
     } else{
         spawn(); //Initial Rendering and Spawning of Player Character
@@ -126,23 +125,23 @@ function start(){
 }
 
 // Static Barriers 
-const barriers =  [
-    { 
-        x: 400, 
-        y: 0, 
-        width: 20, 
-        height: 600,
-        color: "red"
-    },
+// const barriers =  [
+//     { 
+//         x: 400, 
+//         y: 0, 
+//         width: 20, 
+//         height: 600,
+//         color: "red"
+//     },
 
-    {
-        x: 200,
-        y: 600,
-        width: 200,
-        height: 40, 
-        color: "yellow"
-    }, 
-]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
+//     {
+//         x: 200,
+//         y: 600,
+//         width: 200,
+//         height: 40, 
+//         color: "yellow"
+//     }, 
+// ]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
 
 function drawBarriers() {
     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
@@ -241,6 +240,7 @@ function respawn(){
     rectY = RESPAWN_Y;
     
     reRender(0, 0);
+
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -276,24 +276,9 @@ function removeOldCharacter() {
 
 
 function reRender(movePosX, movePosY){
-    var count = 0;
     
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
         return;
-    }
-
-    if (reachScreenEnd(rectX + movePosX)) {
-        playerPH.clearRect(0, 0, canvas.width, canvas.height);
-        if (currentScreen == 3) { 
-            // goes to the next level if player reached end of first level
-            currentLevel++;
-            currentScreen = 0;
-        } else {
-            // goes to next screen
-            currentScreen++;
-            spawn();
-            //alert(`POS is: ${rectX}, ${rectY}`);
-        }
     }
     
     removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
@@ -358,14 +343,14 @@ function pcInteract()
         return;
     }
     else if (objType == pushBlock) {
-        alert("push block active");
+        // alert("push block active");
     }//PushBlock found
     else if (objType == bubble) {
-      alert("Bubble Found");
+      // alert("Bubble Found");
       activateBubble();
     }//Bubble found
     else if (objType == signalFlare){
-      alert("Signal Flare Found");
+      // alert("Signal Flare Found");
       window.dispatchEvent(flareSent);
     } //Signal Flare found
 }
@@ -468,16 +453,18 @@ function move(moveKey) {
 
 window.addEventListener("keydown", (e) =>{ 
     main(); //infinite loop
-    pressedKeys.add(e.key.toLowerCase());
+    
     //Fix to allow caps letters and multiple buttons being pressed
     if(e.key == "Enter" && !gameStart){
+        gameStart = true;
         spawn();
-    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
-    pressedKeys.has('s') || pressedKeys.has('d')){
-        moveCharacterWASD(pressedKeys);
+        start();
+    } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
+    	e.key == "d"){
+        move(e);
     } else if (e.key === " ") { //Space Entered - call jump
         // reRender(0, -50);Jump no longer needed
-    } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
+    } else if (e.key == "e") { //'e' key pressed, call enter
         pcInteract();
     } else if (e.key == 'c') //Respawn keybind
     {
