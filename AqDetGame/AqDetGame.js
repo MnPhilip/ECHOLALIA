@@ -18,7 +18,6 @@ window.main = () => {
 }
 
 function start(){
-    playerPH.imageSmoothingEnabled = false;
     //set canvas size
     canvas.style.width = '1308px';
     canvas.style.height = '649px';
@@ -188,579 +187,472 @@ function start(){
         playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
         playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
 
-// <<<<<<< catalina
-// const TILE = 60;
-
-// // Images
-// const tileSheet = new Image();
-// tileSheet.src = "tilesheet.png";
-// const playerSheet = new Image();
-// playerSheet.src = "playersheet.png";
-
-// // Column of each tile in tilesheet.png
-// const TILE_INDEX = {
-//     floor: 0, floor_alt: 1, wall: 2, background: 3, pit: 4,
-//     pit_cliff: 5, edge_up: 6, edge_down: 7, edge_left: 8, edge_right: 9
-// };
-// // Row of each direction in playersheet.png
-// const DIR_ROW = { down: 0, up: 1, left: 2, right: 3 };
-
-// let facing = "down";
-// let walkFrame = 0;   // 0 idle, 1 walk0, 2 walk1
-// let stepCount = 0;
-
-// // Level: 1 character = 1 tile
-// const levelMap = [
-//     "##############",
-//     "#............#",
-//     "#..,.........#",
-//     "#.......#....#",
-//     "#.......#....#",
-//     "#.....~~~....#",
-//     "#.....___..,.#",
-//     "#............#",
-//     "##############",
-// ];
-// const CHAR_TO_TILE = { "#": "wall", ".": "floor", ",": "floor_alt", "_": "pit", "~": "pit_cliff", " ": "background" };
-// const SOLID = new Set(["#", "_", "~", " "]);
-
-// function drawTile(name, col, row) {
-//     const i = TILE_INDEX[name];
-//     playerPH.drawImage(tileSheet, i * TILE, 0, TILE, TILE, col * TILE, row * TILE, TILE, TILE);
-// }
-
-// function drawMap() {
-//     for (let row = 0; row < levelMap.length; row++)
-//         for (let col = 0; col < levelMap[row].length; col++)
-//             drawTile(CHAR_TO_TILE[levelMap[row][col]] || "background", col, row);
-// }
-
-// function drawPlayer() {
-//     playerPH.drawImage(playerSheet, walkFrame * TILE, DIR_ROW[facing] * TILE, TILE, TILE, rectX, rectY, TILE, TILE);
-// }
-
-// function draw() {
-//     playerPH.clearRect(0, 0, canvas.width, canvas.height);
-//     drawMap();
-//     drawPlayer();
-// }
-
-// function tileAt(px, py) {
-//     const col = Math.floor(px / TILE), row = Math.floor(py / TILE);
-//     if (row < 0 || row >= levelMap.length || col < 0 || col >= levelMap[row].length) return " ";
-//     return levelMap[row][col];
-// }
-
-// function isBlocked(x, y) {
-//     const corners = [[x, y], [x + rectSize - 1, y], [x, y + rectSize - 1], [x + rectSize - 1, y + rectSize - 1]];
-//     return corners.some(([cx, cy]) => SOLID.has(tileAt(cx, cy)));
-// }
-
-// //const TILE = 60; // Size of each tile in pixels
-
-// //const tileArt = {
-// //   "0": "white", // Empty space
-// //    "1": "black", // Wall
-// //    "2": "blue"   // Water
-
-// //    playerPH.fillStyle = tileArt[tileType];
-// //    playerPH.fillRect(x * TILE, y * TILE, TILE, TILE);
-// //    playerPH.strokeStyle = "gray";
-// //    playerPH.lineWidth = 2;
-
-// //    playerPH.beginPath();
-// //    playerPH.moveTo(x, y + TILE /2);
-// //    playerPH.lineTo(x + TILE, y + TILE /2);
-// //    playerPH.moveTo(x + TILE / 2, y);
-// //    playerPH.lineTo(x + TILE / 2, y + TILE /2);
-// //    playerPH.moveTo(x, y + TILE / 2);
-// //    playerPH.lineTo(x, y + TILE);
-// //    playerPH.stroke();
-// //}
-
-// function spawn() {
-//     rectX = 1 * TILE;
-//     rectY = 1 * TILE;
-//     facing = "down";
-//     walkFrame = 0;
-//     draw();
-// }
-
-// function respawn(){
-//     findRespawn();
-//     rectX = RESPAWN_X;
-//     rectY = RESPAWN_Y;
-//     facing = "down";
-//     walkFrame = 0;
-//     draw();
-// =======
-//         renderInit();
-//     } else{
-//         spawn(); //Initial Rendering and Spawning of Player Character
-//     }
+        renderInit();
+    } else{
+        spawn(); //Initial Rendering and Spawning of Player Character
+    }
     
-//     //requestAnimationFrame(start);
-// }
+    //requestAnimationFrame(start);
+}
 
-// // Static Barriers 
-// const barriers =  [
-//     { 
-//         x: 400, 
-//         y: 0, 
-//         width: 20, 
-//         height: 600,
-//         color: "red"
-//     },
+// Static Barriers 
+const barriers =  [
+    { 
+        x: 400, 
+        y: 0, 
+        width: 20, 
+        height: 600,
+        color: "red"
+    },
 
-//     {
-//         x: 200,
-//         y: 600,
-//         width: 200,
-//         height: 40, 
-//         color: "yellow"
-//     }, 
-// ]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
+    {
+        x: 200,
+        y: 600,
+        width: 200,
+        height: 40, 
+        color: "yellow"
+    }, 
+]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
 
-// function drawBarriers() {
-//     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-//     for (const b of barriers) {
-//         lvlLayout.strokeStyle = b.color;
-//         lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
-// const SEAWEED_SIZE = 40;
-// const PUDDLE_SIZE = 50;
-// const ROCKET_SIZE = 70;
-// const BUBBLE_SIZE = 80;
-// const PUSH_ROCK_SIZE = PUDDLE_SIZE;
+function drawBarriers() {
+    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+    for (const b of barriers) {
+        lvlLayout.strokeStyle = b.color;
+        lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
+const SEAWEED_SIZE = 40;
+const PUDDLE_SIZE = 50;
+const ROCKET_SIZE = 70;
+const BUBBLE_SIZE = 80;
+const PUSH_ROCK_SIZE = PUDDLE_SIZE;
 
-// const level1spawn = [
-//   { screen: 0, x: 120, y: 480 },
-//   { screen: 1, x: 120, y: 190 },
-//   { screen: 2, x: 120, y: 190 },
-//   { screen: 3, x: 120, y: 190 },
-// ];
+const level1spawn = [
+  { screen: 0, x: 120, y: 480 },
+  { screen: 1, x: 120, y: 190 },
+  { screen: 2, x: 120, y: 190 },
+  { screen: 3, x: 120, y: 190 },
+];
 
-// function drawBarriers() {
-//     for (const b of barriers[currentScreen]) {
-//         playerPH.fillStyle = b.color;
-//         playerPH.fillRect(b.x,b.y,b.width,b.height);
-//     }
-//     drawObjectBarriers();
-// }
+function drawBarriers() {
+    for (const b of barriers[currentScreen]) {
+        playerPH.fillStyle = b.color;
+        playerPH.fillRect(b.x,b.y,b.width,b.height);
+    }
+    drawObjectBarriers();
+}
 
-// function drawObjectBarriers() {
-//     // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-//     for (const obj of interactableLoc) {
-//         lvlLayout.strokeStyle = 'green';
-//         lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
-//     }
+function drawObjectBarriers() {
+    // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+    for (const obj of interactableLoc) {
+        lvlLayout.strokeStyle = 'green';
+        lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
+    }
     
-// const spawnArr = [{ spawnPoints: level1spawn }];
+const spawnArr = [{ spawnPoints: level1spawn }];
 
-// const SPRITES = [];
-// const UrchinImage = new Image();
-// UrchinImage.src = "AqDetImport/UrchinEnemy.png";
-// UrchinImage.onload = () => {
-//   SPRITES.push(UrchinImage);
-// };
+const SPRITES = [];
+const UrchinImage = new Image();
+UrchinImage.src = "AqDetImport/UrchinEnemy.png";
+UrchinImage.onload = () => {
+  SPRITES.push(UrchinImage);
+};
 
-// const enemy = {
-//   x: 200,
-//   y: 500,
-//   width: 50,
-//   height: 50,
-//   color: "purple",
-// };
+const enemy = {
+  x: 200,
+  y: 500,
+  width: 50,
+  height: 50,
+  color: "purple",
+};
 
-// const waterCurrents = [
-//   {
-//     x: 100,
-//     y: 200,
-//     width: 250,
-//     height: 150,
-//     type: "strong",
-//     direction: { x: 1, y: 0 },
-//   },
-// ];
+const waterCurrents = [
+  {
+    x: 100,
+    y: 200,
+    width: 250,
+    height: 150,
+    type: "strong",
+    direction: { x: 1, y: 0 },
+  },
+];
 
-// const tunnels = [
-//   { id: "A", partnerId: "B", x: 100, y: canvas.height - 400, width: 90, height: 45 },
-//   { id: "B", partnerId: "A", x: 500, y: canvas.height - 600, width: 90, height: 45 },
-// ];
+const tunnels = [
+  { id: "A", partnerId: "B", x: 100, y: canvas.height - 400, width: 90, height: 45 },
+  { id: "B", partnerId: "A", x: 500, y: canvas.height - 600, width: 90, height: 45 },
+];
 
-// function createBarrier() {
-//   return [
-//     [
-//       { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: 260, y: 330, width: 120, height: 24, color: "#2a4b5f" },
-//     ],
-//     [
-//       { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: 420, y: 260, width: 100, height: 26, color: "#2a4b5f" },
-//     ],
-//     [
-//       { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: 260, y: 210, width: 120, height: 22, color: "#2a4b5f" },
-//     ],
-//     [
-//       { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
-//       { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
-//       { x: 480, y: 320, width: 140, height: 24, color: "#2a4b5f" },
-//     ],
-//   ];
-// }
+function createBarrier() {
+  return [
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 260, y: 330, width: 120, height: 24, color: "#2a4b5f" },
+    ],
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 420, y: 260, width: 100, height: 26, color: "#2a4b5f" },
+    ],
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 260, y: 210, width: 120, height: 22, color: "#2a4b5f" },
+    ],
+    [
+      { x: 0, y: 0, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: canvas.height - 22, width: canvas.width, height: 22, color: "#7f9ea7" },
+      { x: 0, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: canvas.width - 22, y: 0, width: 22, height: canvas.height, color: "#7f9ea7" },
+      { x: 480, y: 320, width: 140, height: 24, color: "#2a4b5f" },
+    ],
+  ];
+}
 
-// function createInteractables() {
-//   return [
-//     [
-//       { x: 180, y: 260, width: 26, height: 26, color: "#d0f0ff" },
-//       { x: 640, y: 300, width: 26, height: 26, color: "#d0f0ff" },
-//     ],
-//     [
-//       { x: 300, y: 200, width: 26, height: 26, color: "#d0f0ff" },
-//       { x: 720, y: 220, width: 26, height: 26, color: "#d0f0ff" },
-//     ],
-//     [
-//       { x: 200, y: 220, width: 26, height: 26, color: "#d0f0ff" },
-//       { x: 620, y: 330, width: 26, height: 26, color: "#d0f0ff" },
-//     ],
-//     [
-//       { x: 300, y: 250, width: 26, height: 26, color: "#d0f0ff" },
-//       { x: 760, y: 270, width: 26, height: 26, color: "#d0f0ff" },
-//     ],
-//   ];
-// }
+function createInteractables() {
+  return [
+    [
+      { x: 180, y: 260, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 640, y: 300, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+    [
+      { x: 300, y: 200, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 720, y: 220, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+    [
+      { x: 200, y: 220, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 620, y: 330, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+    [
+      { x: 300, y: 250, width: 26, height: 26, color: "#d0f0ff" },
+      { x: 760, y: 270, width: 26, height: 26, color: "#d0f0ff" },
+    ],
+  ];
+}
 
-// //Checks if an interactable will collide with a barrer
-// function collidesWithObject(x, y, width, height) {
-//     if (interactActive) {
-//         return false;
-//     }
-//     for (const b of interactableLoc) {
-//         if (x < b.x + b.width &&
-//             x + rectSize > b.x &&
-//             y < b.y + b.height &&
-//             y + rectSize > b.y) {
-//             return true;
-//             }
-//     }
-//     return false;
-// }
+//Checks if an interactable will collide with a barrer
+function collidesWithObject(x, y, width, height) {
+    if (interactActive) {
+        return false;
+    }
+    for (const b of interactableLoc) {
+        if (x < b.x + b.width &&
+            x + rectSize > b.x &&
+            y < b.y + b.height &&
+            y + rectSize > b.y) {
+            return true;
+            }
+    }
+    return false;
+}
 
-// function drawBackground() {
-//     background.clearRect(0, 0, canvas.width, canvas.height);
-//     var backImg = new Image();
-//     backImg.src = url('test.jpg');
-//     background.drawImage(backImg, 0, 0);  
-// }
-// const jumpPuddles = [
-//     [], // screen 0, no jump puddles
-//     [ // screen 1
-//         { // left puddle, swaps with [1][1]
-//             x: rectSize * 4 + canvas.width / 2,
-//             y: canvas.height / 2 + rectSize,
-//             width: PUDDLE_SIZE,
-//             height: PUDDLE_SIZE,
-//             color: "MediumPurple"
-//         },
-//         { // right puddle, swaps with [1][0]
-//             x: canvas.width / 1.2 - SEAWEED_SIZE * 2 + 5,
-//             y: canvas.height - rectSize * 4 - SEAWEED_SIZE / 2 - 5,
-//             width: PUDDLE_SIZE,
-//             height: PUDDLE_SIZE,
-//             color: "MediumPurple"
-//         }
-//     ], 
-//     [ // screen 2
-//         { // top right puddle, swaps with [2][1]
-//             x: canvas.width - rectSize * 2 - SEAWEED_SIZE,
-//             y: rectSize,
-//             width: PUDDLE_SIZE,
-//             height: PUDDLE_SIZE,
-//             color: "MediumPurple"
-//         },
-//         { // bottom right puddle, swaps with [2][0]
-//             x: canvas.width - rectSize * 6,
-//             y: canvas.height - rectSize * 2,
-//             width: PUDDLE_SIZE,
-//             height: PUDDLE_SIZE,
-//             color: "MediumPurple"
-//         }
-// function createJumpPuddle() {
-//   return [
-//     [
-//       { x: 120, y: 450, width: 55, height: 18, color: "#a1d4d6" },
-//       { x: 610, y: 380, width: 55, height: 18, color: "#a1d4d6" },
-//     ],
-//     [
-//       { x: 150, y: 480, width: 55, height: 18, color: "#a1d4d6" },
-//       { x: 700, y: 260, width: 55, height: 18, color: "#a1d4d6" },
-//     ],
-//     [
-//       { x: 190, y: 430, width: 55, height: 18, color: "#a1d4d6" },
-//       { x: 670, y: 300, width: 55, height: 18, color: "#a1d4d6" },
-//     ],
-//     [
-//       { x: 140, y: 470, width: 55, height: 18, color: "#a1d4d6" },
-//       { x: 660, y: 270, width: 55, height: 18, color: "#a1d4d6" },
-//     ],
-//   ];
-// }
+function drawBackground() {
+    background.clearRect(0, 0, canvas.width, canvas.height);
+    var backImg = new Image();
+    backImg.src = url('test.jpg');
+    background.drawImage(backImg, 0, 0);  
+}
+const jumpPuddles = [
+    [], // screen 0, no jump puddles
+    [ // screen 1
+        { // left puddle, swaps with [1][1]
+            x: rectSize * 4 + canvas.width / 2,
+            y: canvas.height / 2 + rectSize,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        },
+        { // right puddle, swaps with [1][0]
+            x: canvas.width / 1.2 - SEAWEED_SIZE * 2 + 5,
+            y: canvas.height - rectSize * 4 - SEAWEED_SIZE / 2 - 5,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        }
+    ], 
+    [ // screen 2
+        { // top right puddle, swaps with [2][1]
+            x: canvas.width - rectSize * 2 - SEAWEED_SIZE,
+            y: rectSize,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        },
+        { // bottom right puddle, swaps with [2][0]
+            x: canvas.width - rectSize * 6,
+            y: canvas.height - rectSize * 2,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE,
+            color: "MediumPurple"
+        }
+function createJumpPuddle() {
+  return [
+    [
+      { x: 120, y: 450, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 610, y: 380, width: 55, height: 18, color: "#a1d4d6" },
+    ],
+    [
+      { x: 150, y: 480, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 700, y: 260, width: 55, height: 18, color: "#a1d4d6" },
+    ],
+    [
+      { x: 190, y: 430, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 670, y: 300, width: 55, height: 18, color: "#a1d4d6" },
+    ],
+    [
+      { x: 140, y: 470, width: 55, height: 18, color: "#a1d4d6" },
+      { x: 660, y: 270, width: 55, height: 18, color: "#a1d4d6" },
+    ],
+  ];
+}
 
-// const barriers = createBarrier();
-// const interactableItems = createInteractables();
-// const jumpPuddles = createJumpPuddle();
+const barriers = createBarrier();
+const interactableItems = createInteractables();
+const jumpPuddles = createJumpPuddle();
 
-// function drawBarriers() {
-//   for (const b of barriers[currentScreen] || []) {
-//     playerPH.fillStyle = b.color;
-//     playerPH.fillRect(b.x, b.y, b.width, b.height);
-//   }
-// }
+function drawBarriers() {
+  for (const b of barriers[currentScreen] || []) {
+    playerPH.fillStyle = b.color;
+    playerPH.fillRect(b.x, b.y, b.width, b.height);
+  }
+}
 
-// function drawEnemy() {
-//   if (UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
-//     playerPH.drawImage(UrchinImage, enemy.x, enemy.y, enemy.width, enemy.height);
-//     return;
-//   }
-//   playerPH.fillStyle = enemy.color;
-//   playerPH.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-// }
+function drawEnemy() {
+  if (UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
+    playerPH.drawImage(UrchinImage, enemy.x, enemy.y, enemy.width, enemy.height);
+    return;
+  }
+  playerPH.fillStyle = enemy.color;
+  playerPH.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+}
 
-// function drawWaterCurrents() {
-//   playerPH.save();
-//   playerPH.strokeStyle = "lightblue";
-//   playerPH.fillStyle = "rgba(148, 210, 231, 0.5)";
-//   playerPH.lineWidth = 3;
-//   for (const current of waterCurrents) {
-//     playerPH.strokeRect(current.x, current.y, current.width, current.height);
-//     playerPH.fillRect(current.x, current.y, current.width, current.height);
-//   }
-//   playerPH.restore();
-// }
+function drawWaterCurrents() {
+  playerPH.save();
+  playerPH.strokeStyle = "lightblue";
+  playerPH.fillStyle = "rgba(148, 210, 231, 0.5)";
+  playerPH.lineWidth = 3;
+  for (const current of waterCurrents) {
+    playerPH.strokeRect(current.x, current.y, current.width, current.height);
+    playerPH.fillRect(current.x, current.y, current.width, current.height);
+  }
+  playerPH.restore();
+}
 
-// function tunnelExit(tunnel) {
-//   return {
-//     x: tunnel.x + (tunnel.width - rectSize) / 2,
-//     y: tunnel.y - rectSize + 4,
-//   };
-// }
+function tunnelExit(tunnel) {
+  return {
+    x: tunnel.x + (tunnel.width - rectSize) / 2,
+    y: tunnel.y - rectSize + 4,
+  };
+}
 
-// function drawTunnels() {
-//   playerPH.save();
-//   playerPH.lineWidth = 4;
-//   playerPH.font = "14px Arial";
-//   playerPH.textAlign = "center";
-//   playerPH.textBaseline = "bottom";
+function drawTunnels() {
+  playerPH.save();
+  playerPH.lineWidth = 4;
+  playerPH.font = "14px Arial";
+  playerPH.textAlign = "center";
+  playerPH.textBaseline = "bottom";
 
-//   for (const tunnel of tunnels) {
-//     const centerX = tunnel.x + tunnel.width / 2;
-//     const centerY = tunnel.y + tunnel.height / 2;
-//     playerPH.beginPath();
-//     playerPH.ellipse(centerX, centerY, tunnel.width / 2, tunnel.height / 2, 0, 0, Math.PI * 2);
-//     playerPH.fillStyle = "MediumSpringGreen";
-//     playerPH.fill();
-//     playerPH.strokeStyle = "orange";
-//     playerPH.stroke();
-//     if (firstTimeTunnel) {
-//       playerPH.fillText("Press E to teleport", centerX, tunnel.y - 8);
-//     }
-//   }
-//   playerPH.restore();
-// }
+  for (const tunnel of tunnels) {
+    const centerX = tunnel.x + tunnel.width / 2;
+    const centerY = tunnel.y + tunnel.height / 2;
+    playerPH.beginPath();
+    playerPH.ellipse(centerX, centerY, tunnel.width / 2, tunnel.height / 2, 0, 0, Math.PI * 2);
+    playerPH.fillStyle = "MediumSpringGreen";
+    playerPH.fill();
+    playerPH.strokeStyle = "orange";
+    playerPH.stroke();
+    if (firstTimeTunnel) {
+      playerPH.fillText("Press E to teleport", centerX, tunnel.y - 8);
+    }
+  }
+  playerPH.restore();
+}
 
-// function drawPlayer() {
-//   if (teleportState?.phase === "hidden") return;
+function drawPlayer() {
+  if (teleportState?.phase === "hidden") return;
 
-//   let scale = 1;
-//   if (teleportState) {
-//     const progress = Math.min(teleportState.elapsed / TUNNEL_TIMING[teleportState.phase], 1);
-//     scale = teleportState.phase === "entering" ? 1 - progress : progress;
-//   }
+  let scale = 1;
+  if (teleportState) {
+    const progress = Math.min(teleportState.elapsed / TUNNEL_TIMING[teleportState.phase], 1);
+    scale = teleportState.phase === "entering" ? 1 - progress : progress;
+  }
 
-//   const size = rectSize * scale;
-//   playerPH.fillStyle = "green";
-//   playerPH.fillRect(rectX + (rectSize - size) / 2, rectY + (rectSize - size) / 2, size, size);
-// }
+  const size = rectSize * scale;
+  playerPH.fillStyle = "green";
+  playerPH.fillRect(rectX + (rectSize - size) / 2, rectY + (rectSize - size) / 2, size, size);
+}
 
-// function drawJumpPuddles() {
-//   for (const d of jumpPuddles[currentScreen] || []) {
-//     playerPH.fillStyle = d.color;
-//     playerPH.fillRect(d.x, d.y, d.width, d.height);
-//   }
-// }
+function drawJumpPuddles() {
+  for (const d of jumpPuddles[currentScreen] || []) {
+    playerPH.fillStyle = d.color;
+    playerPH.fillRect(d.x, d.y, d.width, d.height);
+  }
+}
 
-// function drawInteractables() {
-//   for (const d of interactableItems[currentScreen] || []) {
-//     playerPH.fillStyle = d.color;
-//     playerPH.fillRect(d.x, d.y, d.width, d.height);
-//   }
-// }
+function drawInteractables() {
+  for (const d of interactableItems[currentScreen] || []) {
+    playerPH.fillStyle = d.color;
+    playerPH.fillRect(d.x, d.y, d.width, d.height);
+  }
+}
 
-// function drawAll() {
-//   playerPH.clearRect(0, 0, canvas.width, canvas.height);
-//   drawWaterCurrents();
-//   drawTunnels();
-//   drawBarriers();
-//   drawEnemy();
-//   drawPlayer();
-//   drawInteractables();
-//   drawJumpPuddles();
-// }
+function drawAll() {
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+  drawWaterCurrents();
+  drawTunnels();
+  drawBarriers();
+  drawEnemy();
+  drawPlayer();
+  drawInteractables();
+  drawJumpPuddles();
+}
 
-// function WCCollision() {
-//   if (!gameStart) return;
+function WCCollision() {
+  if (!gameStart) return;
 
-//   const overlappingCurrents = waterCurrents.filter((current) => {
-//     return rectX < current.x + current.width &&
-//       rectX + rectSize > current.x &&
-//       rectY < current.y + current.height &&
-//       rectY + rectSize > current.y;
-//   });
+  const overlappingCurrents = waterCurrents.filter((current) => {
+    return rectX < current.x + current.width &&
+      rectX + rectSize > current.x &&
+      rectY < current.y + current.height &&
+      rectY + rectSize > current.y;
+  });
 
-//   for (const current of overlappingCurrents) {
-//     const currentType = CURRENT_TYPES[current.type];
-//     if (!currentType) continue;
-//     elementMovement(ELEMENT_WATER_CURRENT, current.direction, currentType.speed);
-//   }
-// }
+  for (const current of overlappingCurrents) {
+    const currentType = CURRENT_TYPES[current.type];
+    if (!currentType) continue;
+    elementMovement(ELEMENT_WATER_CURRENT, current.direction, currentType.speed);
+  }
+}
 
-// function elementMovement(elementType, direction, speed) {
-//   if (elementType !== ELEMENT_WATER_CURRENT || !Number.isInteger(speed) || speed <= 0) return false;
+function elementMovement(elementType, direction, speed) {
+  if (elementType !== ELEMENT_WATER_CURRENT || !Number.isInteger(speed) || speed <= 0) return false;
 
-//   let directionVector = null;
-//   if (typeof direction === "string") {
-//     const normalizedDirection = direction.toLocaleLowerCase();
-//     const directions = {
-//       up: { x: 0, y: -1 },
-//       down: { x: 0, y: 1 },
-//       left: { x: -1, y: 0 },
-//       right: { x: 1, y: 0 },
-//     };
-//     directionVector = directions[normalizedDirection];
-//   } else if (direction && Number.isFinite(direction.x) && Number.isFinite(direction.y)) {
-//     directionVector = direction;
-//   }
+  let directionVector = null;
+  if (typeof direction === "string") {
+    const normalizedDirection = direction.toLocaleLowerCase();
+    const directions = {
+      up: { x: 0, y: -1 },
+      down: { x: 0, y: 1 },
+      left: { x: -1, y: 0 },
+      right: { x: 1, y: 0 },
+    };
+    directionVector = directions[normalizedDirection];
+  } else if (direction && Number.isFinite(direction.x) && Number.isFinite(direction.y)) {
+    directionVector = direction;
+  }
 
-//   if (!directionVector) {
-//     return false;
-//   }
+  if (!directionVector) {
+    return false;
+  }
 
-//   const length = Math.hypot(directionVector.x, directionVector.y);
-//   if (length === 0) return false;
+  const length = Math.hypot(directionVector.x, directionVector.y);
+  if (length === 0) return false;
 
-//   playerVelocity.x += (directionVector.x / length) * speed;
-//   playerVelocity.y += (directionVector.y / length) * speed;
+  playerVelocity.x += (directionVector.x / length) * speed;
+  playerVelocity.y += (directionVector.y / length) * speed;
 
-//   if (activeMovementElement !== elementType) {
-//     activeMovementElement = elementType;
-//   }
+  if (activeMovementElement !== elementType) {
+    activeMovementElement = elementType;
+  }
 
-//   return true;
-// }
+  return true;
+}
 
-// function ableToExitTunnel(pcPosition) {
-//   return (
-//     pcPosition.x >= 0 &&
-//     pcPosition.y >= 0 &&
-//     pcPosition.x + rectSize <= canvas.width &&
-//     pcPosition.y + rectSize <= canvas.height &&
-//     !collidesWithBarrier(pcPosition.x, pcPosition.y) &&
-//     !collidesWithEnemy(pcPosition.x, pcPosition.y)
-//   );
-// }
+function ableToExitTunnel(pcPosition) {
+  return (
+    pcPosition.x >= 0 &&
+    pcPosition.y >= 0 &&
+    pcPosition.x + rectSize <= canvas.width &&
+    pcPosition.y + rectSize <= canvas.height &&
+    !collidesWithBarrier(pcPosition.x, pcPosition.y) &&
+    !collidesWithEnemy(pcPosition.x, pcPosition.y)
+  );
+}
 
-// function tunnelCollision() {
-//   if (!gameStart || teleportState) return false;
+function tunnelCollision() {
+  if (!gameStart || teleportState) return false;
 
-//   const entrance = tunnels.find((tunnel) => {
-//     return rectX < tunnel.x + tunnel.width &&
-//       rectX + rectSize > tunnel.x &&
-//       rectY < tunnel.y + tunnel.height + 14 &&
-//       rectY + rectSize > tunnel.y - 14;
-//   });
+  const entrance = tunnels.find((tunnel) => {
+    return rectX < tunnel.x + tunnel.width &&
+      rectX + rectSize > tunnel.x &&
+      rectY < tunnel.y + tunnel.height + 14 &&
+      rectY + rectSize > tunnel.y - 14;
+  });
 
-//   if (!entrance) return false;
+  if (!entrance) return false;
 
-//   const dest = tunnels.find((tunnel) => {
-//     return tunnel.id === entrance.partnerId &&
-//       tunnel.partnerId === entrance.id &&
-//       tunnel.id !== entrance.id;
-//   });
+  const dest = tunnels.find((tunnel) => {
+    return tunnel.id === entrance.partnerId &&
+      tunnel.partnerId === entrance.id &&
+      tunnel.id !== entrance.id;
+  });
 
-//   if (!dest || !ableToExitTunnel(tunnelExit(dest))) return false;
+  if (!dest || !ableToExitTunnel(tunnelExit(dest))) return false;
 
-//   teleportState = {
-//     dest,
-//     elapsed: 0,
-//     sourceX: rectX,
-//     sourceY: rectY,
-//     phase: "entering",
-//   };
-//   drawAll();
-//   return true;
-// }
+  teleportState = {
+    dest,
+    elapsed: 0,
+    sourceX: rectX,
+    sourceY: rectY,
+    phase: "entering",
+  };
+  drawAll();
+  return true;
+}
 
-// function collidesWithBarrier(x, y) {
-//   for (const b of barriers[currentScreen] || []) {
-//     if (x < b.x + b.width && x + rectSize > b.x && y < b.y + b.height && y + rectSize > b.y) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }
+function collidesWithBarrier(x, y) {
+  for (const b of barriers[currentScreen] || []) {
+    if (x < b.x + b.width && x + rectSize > b.x && y < b.y + b.height && y + rectSize > b.y) {
+      return true;
+    }
+  }
+  return false;
+}
 
-// function collidesWithEnemy(x, y) {
-//   if (x < enemy.x + enemy.width && x + rectSize > enemy.x && y < enemy.y + enemy.height && y + rectSize > enemy.y) {
-//     return true;
-//   }
-//   return false;
-// }
+function collidesWithEnemy(x, y) {
+  if (x < enemy.x + enemy.width && x + rectSize > enemy.x && y < enemy.y + enemy.height && y + rectSize > enemy.y) {
+    return true;
+  }
+  return false;
+}
 
-// function reachScreenEnd(x) {
-//   return x < 1 && x > -20;
-// }
+function reachScreenEnd(x) {
+  return x < 1 && x > -20;
+}
 
-// function getSpawnPoint() {
-//   return spawnArr[currentLevel - 1]?.spawnPoints[spawnIndex] ?? { screen: 0, x: 120, y: 480 };
-// }
+function getSpawnPoint() {
+  return spawnArr[currentLevel - 1]?.spawnPoints[spawnIndex] ?? { screen: 0, x: 120, y: 480 };
+}
 
-// function updateCheckPoint(checknum) {
-//   const total = spawnArr[currentLevel - 1]?.spawnPoints.length ?? 0;
-//   if (checknum === spawnIndex + 1 && checknum < total) {
-//     spawnIndex = checknum;
-//   }
-// }
+function updateCheckPoint(checknum) {
+  const total = spawnArr[currentLevel - 1]?.spawnPoints.length ?? 0;
+  if (checknum === spawnIndex + 1 && checknum < total) {
+    spawnIndex = checknum;
+  }
+}
 
-// function spawn() {
-//   teleportState = null;
-//   const spawnPoint = getSpawnPoint();
-//   currentScreen = spawnPoint.screen;
-//   rectX = spawnPoint.x;
-//   rectY = spawnPoint.y;
-//   playerPH.clearRect(0, 0, canvas.width, canvas.height);
-//   drawAll();
-// }
+function spawn() {
+  teleportState = null;
+  const spawnPoint = getSpawnPoint();
+  currentScreen = spawnPoint.screen;
+  rectX = spawnPoint.x;
+  rectY = spawnPoint.y;
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+  drawAll();
+}
 
-// function respawn() {
-//   teleportState = null;
-//   findRespawn();
-//   removeOldCharacter();
-//   rectX = RESPAWN_X;
-//   rectY = RESPAWN_Y;
-//   reRender(0, 0);
-// >>>>>>> main
-// }
+function respawn() {
+  teleportState = null;
+  findRespawn();
+  removeOldCharacter();
+  rectX = RESPAWN_X;
+  rectY = RESPAWN_Y;
+  reRender(0, 0);
+}
 
 function saveRespawnCoordinates(x, y) {
   RESPAWN_X = x;
@@ -793,16 +685,6 @@ function removeOldCharacter() {
 
 
 function reRender(movePosX, movePosY) {
-    if (isBlocked(rectX + movePosX, rectY + movePosY)) {
-        walkFrame = 0;
-        draw();
-        return;
-    }
-    rectX += movePosX;
-    rectY += movePosY;
-    stepCount++;
-    walkFrame = (Math.floor(stepCount / 2) % 2) + 1;
-    draw();
   if (teleportState) return false;
 
 function reRender(movePosX, movePosY){
@@ -1034,43 +916,6 @@ window.addEventListener("keydown", (e) =>{
     else {}
 })
 
-window.addEventListener("keyup", (e) => {
-    if (gameStart && "wasd".includes(e.key)) {
-        walkFrame = 0;
-        draw();
-    }
-});
-
-//DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
-// function gravUpdate() {
-//     if (rectY < 1400) {
-//         gravVector = 10;
-//         reRender(0, gravVector);
-//     }
-// }
-
-// function updatePhysics() {
-//     // var pcPos = playerPH.rect.x;
-
-//     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
-//     // if (rectY + rectSize > canvas.height) {
-//     //     // The square is below the bottom of the canvas
-//     //     rectY = canvas.height - rectSize;
-//     //     // Square stops falling
-//     //     velocityY = 0;
-//     // }
-
-//     // velocityY += gravity;
-//     // if (velocityY > max_fall_speed) {
-//     //     velocityY = max_fall_speed;
-//     // }
-//     // //Update rectY by velocityY
-//     // rectY += velocityY;
-//     // //Keep it from flying off the TOP (rectY < 0)
-//     // if (rectY < 0) {
-//     //     rectY = 0;
-//     //     velocityY = 0;
-//     // }
 window.addEventListener("flareSent", () => {
   interactableLoc[currObj].color = "pink";
   window.dispatchEvent(flareLanded);
@@ -1278,10 +1123,6 @@ function onSetupKeyDown(event) {
   levelSelectDisplay();
 }
 
-function levelSelectDisplay() {
-  const TOTAL_LEVELS = 5;
-  for (let level = 1; level <= TOTAL_LEVELS; level++) {
-    drawLevelOption(level, isUnlocked(level));
 window.main = (timestamp = performance.now()) => {
   if (!gameStart) {
     stopMain = null;
@@ -1326,13 +1167,6 @@ function startLoopFromKeydown() {
   stopMain = window.requestAnimationFrame(main);
 }
 
-let imagesLoaded = 0;
-function onImageLoaded() {
-    imagesLoaded++;
-    if (imagesLoaded === 2) start();
-}
-tileSheet.onload = onImageLoaded;
-playerSheet.onload = onImageLoaded;
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (event.key === "Enter" && !gameStart) {
