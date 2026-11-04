@@ -1,7 +1,7 @@
 //alert("Test of JS file worksssss");
-document.addEventListener('DOMContentLoaded', () => {
-    // alert("DEBUG SPACE LOADED");
-})
+// document.addEventListener('DOMContentLoaded', () => {
+//     alert("DEBUG SPACE LOADED");
+// })
 
 
 //Consider this function the Main of the entire game AND the infinite "While loop" that will call
@@ -50,40 +50,11 @@ var currObj = -1;
 
 
 const moveDistance = 25; 
+var moveDistanceX;
+var moveDistanceY;
 counter = 0;
 
-// const interactableSize = 75;
-// var interactableLoc = [
-//     {
-//         x: 80,
-//         y: 700,
-//         width: interactableSize,
-//         height: interactableSize,
-//         color: "purple",
-//         type: pushBlock,
-//         activated: false
-//     }, 
-
-//     {
-//         x: 380,
-//         y: 800,
-//         width: interactableSize,
-//         height: interactableSize,
-//         color: "aqua",
-//         type: bubble,
-//         activated: false
-//     },
-
-//     {
-//         x: 680,
-//         y: 800,
-//         width: interactableSize,
-//         height: interactableSize,
-//         color: "red",
-//         type: signalFlare,
-//         activated: false
-//     }
-// ]; //[Xorigin][Yorigin][type_constant]
+const interactableSize = 75;
 
 
 
@@ -95,18 +66,18 @@ lvlCanvas.height = window.innerHeight;
 bckgrndCanvas.width = window.innerWidth;
 bckgrndCanvas.height = window.innerHeight;
 
-let gameStart = false;
-
 function renderInit() {
     drawBarriers();
     // drawBackground();
     drawInteractables();
-    playerPH.fillStyle = "green";
+
     
-    // gameStart = true; 
+    playerPH.fillStyle = "green";
 }
 
 function start(){
+    canvas.style.width = '1308px';
+    canvas.style.height = '649px';
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
         playerPH.fillStyle = "Yellow";
@@ -123,46 +94,75 @@ function start(){
     
     //requestAnimationFrame(start);
 }
+ 
 
-// Static Barriers 
-// const barriers =  [
-//     { 
-//         x: 400, 
-//         y: 0, 
-//         width: 20, 
-//         height: 600,
-//         color: "red"
-//     },
+var currentLevel = 0;
+var currentScreen = 0;
 
-//     {
-//         x: 200,
-//         y: 600,
-//         width: 200,
-//         height: 40, 
-//         color: "yellow"
-//     }, 
-// ]; //To draw multiple barriers they'll be established in a separate file in a manner similar to this
+var rectX; //player PlaceHolder
+var rectY;
+var gravVector;
+
+var RESPAWN_X;
+var RESPAWN_Y;
+//0,0, IS TOP LEFT
+
+const NO_MOVEMENT = 0;
+const STANDARD_MOVEMENT = 15; 
+
+const pressedKeys = new Set();
+
+counter = 0;
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let gameStart = false;
+
+let spawnIndex = 0;
+
+
+
+const SEAWEED_SIZE = 40;
+const PUDDLE_SIZE = 50;
+const ROCKET_SIZE = 70;
+const BUBBLE_SIZE = 80;
+const PUSH_ROCK_SIZE = PUDDLE_SIZE;
+
+
+const barriers = createBarrier(canvas);
+const interactableItems = createInteractables(canvas);
+const jumpPuddles = createJumpPuddle(canvas);
+
+
+const spawnArr = populateSpawnCoords(canvas);
+
 
 function drawBarriers() {
+    for (const b of barriers[currentScreen]) {
+        playerPH.fillStyle = b.color;
+        playerPH.fillRect(b.x,b.y,b.width,b.height);
+    }
+    
     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-    for (const b of barriers) {
+    for (const b of barriers[currentScreen]) {
         lvlLayout.strokeStyle = b.color;
         lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
     }
-    drawObjectBarriers();
+    // drawObjectBarriers();
 }
 
-function drawObjectBarriers() {
-    // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-    for (const obj of interactableLoc) {
-        lvlLayout.strokeStyle = 'green';
-        lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
-    }
+// function drawObjectBarriers() {
+//     // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+//     for (const obj of interactableItems) {
+//         lvlLayout.strokeStyle = 'green';
+//         lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
+//     }
     
-}
+// }
 
 function collidesWithBarrier(x, y, width, height) {
-    for (const b of barriers) { //Checks if player is running into a barrier
+    for (const b of barriers[currentScreen]) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
             y < b.y + b.height &&
@@ -173,12 +173,62 @@ function collidesWithBarrier(x, y, width, height) {
     return false;
 }
 
+function drawJumpPuddles() {
+    for (const d of jumpPuddles[currentScreen]) {
+        playerPH.fillStyle = d.color;
+        playerPH.fillRect(d.x,d.y,d.width,d.height);
+    }
+}
+
+
+function drawInteractables() {
+    for (const d of interactableItems[currentScreen]) {
+        playerPH.fillStyle = d.color;
+        playerPH.fillRect(d.x,d.y,d.width,d.height);
+    }
+}
+
+// returns true if player has reached left-most area, to proceed to the next screen
+function reachScreenEnd(rectX) {
+    if (rectX < 1 && rectX > -20) {
+        return true;
+    }
+    return false;
+}
+
+
+function getSpawnPoint(){
+    return spawnArr[currentLevel].spawnPoints[spawnIndex];
+}
+
+function updateCheckPoint(checknum){
+    if(checknum == spawnIndex +1 && checknum < spawnArr[currentLevel].spawnPoints.length){
+        spawnIndex = checknum;
+    }
+}
+
+function spawn(){
+    const spawnPoint = getSpawnPoint();
+    currentScreen = spawnPoint.screen;
+    rectX = spawnPoint.x;
+   rectY = spawnPoint.y;
+    //alert("X: " + rectX  + "\n Y" + rectY)
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawBarriers();
+    drawInteractables();
+    drawJumpPuddles();//draw movement element
+
+    playerPH.fillStyle = "green";
+    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+}
+
 //Checks if an interactable will collide with a barrer
 function collidesWithObject(x, y, width, height) {
     if (interactActive) {
         return false;
     }
-    for (const b of interactableLoc) {
+    for (const b of interactableItems) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
             y < b.y + b.height &&
@@ -200,7 +250,7 @@ function drawBackground() {
 function drawInteractables() {
     //TESTING STATEMENT AND LOOP
 
-    for (const obj of interactableLoc)
+    for (const obj of interactableItems)
     {
         lvlLayout.textAlign = "center";
         lvlLayout.textBaseline = "middle";
@@ -215,24 +265,25 @@ function drawInteractables() {
 
 
 //Exclusively for first spawns of a level when the level is rendered, anything else should be done via Respawn()
-function spawn(){ 
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-    drawBarriers(); //Can be replaced with a function to draw a level and its layout
-    drawInteractables();
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    respawn(); 
-}
+// function spawn(){ 
+//     playerPH.clearRect(0, 0, canvas.width, canvas.height);
+//     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+//     drawBarriers(); //Can be replaced with a function to draw a level and its layout
+//     drawInteractables();
+//     playerPH.clearRect(0, 0, canvas.width, canvas.height);
+//     respawn(); 
+// }
 
 
 //Any spawning done AFTER initial level setup, 
 function respawn(){
+    spawn();
     findRespawn(); //Allows player to get spawn coordinates without hardcoding
     removeOldCharacter();
     if (interactActive){
       interactActive = !interactActive;
-      interactableLoc[currObj].activated = false;
-      if (interactableLoc[currObj].type == bubble){
+      interactableItems[currObj].activated = false;
+      if (interactableItems[currObj].type == bubble){
         bubblePop();
       }
     }
@@ -271,53 +322,83 @@ function findRespawn(){ //Will eventually be upgraded to search for respawn poin
 
 //Currently a shorthand funtion, can eventually be used to house animations associated with respawning
 function removeOldCharacter() {
-  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height); //Shorthand to clear old character instance, SHOULD BE CALLED BEFORE RECTX OR RECTY ARE MODIFIED
+  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
 }
 
 
-function reRender(movePosX, movePosY){
+function reRender(movePosX, movePosY) {
+
+    const newX = rectX + movePosX;
+    const newY = rectY + movePosY;
+
+    // Check if player reached the left edge
+    if (reachScreenEnd(newX)) {
+
+        // Check if this is the last screen
+        if (currentScreen === 3) {
+            alert("Level done");
+            return;
+        }
+
+        // Unlock the next checkpoint
+        updateCheckPoint(currentScreen + 1);
+
+        // Change to next screen
+        currentScreen++;
+
+        // Get new screen coordinates
+        const coordinates =
+            spawnArr[currentLevel].spawnPoints[currentScreen];
+
+        rectX = coordinates.x;
+        rectY = coordinates.y;
+
+        // Draw new screen
+        playerPH.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawBarriers();
+        drawInteractables();
+        drawJumpPuddles();
+
+        playerPH.fillStyle = "green";
+        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+
+        return;
+    }
+
+    // Check collisions before normal movement
     
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
         return;
     }
     
-    removeOldCharacter(); //Must be called BEFORE RectX and RectY are modified
-    rectX += movePosX;
-    rectY += movePosY;
-    drawBarriers();
-    
     if (currObj != -1){
-      if (interactableLoc[currObj].type == pushBlock && interactableLoc[currObj].activated){
-        interactableLoc[currObj].x += movePosX;
-        interactableLoc[currObj].y += movePosY;
-      } else if (interactableLoc[currObj].type == bubble && interactableLoc[currObj].activated){
-        interactableLoc[currObj].x += movePosX;
-        interactableLoc[currObj].y += movePosY;
+      if (interactableItems[currObj].type == pushBlock && interactableItems[currObj].activated){
+        interactableItems[currObj].x += movePosX;
+        interactableItems[currObj].y += movePosY;
+      } else if (interactableItems[currObj].type == bubble && interactableItems[currObj].activated){
+        interactableItems[currObj].x += movePosX;
+        interactableItems[currObj].y += movePosY;
         bubbleCounter--;  
-        if (bubbleCounter == 0 && interactableLoc[currObj].type == bubble) {
+        if (bubbleCounter == 0 && interactableItems[currObj].type == bubble) {
           bubblePop();
         }
       }
     }
 
+    // Clear old player
+    playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
 
-    
+    // Update position
+    rectX = newX;
+    rectY = newY;
 
-    //TO IMPLEMENT: Function for checking if the player character is standing on a kill-you tile
+    // Redraw environment
+    drawBarriers();
+    drawInteractables();
+    drawJumpPuddles();
 
-
-    // for (obj of interactableLoc){
-    //     if (obj.activated && interactableLoc[currObj].type == pushBlock) {
-    //         obj.x += movePosX;
-    //         obj.y += movePosY;
-    //         // objBarriers[count].x = obj.x; //These two lines allow barriers to be moved with their interactions
-    //         // objBarriers[count].y = obj.y;
-    //     }
-    //     count++;
-    // }
-    drawInteractables();    
-  
-
+    // Draw player
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 }
@@ -331,7 +412,7 @@ function pcInteract()
         // alert("Interact Key Pressed!");
     } else {
         interactActive = !interactActive;
-        interactableLoc[currObj].activated = false;
+        interactableItems[currObj].activated = false;
         currObj = -1;
         objType = -1;
     }
@@ -355,14 +436,28 @@ function pcInteract()
     } //Signal Flare found
 }
 
+// moves the player a fixed amount, depending on the key pressed (WASD)
+function moveCharacterWASD(moveKeys) {
+    moveDistanceX = NO_MOVEMENT;
+    moveDistanceY = NO_MOVEMENT;
+    if (moveKeys.has('w')){
+        moveDistanceY -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('a')){
+	    moveDistanceX -= STANDARD_MOVEMENT;
+    } else if (moveKeys.has('s')){
+        moveDistanceY += STANDARD_MOVEMENT;
+    } else if (moveKeys.has('d')){
+        moveDistanceX += STANDARD_MOVEMENT;
+    }
+  }
 //CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
 //      and set the "activated" boolean of that interactable to 'true'
 function interactCheck(){
     if (directionalCheck()) {//Checks above and below the player object
         // alert(directionalCheck());
         interactActive = true;  //Allows other functions to know an interaction is active
-        interactableLoc[currObj].activated = true;
-        return interactableLoc[currObj].type;
+        interactableItems[currObj].activated = true;
+        return interactableItems[currObj].type;
     }
 }
 
@@ -374,7 +469,7 @@ function directionalCheck(){
   //
   //RectX, RectY -> RectX+move, RectY
   if (lastKeyPressed == "w"){ //CHECK UP, NEG Y
-    for (var obj of interactableLoc){
+    for (var obj of interactableItems){
       if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
         currObj = count;
         return true;
@@ -382,7 +477,7 @@ function directionalCheck(){
       count++;
     }
   } else if (lastKeyPressed == "a"){ //CHECK LEFT, NEG X
-    for (var obj of interactableLoc){
+    for (var obj of interactableItems){
       if ((obj.x <= rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*3) {
         currObj = count;
         return true;
@@ -390,7 +485,7 @@ function directionalCheck(){
     count++;
     }
   } else if (lastKeyPressed == "s"){ //CHECK DOWN, POS Y
-    for (var obj of interactableLoc){
+    for (var obj of interactableItems){
       if ((obj.y <= rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
         currObj = count;
         return true;
@@ -398,7 +493,7 @@ function directionalCheck(){
     count++;
     }
   } else if (lastKeyPressed == "d"){ //CHECK RIGHT, POS X
-    for (var obj of interactableLoc) {
+    for (var obj of interactableItems) {
       if ((obj.x <= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*2) {
         currObj = count;
         return true;
@@ -411,8 +506,8 @@ function directionalCheck(){
 }
 
 function activateBubble(){
-  if (interactableLoc[currObj].type == bubble) {
-    bubblePush(interactableLoc[currObj].x, interactableLoc[currObj].y);
+  if (interactableItems[currObj].type == bubble) {
+    bubblePush(interactableItems[currObj].x, interactableItems[currObj].y);
   }
 }
 
@@ -427,9 +522,9 @@ function bubblePush(newX, newY){
 }
 
 function bubblePop() {
-    interactableLoc[currObj].activated = false;
-    interactableLoc[currObj].x = bubbleResX;
-    interactableLoc[currObj].y = bubbleResY;
+    interactableItems[currObj].activated = false;
+    interactableItems[currObj].x = bubbleResX;
+    interactableItems[currObj].y = bubbleResY;
     interactActive = false;
     pcInteract();
 }
@@ -452,21 +547,20 @@ function move(moveKey) {
 }
 
 window.addEventListener("keydown", (e) =>{ 
-    main(); //infinite loop
-    
+    // main(); //infinite loop
+    pressedKeys.add(e.key.toLowerCase());
     //Fix to allow caps letters and multiple buttons being pressed
     if(e.key == "Enter" && !gameStart){
-        gameStart = true;
+      gameStart = true;
         spawn();
-        start();
-    } else if(e.key == "w" || e.key == "a" || e.key == "s" || 
-    	e.key == "d"){
-        move(e);
+    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
+    pressedKeys.has('s') || pressedKeys.has('d')){
+        moveCharacterWASD(pressedKeys);
     } else if (e.key === " ") { //Space Entered - call jump
         // reRender(0, -50);Jump no longer needed
-    } else if (e.key == "e") { //'e' key pressed, call enter
+    } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
         pcInteract();
-    } else if (e.key == 'c') //Respawn keybind
+    } else if ((e.key).toLowerCase() == 'c')
     {
         respawn();
     } else if (e.key == 'o') { //DEBUG: Prints current location of the PC
@@ -476,8 +570,12 @@ window.addEventListener("keydown", (e) =>{
     else {}
 })
 
+window.addEventListener('keyup', (event) => {
+    // Remove the key from the Set when released
+    pressedKeys.delete(event.key.toLowerCase());
+});
 window.addEventListener("flareSent", () => {
-  interactableLoc[currObj].color = "pink";
+  interactableItems[currObj].color = "pink";
   window.dispatchEvent(flareLanded);
 })
 
@@ -494,32 +592,6 @@ window.addEventListener("flareLanded", (sfx, sfy) => {
 //     }
 // }
 
-// function updatePhysics() {
-//     // var pcPos = playerPH.rect.x;
-
-//     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
-//     // if (rectY + rectSize > canvas.height) {
-//     //     // The square is below the bottom of the canvas
-//     //     rectY = canvas.height - rectSize;
-//     //     // Square stops falling
-//     //     velocityY = 0;
-//     // }
-
-//     // velocityY += gravity;
-//     // if (velocityY > max_fall_speed) {
-//     //     velocityY = max_fall_speed;
-//     // }
-//     // //Update rectY by velocityY
-//     // rectY += velocityY;
-//     // //Keep it from flying off the TOP (rectY < 0)
-//     // if (rectY < 0) {
-//     //     rectY = 0;
-//     //     velocityY = 0;
-//     // }
-
-    
-//     gravUpdate();
-// }
 let chosenOption = null;
 
 function levelCompleted() {
@@ -585,4 +657,4 @@ function levelSelectDisplay() {
 
 // document.addEventListener("keydown", onSetupKeyDown);
 
-start() 
+start()
