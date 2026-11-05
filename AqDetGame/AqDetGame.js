@@ -57,6 +57,8 @@ counter = 0;
 const interactableSize = 75;
 
 
+const windowWidth = '1308px';
+ const windowHeight = '649px';
 
 
 canvas.width = window.innerWidth;
@@ -78,6 +80,7 @@ function renderInit() {
 function start(){
     canvas.style.width = '1308px';
     canvas.style.height = '649px';
+
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
         playerPH.fillStyle = "Yellow";
@@ -90,6 +93,7 @@ function start(){
         renderInit();
     } else{
         spawn(); //Initial Rendering and Spawning of Player Character
+        alert("Spawned again");
     }
     
     //requestAnimationFrame(start);
@@ -108,9 +112,8 @@ var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
 const NO_MOVEMENT = 0;
-const STANDARD_MOVEMENT = 15; 
+const STANDARD_MOVEMENT = 25; 
 
-const pressedKeys = new Set();
 
 counter = 0;
 
@@ -120,7 +123,6 @@ canvas.height = window.innerHeight;
 let gameStart = false;
 
 let spawnIndex = 0;
-
 
 
 const SEAWEED_SIZE = 40;
@@ -135,16 +137,16 @@ const interactableItems = createInteractables(canvas);
 const jumpPuddles = createJumpPuddle(canvas);
 
 
-const spawnArr = populateSpawnCoords(canvas);
+var spawnArr = populateSpawnCoords();
 
 
 function drawBarriers() {
     for (const b of barriers[currentScreen]) {
-        playerPH.fillStyle = b.color;
-        playerPH.fillRect(b.x,b.y,b.width,b.height);
+        lvlLayout.fillStyle = b.color;
+        lvlLayout.fillRect(b.x,b.y,b.width,b.height);
     }
     
-    lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+    // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of barriers[currentScreen]) {
         lvlLayout.strokeStyle = b.color;
         lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
@@ -180,7 +182,6 @@ function drawJumpPuddles() {
     }
 }
 
-
 function drawInteractables() {
     for (const d of interactableItems[currentScreen]) {
         playerPH.fillStyle = d.color;
@@ -198,7 +199,8 @@ function reachScreenEnd(rectX) {
 
 
 function getSpawnPoint(){
-    return spawnArr[currentLevel].spawnPoints[spawnIndex];
+    return spawnArr[currentLevel];//.spawnPoints[spawnIndex];
+    
 }
 
 function updateCheckPoint(checknum){
@@ -211,7 +213,7 @@ function spawn(){
     const spawnPoint = getSpawnPoint();
     currentScreen = spawnPoint.screen;
     rectX = spawnPoint.x;
-   rectY = spawnPoint.y;
+    rectY = spawnPoint.y;
     //alert("X: " + rectX  + "\n Y" + rectY)
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -228,7 +230,7 @@ function collidesWithObject(x, y, width, height) {
     if (interactActive) {
         return false;
     }
-    for (const b of interactableItems) {
+    for (const b of interactableItems[currentScreen]) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
             y < b.y + b.height &&
@@ -347,8 +349,7 @@ function reRender(movePosX, movePosY) {
         currentScreen++;
 
         // Get new screen coordinates
-        const coordinates =
-            spawnArr[currentLevel].spawnPoints[currentScreen];
+        var coordinates = spawnArr[currentLevel].spawnPoints[currentScreen];
 
         rectX = coordinates.x;
         rectY = coordinates.y;
@@ -440,13 +441,20 @@ function pcInteract()
 function moveCharacterWASD(moveKeys) {
     moveDistanceX = NO_MOVEMENT;
     moveDistanceY = NO_MOVEMENT;
+
     if (moveKeys.has('w')){
         moveDistanceY -= STANDARD_MOVEMENT;
-    } else if (moveKeys.has('a')){
+    }
+    
+    if (moveKeys.has('a')){
 	    moveDistanceX -= STANDARD_MOVEMENT;
-    } else if (moveKeys.has('s')){
+    }
+    
+    if (moveKeys.has('s')){
         moveDistanceY += STANDARD_MOVEMENT;
-    } else if (moveKeys.has('d')){
+    }
+    
+    if (moveKeys.has('d')){
         moveDistanceX += STANDARD_MOVEMENT;
     }
   }
@@ -547,12 +555,12 @@ function move(moveKey) {
 }
 
 window.addEventListener("keydown", (e) =>{ 
-    // main(); //infinite loop
+    var pressedKeys = new Set();
     pressedKeys.add(e.key.toLowerCase());
     //Fix to allow caps letters and multiple buttons being pressed
     if(e.key == "Enter" && !gameStart){
-      gameStart = true;
-        spawn();
+        gameStart = true;
+        start();
     } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
     pressedKeys.has('s') || pressedKeys.has('d')){
         moveCharacterWASD(pressedKeys);
@@ -562,7 +570,8 @@ window.addEventListener("keydown", (e) =>{
         pcInteract();
     } else if ((e.key).toLowerCase() == 'c')
     {
-        respawn();
+      alert("ERROR: RESPAWN NOT UP-TO-SPEC");
+        // respawn();
     } else if (e.key == 'o') { //DEBUG: Prints current location of the PC
         alert(rectX);
         alert(rectY);
@@ -573,6 +582,7 @@ window.addEventListener("keydown", (e) =>{
 window.addEventListener('keyup', (event) => {
     // Remove the key from the Set when released
     pressedKeys.delete(event.key.toLowerCase());
+    // alert("keyup");
 });
 window.addEventListener("flareSent", () => {
   interactableItems[currObj].color = "pink";
@@ -657,4 +667,4 @@ function levelSelectDisplay() {
 
 // document.addEventListener("keydown", onSetupKeyDown);
 
-start()
+start();

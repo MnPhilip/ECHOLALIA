@@ -568,7 +568,6 @@ return interactableItems;
 
 function populateSpawnCoords(canvas){
     const level1spawn = [
-        
             // Level 0
         
                 {
