@@ -293,7 +293,6 @@ function respawn(){
     rectY = RESPAWN_Y;
     
     reRender(0, 0);
-
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -457,6 +456,8 @@ function moveCharacterWASD(moveKeys) {
     if (moveKeys.has('d')){
         moveDistanceX += STANDARD_MOVEMENT;
     }
+
+    reRender(moveDistanceX, moveDistanceY);
   }
 //CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
 //      and set the "activated" boolean of that interactable to 'true'
