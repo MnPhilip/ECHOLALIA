@@ -17,7 +17,17 @@ window.main = () => {
 
 
 const canvas = document.getElementById('PlrDisplay');
-const playerPH = canvas.getContext("2d"); 
+const playerPH = canvas.getContext("2d");
+const initialSetupScreen = document.getElementById("initialSetup");
+const beginGameButton = document.getElementById("beginGame");
+const levelSelectScreen = document.querySelector(".level-select");
+const gameScreen = document.getElementById("gameScreen");
+const completionMenu = document.getElementById("completionMenu");
+const completionWaiting = document.getElementById("completionWaiting");
+const surrenderMenu = document.getElementById("surrenderMenu");
+const cancelSurrenderOfferButton = document.getElementById("cancelSurrenderOffer");
+const currentLevelTitle = document.getElementById("currentLevelTitle");
+const offerSurrenderButton = document.getElementById("offerSurrender");
 
 const lvlCanvas = document.getElementById('LevelDisplay');
 const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
@@ -555,16 +565,14 @@ function move(moveKey) {
     reRender(moveDistanceX, moveDistanceY);
 }
 
-window.addEventListener("keydown", (e) =>{ 
-    var pressedKeys = new Set();
-    pressedKeys.add(e.key.toLowerCase());
+window.addEventListener("keydown", (e) => {
+    if (!gameStart || gameScreen.hidden || !completionMenu.hidden) return;
+    main();
+    
     //Fix to allow caps letters and multiple buttons being pressed
-    if(e.key == "Enter" && !gameStart){
-        gameStart = true;
-        start();
-    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
-    pressedKeys.has('s') || pressedKeys.has('d')){
-        moveCharacterWASD(pressedKeys);
+    if(e.key == "w" || e.key == "a" || e.key == "s" ||
+    	e.key == "d"){
+        move(e);
     } else if (e.key === " ") { //Space Entered - call jump
         // reRender(0, -50);Jump no longer needed
     } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
@@ -604,26 +612,54 @@ window.addEventListener("flareLanded", (sfx, sfy) => {
 // }
 
 let chosenOption = null;
+let currentLevel = 1;
+const SURRENDER_OFFERED = "surrender-offered";
+const SURRENDER_OFFER_CANCELLED = "surrender-offer-cancelled";
+let surrenderOfferPending = false;
 
 function levelCompleted() {
+  onLevelCompleted(currentLevel);
   chosenOption = null;
-  showCompletionMenu(); // Continue and Exit buttons
+  completionMenu.hidden = false;
+  completionMenu.classList.remove("is-waiting");
+  completionWaiting.hidden = true;
+  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+    button.disabled = false;
+  });
 }
 
-function onOptionPressed(option) { // "continue" or "exit"
-  if (chosenOption !== null) return; // ignore repeat presses
+function onOptionPressed(option) {
+  if (chosenOption !== null || !["continue", "exit"].includes(option)) return;
   chosenOption = option;
-  darkenMenu();
-  showMessage("Waiting");
-  alertAlternatePlayer(option); // placeholder, see questions
+  completionMenu.classList.add("is-waiting");
+  completionWaiting.hidden = false;
+  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+    button.disabled = true;
+  });
+  alertPartnerPlayer(option);
 }
 
-function onAlternatePlayerResponse() { // called when the signal arrives
-  hideMessage();
-  closeMenu();
-  if (chosenOption === "continue") loadNextLevel();
-  else if (chosenOption === "exit") loadLevelSelect();
+function alertPartnerPlayer(flag) {
+  window.dispatchEvent(new CustomEvent("echolalia:alternate-player-alert", {
+    detail: { option: flag, flag }
+  }));
+}
+
+function onAlternatePlayerResponse() {
+  if (surrenderOfferPending) {
+    surrenderOfferPending = false;
+    surrenderMenu.hidden = true;
+    return;
+  }
+  if (chosenOption === null) return;
+  const responseOption = chosenOption;
   chosenOption = null;
+  completionMenu.hidden = true;
+  completionMenu.classList.remove("is-waiting");
+  completionWaiting.hidden = true;
+
+  if (responseOption === "continue") loadNextLevel();
+  else loadLevelSelect();
 }
 const TOTAL_LEVELS = 5;
 let highestUnlocked = 1; // Level 1 always unlocked
@@ -636,7 +672,7 @@ function onLevelCompleted(level) {
   if (level === highestUnlocked && level < TOTAL_LEVELS) {
     highestUnlocked = level + 1;
   }
-  //DISPLAY AN HTML POP_UP WINDOW THAT GIVES THE PLAYER CONTINUATINO OPTIONS
+  updateLevelSelectButtons();
 }
 
 function onLevelSelected(level) {
@@ -644,28 +680,86 @@ function onLevelSelected(level) {
   loadLevel(level);
 }
 
-function onOfferSurrender() {
-  alertPartnerPlayer(SURRENDER_OFFERED); // flag value
+function updateLevelSelectButtons() {
+  document.querySelectorAll(".level[data-level]").forEach((button) => {
+    const unlocked = isUnlocked(Number(button.dataset.level));
+    button.classList.toggle("is-locked", !unlocked);
+    button.disabled = !unlocked;
+    button.setAttribute("aria-disabled", String(!unlocked));
+    button.querySelector(".level__lock").hidden = unlocked;
+    if (!unlocked) button.setAttribute("aria-label", `Level ${button.dataset.level} locked`);
+    else button.setAttribute("aria-label", `Level ${button.dataset.level}`);
+  });
 }
+
+function loadLevel(level) {
+  currentLevel = level;
+  levelSelectScreen.hidden = true;
+  gameScreen.hidden = false;
+  currentLevelTitle.textContent = `Level ${level}`;
+  gameStart = true;
+  spawn();
+}
+
+function loadNextLevel() {
+  if (currentLevel < TOTAL_LEVELS) {
+    loadLevel(currentLevel + 1);
+  } else {
+    loadLevelSelect();
+  }
+}
+
+function loadLevelSelect() {
+  gameScreen.hidden = true;
+  levelSelectDisplay();
+  gameStart = false;
+  playerPH.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+document.querySelectorAll(".level[data-level]").forEach((button) => {
+  button.addEventListener("click", () => onLevelSelected(Number(button.dataset.level)));
+});
+
+completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
+  button.addEventListener("click", () => onOptionPressed(button.dataset.completionOption));
+});
+
+window.addEventListener("echolalia:alternate-player-response", onAlternatePlayerResponse);
+window.levelCompleted = levelCompleted;
+window.onAlternatePlayerResponse = onAlternatePlayerResponse;
+
+function onOfferSurrender() {
+  if (surrenderOfferPending) return;
+  surrenderOfferPending = true;
+  surrenderMenu.hidden = false;
+  alertPartnerPlayer(SURRENDER_OFFERED);
+}
+
+offerSurrenderButton.addEventListener("click", onOfferSurrender);
+cancelSurrenderOfferButton.addEventListener("click", () => {
+  if (!surrenderOfferPending) return;
+  surrenderOfferPending = false;
+  surrenderMenu.hidden = true;
+  alertPartnerPlayer(SURRENDER_OFFER_CANCELLED);
+});
+
 let levelSelectShown = false;
 
 function onSetupKeyDown(event) {
   if (event.key !== "Enter") return;
   if (levelSelectShown) return; // ignore repeats
   levelSelectShown = true;
-
-  hideSetupScreen();
-  document.removeEventListener("keydown", onSetupKeyDown);
   levelSelectDisplay();
 }
 
 function levelSelectDisplay() {
-  const TOTAL_LEVELS = 5;
-  for (let level = 1; level <= TOTAL_LEVELS; level++) {
-    drawLevelOption(level, isUnlocked(level)); // positioned in order
-  }
+  updateLevelSelectButtons();
+  initialSetupScreen.hidden = true;
+  levelSelectScreen.hidden = false;
 }
 
-// document.addEventListener("keydown", onSetupKeyDown);
+document.addEventListener("keydown", onSetupKeyDown);
+beginGameButton.addEventListener("click", levelSelectDisplay);
 
 start();
+window.levelSelectDisplay = levelSelectDisplay;
