@@ -26,6 +26,19 @@ const bckgrndCanvas = document.getElementById('BackgroundDisplay');
 const background = bckgrndCanvas.getContext("2d");
 
 
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+lvlCanvas.width = window.innerWidth;
+lvlCanvas.height = window.innerHeight;
+bckgrndCanvas.width = window.innerWidth;
+bckgrndCanvas.height = window.innerHeight;
+
+canvas.width = 1308;
+canvas.height = 649;
+canvas.style.width = "1308px";
+canvas.style.height = "649px";
+
+
 const rectSize = 50;
 var rectX = 120; //player PlaceHolder
 var rectY = 300;
@@ -56,50 +69,6 @@ counter = 0;
 
 const interactableSize = 75;
 
-
-const windowWidth = '1308px';
- const windowHeight = '649px';
-
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-lvlCanvas.width = window.innerWidth;
-lvlCanvas.height = window.innerHeight;
-bckgrndCanvas.width = window.innerWidth;
-bckgrndCanvas.height = window.innerHeight;
-
-function renderInit() {
-    drawBarriers();
-    // drawBackground();
-    drawInteractables();
-
-    
-    playerPH.fillStyle = "green";
-}
-
-function start(){
-    canvas.style.width = '1308px';
-    canvas.style.height = '649px';
-
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    if(!gameStart){
-        playerPH.fillStyle = "Yellow";
-        playerPH.font = "80px Arial";
-        playerPH.textAlign = "center";
-        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
-        
-        renderInit();
-    } else{
-        spawn(); //Initial Rendering and Spawning of Player Character
-        alert("Spawned again");
-    }
-    
-    //requestAnimationFrame(start);
-}
- 
-
 var currentLevel = 0;
 var currentScreen = 0;
 
@@ -117,8 +86,6 @@ const STANDARD_MOVEMENT = 25;
 
 counter = 0;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
 let gameStart = false;
 
@@ -135,9 +102,38 @@ const PUSH_ROCK_SIZE = PUDDLE_SIZE;
 const barriers = createBarrier(canvas);
 const interactableItems = createInteractables(canvas);
 const jumpPuddles = createJumpPuddle(canvas);
+var spawnArr = populateSpawnCoords(canvas);
 
 
-var spawnArr = populateSpawnCoords();
+function renderInit() {
+    drawBarriers();
+    // drawBackground();
+    drawInteractables();
+
+    
+    playerPH.fillStyle = "green";
+}
+
+function start(){
+
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        playerPH.fillStyle = "Yellow";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.fillRect(spawnArr[currentScreen].x, spawnArr[currentScreen].y, rectSize, rectSize);
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+        
+        renderInit();
+    } else{
+        spawn(); //Initial Rendering and Spawning of Player Character
+        reRender(0,0);
+        // alert("Spawned again");
+    }
+    
+    //requestAnimationFrame(start);
+}
 
 
 function drawBarriers() {
@@ -148,20 +144,12 @@ function drawBarriers() {
     
     // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of barriers[currentScreen]) {
-        lvlLayout.strokeStyle = b.color;
+        lvlLayout.strokeStyle = 'red';
         lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
     }
     // drawObjectBarriers();
 }
 
-// function drawObjectBarriers() {
-//     // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-//     for (const obj of interactableItems) {
-//         lvlLayout.strokeStyle = 'green';
-//         lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
-//     }
-    
-// }
 
 function collidesWithBarrier(x, y, width, height) {
     for (const b of barriers[currentScreen]) {
@@ -177,15 +165,15 @@ function collidesWithBarrier(x, y, width, height) {
 
 function drawJumpPuddles() {
     for (const d of jumpPuddles[currentScreen]) {
-        playerPH.fillStyle = d.color;
-        playerPH.fillRect(d.x,d.y,d.width,d.height);
+        lvlLayout.fillStyle = d.color;
+        lvlLayout.fillRect(d.x,d.y,d.width,d.height);
     }
 }
 
 function drawInteractables() {
     for (const d of interactableItems[currentScreen]) {
-        playerPH.fillStyle = d.color;
-        playerPH.fillRect(d.x,d.y,d.width,d.height);
+        lvlLayout.fillStyle = d.color;
+        lvlLayout.fillRect(d.x,d.y,d.width,d.height);
     }
 }
 
@@ -212,10 +200,9 @@ function updateCheckPoint(checknum){
 function spawn(){
     const spawnPoint = getSpawnPoint();
     currentScreen = spawnPoint.screen;
+
     rectX = spawnPoint.x;
     rectY = spawnPoint.y;
-    //alert("X: " + rectX  + "\n Y" + rectY)
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBarriers();
     drawInteractables();
@@ -252,12 +239,8 @@ function drawBackground() {
 function drawInteractables() {
     //TESTING STATEMENT AND LOOP
 
-    for (const obj of interactableItems)
+    for (const obj of interactableItems[currentScreen])
     {
-        lvlLayout.textAlign = "center";
-        lvlLayout.textBaseline = "middle";
-        lvlLayout.font = "12px Arial";
-        lvlLayout.fillText = "PB";
         lvlLayout.fillStyle = obj.color;
         lvlLayout.fillRect(obj.x, obj.y, obj.width, obj.height);
     }
@@ -348,10 +331,10 @@ function reRender(movePosX, movePosY) {
         currentScreen++;
 
         // Get new screen coordinates
-        var coordinates = spawnArr[currentLevel].spawnPoints[currentScreen];
+        var coordinates = spawnArr[currentScreen];
 
-        rectX = coordinates.x;
-        rectY = coordinates.y;
+        newX = coordinates.x;
+        newY = coordinates.y;
 
         // Draw new screen
         playerPH.clearRect(0, 0, canvas.width, canvas.height);
@@ -361,7 +344,7 @@ function reRender(movePosX, movePosY) {
         drawJumpPuddles();
 
         playerPH.fillStyle = "green";
-        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+        playerPH.fillRect(newX, newY, rectSize, rectSize);
 
         return;
     }
@@ -458,6 +441,8 @@ function moveCharacterWASD(moveKeys) {
     }
 
     reRender(moveDistanceX, moveDistanceY);
+    
+        // alert("here");
   }
 //CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
 //      and set the "activated" boolean of that interactable to 'true'

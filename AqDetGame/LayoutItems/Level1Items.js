@@ -414,7 +414,6 @@ const barriers =  [
 return barriers;
 }
 
-
 function createJumpPuddle (canvas){
 const jumpPuddles = [
     [], // screen 0, no jump puddles
@@ -469,7 +468,6 @@ const jumpPuddles = [
 ];
  return jumpPuddles;
 }
-
 
 function createInteractables(canvas){
 const interactableItems = [
@@ -569,27 +567,26 @@ return interactableItems;
 function populateSpawnCoords(canvas){
     const level1spawn = [
             // Level 0
-        
                 {
                     screen: 0,
-                    x: window.innerWidth - 100,
-                    y: window.innerHeight / 2
+                    x: canvas.width - 100,
+                    y: canvas.height / 2
                 },
                 {
                     screen: 1,
-                    x: window.innerWidth - 100,
-                    y: window.innerHeight / 2
+                    x: canvas.width - 100,
+                    y: canvas.height / 2
                 
                 },
                 {
                     screen: 2,
-                    x: window.innerWidth - 100,
-                    y: window.innerHeight / 2
+                    x: canvas.width - 100,
+                    y: canvas.height / 2
                 },
                 {
                     screen: 3,
-                x: window.innerWidth - 100,
-                    y: window.innerHeight / 2
+                    x: canvas.width - 100,
+                    y: canvas.height / 2
                 }
             
         
