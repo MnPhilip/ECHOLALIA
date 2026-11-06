@@ -37,7 +37,6 @@ const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, M
 const bckgrndCanvas = document.getElementById('BackgroundDisplay');
 const background = bckgrndCanvas.getContext("2d");
 
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 lvlCanvas.width = window.innerWidth;
@@ -49,7 +48,6 @@ canvas.width = 1308;
 canvas.height = 649;
 canvas.style.width = "1308px";
 canvas.style.height = "649px";
-
 
 const rectSize = 50;
 var rectX = 120; //player PlaceHolder
@@ -73,7 +71,6 @@ const signalFlare = 33;
 var interactActive = false;
 var currObj = -1;
 
-
 const moveDistance = 25; 
 var moveDistanceX;
 var moveDistanceY;
@@ -95,14 +92,10 @@ var RESPAWN_Y;
 const NO_MOVEMENT = 0;
 const STANDARD_MOVEMENT = 25; 
 
-
 counter = 0;
 
-
 let gameStart = false;
-
 let spawnIndex = 0;
-
 
 const SEAWEED_SIZE = 40;
 const PUDDLE_SIZE = 50;
