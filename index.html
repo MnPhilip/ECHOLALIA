@@ -2,30 +2,35 @@
 <html lang="en-US">
 
 
+
+
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="AqDetGame/AqDetGame.css">
-    <script src="AqDetGame/AqDetGame.js"></script>
+    <link rel="stylesheet" type="text/css" href="AqDetGame/AqDetGame.css?v=20261023-surrender-pending">
+    <style>
+    </style>
+
+
 </head>
-
 <body>
-    
-    <!--canvas id='LevelDisplay'></canvas>
-    <canvas id='PlrDisplay'></canvas>
-    <canvas id='BackgroundDisplay'></canvas>
+   
 
 
-  <div class="initial-setup" id="initialSetup" aria-label="Initial setup">
+
+    <script src="AqDetImport/signalFlare.js" type="text/javascript"></script>
+  <main class="initial-setup" id="initialSetup" aria-label="Initial setup">
     <div class="initial-setup__visual" aria-hidden="true">
       <span></span><span></span><span></span><span></span>
     </div>
     <h1>Aquatic Detour</h1>
     <button class="initial-setup__begin" id="beginGame" type="button">Press Enter to Begin</button>
-  </div>
+  </main>
+
 
   <main class="level-select" data-theme="blue" hidden>
     <h1 class="level-select__title">Level Select</h1>
     <button class="level-select__surrender" id="offerSurrender" type="button">Offer Surrender</button>
+
 
     <section class="level-select__panel" aria-label="Level selection">
       <div class="level-select__row">
@@ -46,6 +51,7 @@
         </button>
       </div>
 
+
       <div class="level-select__row">
         <button class="level is-locked" type="button" data-level="4" disabled aria-disabled="true" aria-label="Level 4 locked">
           <img class="level__thumbnail" src="levelselectimages/level-4.jpg" alt="">
@@ -61,12 +67,14 @@
     </section>
   </main>
 
+
   <section class="game-screen" id="gameScreen" aria-label="Game" hidden>
     <h1 class="game-screen__title" id="currentLevelTitle">Level 1</h1>
     <canvas id='BackgroundDisplay'></canvas>
     <canvas id='PlrDisplay'></canvas>
     <canvas id='LevelDisplay'></canvas>
   </section>
+
 
   <section class="completion-menu" id="completionMenu" role="dialog" aria-modal="true" aria-labelledby="completionTitle" hidden>
     <div class="completion-menu__panel">
@@ -80,6 +88,7 @@
     </div>
   </section>
 
+
   <section class="surrender-pending" id="surrenderMenu" role="dialog" aria-modal="true" aria-labelledby="surrenderTitle" aria-describedby="surrenderDescription" hidden>
     <div class="surrender-pending__panel">
       <h2 id="surrenderTitle">Surrender offer sent to partner!</h2>
@@ -87,10 +96,10 @@
       <p class="surrender-pending__waiting" role="status" aria-live="polite">Waiting...</p>
       <button class="surrender-pending__cancel" id="cancelSurrenderOffer" type="button">Cancel offer</button>
     </div>
-  </section-->
+  </section>
 
 
-    <script src="AqDetGame/LayoutItems/Level1Items.js"></script>
-    <script src="AqDetImport/signalFlare.js"></script>
+  <script src="AqDetGame/LayoutItems/Level1Items.js"></script>
+  <script src="AqDetGame/AqDetGame.js?v=20261023-7" type="text/javascript"></script>
 </body>
 </html>

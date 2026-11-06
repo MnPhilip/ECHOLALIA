@@ -1,4 +1,4 @@
-alert("Test of JS file worksssss");
+//alert("Test of JS file worksssss");
 document.addEventListener('DOMContentLoaded', () => {
     alert("DEBUG SPACE LOADED");
 })
@@ -12,75 +12,36 @@ window.main = () => {
     counter++;
     // updatePhysics();
     
-    window.cancelAnimationFrame(stopMain);   
+    window.cancelAnimationFrame(stopMain);
+    
+    
 }
 
-
-const initialSetupScreen = document.getElementById("initialSetup");
-const beginGameButton = document.getElementById("beginGame");
-const levelSelectScreen = document.querySelector(".level-select");
-const gameScreen = document.getElementById("gameScreen");
-const completionMenu = document.getElementById("completionMenu");
-const completionWaiting = document.getElementById("completionWaiting");
-const surrenderMenu = document.getElementById("surrenderMenu");
-const cancelSurrenderOfferButton = document.getElementById("cancelSurrenderOffer");
-const currentLevelTitle = document.getElementById("currentLevelTitle");
-const offerSurrenderButton = document.getElementById("offerSurrender");
-
+function start(){
+    canvas.style.width = '1308px';
+    canvas.style.height = '649px';
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        playerPH.fillStyle = "Black";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+    } else{
+        spawn();
+    }
+    
+    //requestAnimationFrame(start);
+}
 
 const canvas = document.getElementById('PlrDisplay');
-const playerPH = canvas.getContext("2d");
-
-const lvlCanvas = document.getElementById('LevelDisplay');
-const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
-
-const bckgrndCanvas = document.getElementById('BackgroundDisplay');
-const background = bckgrndCanvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-lvlCanvas.width = window.innerWidth;
-lvlCanvas.height = window.innerHeight;
-bckgrndCanvas.width = window.innerWidth;
-bckgrndCanvas.height = window.innerHeight;
-
-canvas.width = 1308;
-canvas.height = 649;
-canvas.style.width = "1308px";
-canvas.style.height = "649px";
-
-const rectSize = 50;
-var rectX = 120; //player PlaceHolder
-var rectY = 300;
-//0,0 of PlayerPH is top left of the canvas/square
-var gravVector;
-var lastKeyPressed;
-
-var RESPAWN_X;
-var RESPAWN_Y;
-//0,0, IS TOP LEFT
-var bubbleResX = -1;
-var bubbleResY = -1;
-
-var signalFlareIndex = -1;
-
-//Interactable Type Constants
-const pushBlock = 11;
-const bubble = 22;
-const signalFlare = 33;
-var interactActive = false;
-var currObj = -1;
-
-const moveDistance = 25; 
-var moveDistanceX;
-var moveDistanceY;
-counter = 0;
-
-const interactableSize = 75;
+const playerPH = canvas.getContext("2d"); 
 
 var currentLevel = 0;
 var currentScreen = 0;
 
+
+const rectSize = 60;
 var rectX; //player PlaceHolder
 var rectY;
 var gravVector;
@@ -89,13 +50,30 @@ var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
+
+
+
 const NO_MOVEMENT = 0;
-const STANDARD_MOVEMENT = 25; 
+const STANDARD_MOVEMENT = 15; 
+
+const pressedKeys = new Set();
 
 counter = 0;
 
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 let gameStart = false;
+
+const spawnArr = [
+    {
+        spawnPoints: level1spawn
+    }
+];
+
 let spawnIndex = 0;
+
+
 
 const SEAWEED_SIZE = 40;
 const PUDDLE_SIZE = 50;
@@ -107,54 +85,17 @@ const PUSH_ROCK_SIZE = PUDDLE_SIZE;
 const barriers = createBarrier(canvas);
 const interactableItems = createInteractables(canvas);
 const jumpPuddles = createJumpPuddle(canvas);
-var spawnArr = populateSpawnCoords(canvas);
 
 
-function renderInit() {
-    drawBarriers();
-    // drawBackground();
-    drawInteractables();
 
-    
-    playerPH.fillStyle = "green";
-}
-
-function start(){
-
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    if(!gameStart){
-        playerPH.fillStyle = "Yellow";
-        playerPH.font = "80px Arial";
-        playerPH.textAlign = "center";
-        playerPH.fillRect(spawnArr[currentScreen].x, spawnArr[currentScreen].y, rectSize, rectSize);
-        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
-        
-        renderInit();
-    } else{
-        spawn(); //Initial Rendering and Spawning of Player Character
-        reRender(0,0);
-        // alert("Spawned again");
-    }
-    
-    //requestAnimationFrame(start);
-}
 
 
 function drawBarriers() {
     for (const b of barriers[currentScreen]) {
-        lvlLayout.fillStyle = b.color;
-        lvlLayout.fillRect(b.x,b.y,b.width,b.height);
+        playerPH.fillStyle = b.color;
+        playerPH.fillRect(b.x,b.y,b.width,b.height);
     }
-    
-    // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-    for (const b of barriers[currentScreen]) {
-        lvlLayout.strokeStyle = 'red';
-        lvlLayout.strokeRect(b.x,b.y,b.width,b.height, b.color);
-    }
-    // drawObjectBarriers();
 }
-
 
 function collidesWithBarrier(x, y, width, height) {
     for (const b of barriers[currentScreen]) {
@@ -170,15 +111,16 @@ function collidesWithBarrier(x, y, width, height) {
 
 function drawJumpPuddles() {
     for (const d of jumpPuddles[currentScreen]) {
-        lvlLayout.fillStyle = d.color;
-        lvlLayout.fillRect(d.x,d.y,d.width,d.height);
+        playerPH.fillStyle = d.color;
+        playerPH.fillRect(d.x,d.y,d.width,d.height);
     }
 }
 
+
 function drawInteractables() {
     for (const d of interactableItems[currentScreen]) {
-        lvlLayout.fillStyle = d.color;
-        lvlLayout.fillRect(d.x,d.y,d.width,d.height);
+        playerPH.fillStyle = d.color;
+        playerPH.fillRect(d.x,d.y,d.width,d.height);
     }
 }
 
@@ -192,8 +134,7 @@ function reachScreenEnd(rectX) {
 
 
 function getSpawnPoint(){
-    return spawnArr[currentLevel];//.spawnPoints[spawnIndex];
-    
+    return spawnArr[currentLevel].spawnPoints[spawnIndex];
 }
 
 function updateCheckPoint(checknum){
@@ -205,9 +146,10 @@ function updateCheckPoint(checknum){
 function spawn(){
     const spawnPoint = getSpawnPoint();
     currentScreen = spawnPoint.screen;
-
     rectX = spawnPoint.x;
-    rectY = spawnPoint.y;
+   rectY = spawnPoint.y;
+    //alert("X: " + rectX  + "\n Y" + rectY)
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBarriers();
     drawInteractables();
@@ -215,72 +157,17 @@ function spawn(){
 
     playerPH.fillStyle = "green";
     playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-}
-
-//Checks if an interactable will collide with a barrer
-function collidesWithObject(x, y, width, height) {
-    if (interactActive) {
-        return false;
-    }
-    for (const b of interactableItems[currentScreen]) {
-        if (x < b.x + b.width &&
-            x + rectSize > b.x &&
-            y < b.y + b.height &&
-            y + rectSize > b.y) {
-            return true;
-            }
-    }
-    return false;
-}
-
-function drawBackground() {
-    background.clearRect(0, 0, canvas.width, canvas.height);
-    var backImg = new Image();
-    backImg.src = url('test.jpg');
-    background.drawImage(backImg, 0, 0);  
-}
-
-//Draws Push Blocks, Flares, and Bubbles - Will need integration to get applicable data from a file with Level-specific layouts
-function drawInteractables() {
-    //TESTING STATEMENT AND LOOP
-
-    for (const obj of interactableItems[currentScreen])
-    {
-        lvlLayout.fillStyle = obj.color;
-        lvlLayout.fillRect(obj.x, obj.y, obj.width, obj.height);
-    }
     
-    // drawObjectBarriers();
+
+    
+    // canvasTemp = document.getElementById("LayoutDisplay");
+    // playerPHTEMP = canvasTemp.getContext("2d"); 
+    // playerPHTEMP.fillStyle("red");
+    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
 }
 
-
-//Exclusively for first spawns of a level when the level is rendered, anything else should be done via Respawn()
-// function spawn(){ 
-//     playerPH.clearRect(0, 0, canvas.width, canvas.height);
-//     lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
-//     drawBarriers(); //Can be replaced with a function to draw a level and its layout
-//     drawInteractables();
-//     playerPH.clearRect(0, 0, canvas.width, canvas.height);
-//     respawn(); 
-// }
-
-
-//Any spawning done AFTER initial level setup, 
 function respawn(){
     spawn();
-    findRespawn(); //Allows player to get spawn coordinates without hardcoding
-    removeOldCharacter();
-    if (interactActive){
-      interactActive = !interactActive;
-      interactableItems[currObj].activated = false;
-      if (interactableItems[currObj].type == bubble){
-        bubblePop();
-      }
-    }
-    rectX = RESPAWN_X;
-    rectY = RESPAWN_Y;
-    
-    reRender(0, 0);
 }
 
 function saveRespawnCoordinates(x, y) {
@@ -288,8 +175,7 @@ function saveRespawnCoordinates(x, y) {
   RESPAWN_Y = y;
 }
 
-
-function findRespawn(){ //Will eventually be upgraded to search for respawn points based on the currently loaded level
+function findRespawn(){
     var newResX;
     var newResY;
     if (rectX >= 400){
@@ -308,10 +194,18 @@ function findRespawn(){ //Will eventually be upgraded to search for respawn poin
     saveRespawnCoordinates(newResX, newResY);//AFTER CHANGE: By-level decision, CALL a function that changes based on what level is loaded
 }
 
-
-//Currently a shorthand funtion, can eventually be used to house animations associated with respawning
 function removeOldCharacter() {
+//   if (!player) return; // nothing to remove
+
+//   // stop anything still running on the old PC
+//   player.stopAnimations();
+//   player.detachInputHandlers();
+
+//   // take it out of the game and release the reference
+//   removeFromEntityList(player);
+//   player = null;
   playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
+//   respawn();
 }
 
 
@@ -336,10 +230,11 @@ function reRender(movePosX, movePosY) {
         currentScreen++;
 
         // Get new screen coordinates
-        var coordinates = spawnArr[currentScreen];
+        const coordinates =
+            spawnArr[currentLevel].spawnPoints[currentScreen];
 
-        newX = coordinates.x;
-        newY = coordinates.y;
+        rectX = coordinates.x;
+        rectY = coordinates.y;
 
         // Draw new screen
         playerPH.clearRect(0, 0, canvas.width, canvas.height);
@@ -349,29 +244,14 @@ function reRender(movePosX, movePosY) {
         drawJumpPuddles();
 
         playerPH.fillStyle = "green";
-        playerPH.fillRect(newX, newY, rectSize, rectSize);
+        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 
         return;
     }
 
     // Check collisions before normal movement
-    
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
+    if (collidesWithBarrier(newX, newY)) {
         return;
-    }
-    
-    if (currObj != -1){
-      if (interactableItems[currObj].type == pushBlock && interactableItems[currObj].activated){
-        interactableItems[currObj].x += movePosX;
-        interactableItems[currObj].y += movePosY;
-      } else if (interactableItems[currObj].type == bubble && interactableItems[currObj].activated){
-        interactableItems[currObj].x += movePosX;
-        interactableItems[currObj].y += movePosY;
-        bubbleCounter--;  
-        if (bubbleCounter == 0 && interactableItems[currObj].type == bubble) {
-          bubblePop();
-        }
-      }
     }
 
     // Clear old player
@@ -393,177 +273,45 @@ function reRender(movePosX, movePosY) {
 
 function pcInteract()
 {   
-    var objType;
-    
-    if (!interactActive){
-        objType = interactCheck();
-        // alert("Interact Key Pressed!");
-    } else {
-        interactActive = !interactActive;
-        interactableItems[currObj].activated = false;
-        currObj = -1;
-        objType = -1;
-    }
-
-
-    if (objType < 0)
-    {
-        // alert("No object found or object unbound");
-        return;
-    }
-    else if (objType == pushBlock) {
-        // alert("push block active");
-    }//PushBlock found
-    else if (objType == bubble) {
-      // alert("Bubble Found");
-      activateBubble();
-    }//Bubble found
-    else if (objType == signalFlare){
-      // alert("Signal Flare Found");
-      window.dispatchEvent(flareSent);
-    } //Signal Flare found
+        // alert(rectX);
+        // alert(rectY);
+        alert("Interact Key Pressed!");
 }
 
 // moves the player a fixed amount, depending on the key pressed (WASD)
 function moveCharacterWASD(moveKeys) {
     moveDistanceX = NO_MOVEMENT;
     moveDistanceY = NO_MOVEMENT;
-
     if (moveKeys.has('w')){
         moveDistanceY -= STANDARD_MOVEMENT;
-    }
-    
-    if (moveKeys.has('a')){
+    } else if (moveKeys.has('a')){
 	    moveDistanceX -= STANDARD_MOVEMENT;
-    }
-    
-    if (moveKeys.has('s')){
+    } else if (moveKeys.has('s')){
         moveDistanceY += STANDARD_MOVEMENT;
-    }
-    
-    if (moveKeys.has('d')){
+    } else if (moveKeys.has('d')){
         moveDistanceX += STANDARD_MOVEMENT;
-    }
-
-    reRender(moveDistanceX, moveDistanceY);
-    
-        // alert("here");
-  }
-//CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
-//      and set the "activated" boolean of that interactable to 'true'
-function interactCheck(){
-    if (directionalCheck()) {//Checks above and below the player object
-        // alert(directionalCheck());
-        interactActive = true;  //Allows other functions to know an interaction is active
-        interactableItems[currObj].activated = true;
-        return interactableItems[currObj].type;
-    }
-}
-
-//PURPOSE: Will check all four directions around the player and find if an interactable is accessible 
-function directionalCheck(){
-  count = 0;
-  //RectX, RectY+move -> RectX+move, RectY+move
-  //
-  //
-  //RectX, RectY -> RectX+move, RectY
-  if (lastKeyPressed == "w"){ //CHECK UP, NEG Y
-    for (var obj of interactableItems){
-      if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
-        currObj = count;
-        return true;
-      }
-      count++;
-    }
-  } else if (lastKeyPressed == "a"){ //CHECK LEFT, NEG X
-    for (var obj of interactableItems){
-      if ((obj.x <= rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*3) {
-        currObj = count;
-        return true;
-      }
-    count++;
-    }
-  } else if (lastKeyPressed == "s"){ //CHECK DOWN, POS Y
-    for (var obj of interactableItems){
-      if ((obj.y <= rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
-        currObj = count;
-        return true;
-      }
-    count++;
-    }
-  } else if (lastKeyPressed == "d"){ //CHECK RIGHT, POS X
-    for (var obj of interactableItems) {
-      if ((obj.x <= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*2) {
-        currObj = count;
-        return true;
-      }
-      count++;
-    }
-  } else {return false;}
-
-  return false;
-}
-
-function activateBubble(){
-  if (interactableItems[currObj].type == bubble) {
-    bubblePush(interactableItems[currObj].x, interactableItems[currObj].y);
-  }
-}
-
-function bubblePush(newX, newY){
-  bubbleCounter = bubble;
-  removeOldCharacter();
-  rectX = newX;
-  bubbleResX = newX;
-  rectY = newY;
-  bubbleResY = newY;
-  reRender(0, 0);
-}
-
-function bubblePop() {
-    interactableItems[currObj].activated = false;
-    interactableItems[currObj].x = bubbleResX;
-    interactableItems[currObj].y = bubbleResY;
-    interactActive = false;
-    pcInteract();
-}
-
-
-function move(moveKey) {
-    
-  lastKeyPressed = moveKey.key;
-    if (moveKey.key == "w"){
-        reRender(0, -moveDistance);
-    } else if (moveKey.key == "a"){
-	reRender(-moveDistance, 0);
-    } else if (moveKey.key == "s"){
-	reRender(0, moveDistance);
-    } else if (moveKey.key == "d"){
-	reRender(moveDistance, 0);
     }
     //alert(moveDistanceX + " " + moveDistanceY);
     reRender(moveDistanceX, moveDistanceY);
 }
 
-window.addEventListener("keydown", (e) => {
-    if (!gameStart || gameScreen.hidden || !completionMenu.hidden) return;
-    main();
-    
+window.addEventListener("keydown", (e) =>{ 
+    main(); //infinite loop
+    pressedKeys.add(e.key.toLowerCase());
     //Fix to allow caps letters and multiple buttons being pressed
-    if(e.key == "w" || e.key == "a" || e.key == "s" ||
-    	e.key == "d"){
-        move(e);
+    if(e.key === "Enter" && !gameStart){
+        gameStart = true; 
+        spawn();
+    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
+    pressedKeys.has('s') || pressedKeys.has('d')){
+        moveCharacterWASD(pressedKeys);
     } else if (e.key === " ") { //Space Entered - call jump
         // reRender(0, -50);Jump no longer needed
     } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
         pcInteract();
     } else if ((e.key).toLowerCase() == 'c')
     {
-      alert("ERROR: RESPAWN NOT UP-TO-SPEC");
-        // respawn();
-    } else if (e.key == 'o') { //DEBUG: Prints current location of the PC
-        alert(rectX);
-        alert(rectY);
+        respawn();
     }
     else {}
 })
@@ -571,17 +319,7 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener('keyup', (event) => {
     // Remove the key from the Set when released
     pressedKeys.delete(event.key.toLowerCase());
-    // alert("keyup");
 });
-window.addEventListener("flareSent", () => {
-  interactableItems[currObj].color = "pink";
-  window.dispatchEvent(flareLanded);
-})
-
-window.addEventListener("flareLanded", (sfx, sfy) => {
-  lvlLayout.fillStyle = "Red";
-  lvlLayout.fillRect(400, 400, rectSize*2, rectSize);
-})
 
 //DECOMMISIONED - Gravity Function, can be used as a reference for pushing the PC in a direction (CODEBASE : WATER CURRENT)
 // function gravUpdate() {
@@ -591,156 +329,123 @@ window.addEventListener("flareLanded", (sfx, sfy) => {
 //     }
 // }
 
-let chosenOption = null;
-let currentLevel = 1;
-const SURRENDER_OFFERED = "surrender-offered";
-const SURRENDER_OFFER_CANCELLED = "surrender-offer-cancelled";
-let surrenderOfferPending = false;
+// function updatePhysics() {
+//     // var pcPos = playerPH.rect.x;
 
-function levelCompleted() {
-  onLevelCompleted(currentLevel);
-  chosenOption = null;
-  completionMenu.hidden = false;
-  completionMenu.classList.remove("is-waiting");
-  completionWaiting.hidden = true;
-  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
-    button.disabled = false;
-  });
+//     // //If the square's bottom edge (rectY + rectSize) is below the bottom of the canvas (canvas.height), set rectY to canvas.height - rectSize and velocityY to 0
+//     // if (rectY + rectSize > canvas.height) {
+//     //     // The square is below the bottom of the canvas
+//     //     rectY = canvas.height - rectSize;
+//     //     // Square stops falling
+//     //     velocityY = 0;
+//     // }
+
+//     // velocityY += gravity;
+//     // if (velocityY > max_fall_speed) {
+//     //     velocityY = max_fall_speed;
+//     // }
+//     // //Update rectY by velocityY
+//     // rectY += velocityY;
+//     // //Keep it from flying off the TOP (rectY < 0)
+//     // if (rectY < 0) {
+//     //     rectY = 0;
+//     //     velocityY = 0;
+//     // }
+
+    
+//     gravUpdate();
+// }
+
+// document.addEventListener("keydown", onSetupKeyDown);
+
+
+
+const TOTAL_LEVELS = 5; //total lvels
+let highestUnlocked = 1; // start at level 1 for now
+let levelSelectShown = false; //level select
+
+
+const setupMenu = document.getElementById("initialSetup"); //begin 
+const levelMenu = document.querySelector(".level-select"); //level select has no id so use query selet
+const gameScreen = document.getElementById("gameScreen");//game
+
+function showLevelSelect() {
+    gameStart = false;
+    pressedKeys.clear(); //clear keys so movement doesnt trigger
+    levelSelectShown = true;
+    setupMenu.hidden = true;
+    gameScreen.hidden = true;
+    levelMenu.hidden = false;
+    levelSelectDisplay();
 }
 
-function onOptionPressed(option) {
-  if (chosenOption !== null || !["continue", "exit"].includes(option)) return;
-  chosenOption = option;
-  completionMenu.classList.add("is-waiting");
-  completionWaiting.hidden = false;
-  completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
-    button.disabled = true;
-  });
-  alertPartnerPlayer(option);
+
+function levelSelectDisplay() {
+    const buttons = document.querySelectorAll(".level");//get all level elements
+    buttons.forEach(button => {
+        const level = Number(button.dataset.level);
+        const lock = button.querySelector(".level__lock");
+        if (level == 1) {
+            button.disabled = false;//make button clickable
+          button.classList.remove("is-locked");//remove the faded level cover
+            if (lock) {
+              lock.hidden = true;//remove the lock png
+            }
+        } else {//if it is not level 1 make it seem that it is locked
+            button.disabled = true;
+            button.classList.add("is-locked");
+            if (lock) {
+                lock.hidden = false;
+            }
+        }
+    });
 }
 
-function alertPartnerPlayer(flag) {
-  window.dispatchEvent(new CustomEvent("echolalia:alternate-player-alert", {
-    detail: { option: flag, flag }
-  }));
-}
 
-function onAlternatePlayerResponse() {
-  if (surrenderOfferPending) {
-    surrenderOfferPending = false;
-    surrenderMenu.hidden = true;
-    return;
-  }
-  if (chosenOption === null) return;
-  const responseOption = chosenOption;
-  chosenOption = null;
-  completionMenu.hidden = true;
-  completionMenu.classList.remove("is-waiting");
-  completionWaiting.hidden = true;
-
-  if (responseOption === "continue") loadNextLevel();
-  else loadLevelSelect();
-}
-const TOTAL_LEVELS = 5;
-let highestUnlocked = 1; // Level 1 always unlocked
-
-function isUnlocked(level) {
+function isUnlocked(level){
   return level <= highestUnlocked;
 }
 
-function onLevelCompleted(level) {
-  if (level === highestUnlocked && level < TOTAL_LEVELS) {
-    highestUnlocked = level + 1;
-  }
-  updateLevelSelectButtons();
-}
 
-function onLevelSelected(level) {
-  if (!isUnlocked(level)) return; // blocked: do nothing
+function gointoLevel(level){
+  if(!isUnlocked(level) || level !==1){
+    return;
+  }
   loadLevel(level);
 }
 
-function updateLevelSelectButtons() {
-  document.querySelectorAll(".level[data-level]").forEach((button) => {
-    const unlocked = isUnlocked(Number(button.dataset.level));
-    button.classList.toggle("is-locked", !unlocked);
-    button.disabled = !unlocked;
-    button.setAttribute("aria-disabled", String(!unlocked));
-    button.querySelector(".level__lock").hidden = unlocked;
-    if (!unlocked) button.setAttribute("aria-label", `Level ${button.dataset.level} locked`);
-    else button.setAttribute("aria-label", `Level ${button.dataset.level}`);
-  });
-}
 
 function loadLevel(level) {
-  currentLevel = level;
-  levelSelectScreen.hidden = true;
-  gameScreen.hidden = false;
-  currentLevelTitle.textContent = `Level ${level}`;
-  gameStart = true;
-  spawn();
+    if (level !== 1) return; // Add Level 2-5 data before enabling them.
+    currentLevel = level - 1;
+    currentScreen = 0;
+    spawnIndex = 0;
+    pressedKeys.clear();
+    document.getElementById("currentLevelTitle").textContent = `Level ${level}`;
+    levelMenu.hidden = true;
+    gameScreen.hidden = false;
+    gameStart = true;
+    spawn();
 }
 
-function loadNextLevel() {
-  if (currentLevel < TOTAL_LEVELS) {
-    loadLevel(currentLevel + 1);
-  } else {
-    loadLevelSelect();
-  }
+
+
+function onLevelCompleted(level) {
+    if (level === highestUnlocked && level < TOTAL_LEVELS) {
+        highestUnlocked = level + 1;
+    }
 }
 
-function loadLevelSelect() {
-  gameScreen.hidden = true;
-  levelSelectDisplay();
-  gameStart = false;
-  playerPH.clearRect(0, 0, canvas.width, canvas.height);
-}
 
-document.querySelectorAll(".level[data-level]").forEach((button) => {
-  button.addEventListener("click", () => onLevelSelected(Number(button.dataset.level)));
+
+document.getElementById("beginGame").addEventListener("click", showLevelSelect);
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !levelSelectShown) {
+        showLevelSelect();
+    }
+
+});
+document.querySelectorAll(".level").forEach(button => {
+    button.addEventListener("click", () => gointoLevel(Number(button.dataset.level)));
 });
 
-completionMenu.querySelectorAll("[data-completion-option]").forEach((button) => {
-  button.addEventListener("click", () => onOptionPressed(button.dataset.completionOption));
-});
-
-window.addEventListener("echolalia:alternate-player-response", onAlternatePlayerResponse);
-window.levelCompleted = levelCompleted;
-window.onAlternatePlayerResponse = onAlternatePlayerResponse;
-
-function onOfferSurrender() {
-  if (surrenderOfferPending) return;
-  surrenderOfferPending = true;
-  surrenderMenu.hidden = false;
-  alertPartnerPlayer(SURRENDER_OFFERED);
-}
-
-offerSurrenderButton.addEventListener("click", onOfferSurrender);
-cancelSurrenderOfferButton.addEventListener("click", () => {
-  if (!surrenderOfferPending) return;
-  surrenderOfferPending = false;
-  surrenderMenu.hidden = true;
-  alertPartnerPlayer(SURRENDER_OFFER_CANCELLED);
-});
-
-let levelSelectShown = false;
-
-function onSetupKeyDown(event) {
-  if (event.key !== "Enter") return;
-  if (levelSelectShown) return; // ignore repeats
-  levelSelectShown = true;
-  levelSelectDisplay();
-}
-
-function levelSelectDisplay() {
-    alert("button");
-  updateLevelSelectButtons();
-  initialSetupScreen.hidden = true;
-  levelSelectScreen.hidden = false;
-}
-
-document.addEventListener("keydown", onSetupKeyDown);
-beginGameButton.addEventListener("click", levelSelectDisplay());
-
-// start();
-window.levelSelectDisplay = levelSelectDisplay;
