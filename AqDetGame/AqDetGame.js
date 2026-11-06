@@ -1,6 +1,6 @@
-//alert("Test of JS file worksssss");
+// alert("Test of JS file worksssss");
 document.addEventListener('DOMContentLoaded', () => {
-    alert("DEBUG SPACE LOADED");
+    // alert("DEBUG SPACE LOADED");
 })
 
 
