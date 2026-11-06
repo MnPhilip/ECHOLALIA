@@ -17,22 +17,6 @@ window.main = () => {
     
 }
 
-function start(){
-    canvas.style.width = '1308px';
-    canvas.style.height = '649px';
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    if(!gameStart){
-        playerPH.fillStyle = "Black";
-        playerPH.font = "80px Arial";
-        playerPH.textAlign = "center";
-        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
-        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
-    } else{
-        spawn();
-    }
-    
-    //requestAnimationFrame(start);
-}
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d"); 
@@ -87,6 +71,22 @@ const interactableItems = createInteractables(canvas);
 const jumpPuddles = createJumpPuddle(canvas);
 
 
+function start(){
+    canvas.style.width = '1308px';
+    canvas.style.height = '649px';
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    if(!gameStart){
+        playerPH.fillStyle = "Black";
+        playerPH.font = "80px Arial";
+        playerPH.textAlign = "center";
+        playerPH.textBaseline = "middle"; //These elements will be replaced with function calls for printing the PC assets to the screen
+        playerPH.fillText("PRESS ENTER TO START", canvas.width/2, canvas.height/2);// DEBUG STATEMENT TESTING RESPONSIVENESS
+    } else{
+        spawn();
+    }
+    
+    //requestAnimationFrame(start);
+}
 
 
 
