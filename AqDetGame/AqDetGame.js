@@ -1,7 +1,7 @@
-//alert("Test of JS file worksssss");
-// document.addEventListener('DOMContentLoaded', () => {
-//     alert("DEBUG SPACE LOADED");
-// })
+alert("Test of JS file worksssss");
+document.addEventListener('DOMContentLoaded', () => {
+    alert("DEBUG SPACE LOADED");
+})
 
 
 //Consider this function the Main of the entire game AND the infinite "While loop" that will call
@@ -16,8 +16,6 @@ window.main = () => {
 }
 
 
-const canvas = document.getElementById('PlrDisplay');
-const playerPH = canvas.getContext("2d");
 const initialSetupScreen = document.getElementById("initialSetup");
 const beginGameButton = document.getElementById("beginGame");
 const levelSelectScreen = document.querySelector(".level-select");
@@ -28,6 +26,10 @@ const surrenderMenu = document.getElementById("surrenderMenu");
 const cancelSurrenderOfferButton = document.getElementById("cancelSurrenderOffer");
 const currentLevelTitle = document.getElementById("currentLevelTitle");
 const offerSurrenderButton = document.getElementById("offerSurrender");
+
+
+const canvas = document.getElementById('PlrDisplay');
+const playerPH = canvas.getContext("2d");
 
 const lvlCanvas = document.getElementById('LevelDisplay');
 const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
@@ -738,13 +740,14 @@ function onSetupKeyDown(event) {
 }
 
 function levelSelectDisplay() {
+    alert("button");
   updateLevelSelectButtons();
   initialSetupScreen.hidden = true;
   levelSelectScreen.hidden = false;
 }
 
 document.addEventListener("keydown", onSetupKeyDown);
-beginGameButton.addEventListener("click", levelSelectDisplay);
+beginGameButton.addEventListener("click", levelSelectDisplay());
 
-start();
+// start();
 window.levelSelectDisplay = levelSelectDisplay;

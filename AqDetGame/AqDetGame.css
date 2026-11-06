@@ -3,7 +3,7 @@
 html {
     background-color: blue;
     overflow: hidden;
-    cursor:none;
+    /* cursor:none; */
     /* background-image: url("test.jpg"); */
 }
     
