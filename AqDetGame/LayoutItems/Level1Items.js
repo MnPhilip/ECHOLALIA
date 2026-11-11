@@ -1,4 +1,3 @@
-
 function createBarrier(canvas){
 const barriers =  [
     [ // screen 0
@@ -479,7 +478,9 @@ const interactableItems = [
             y: canvas.height / 2 - PUDDLE_SIZE * 2,
             width: BUBBLE_SIZE,
             height: BUBBLE_SIZE,
-            color: "PaleTurqoise"
+            color: "aqua",
+            type: bubble,
+            activated: false
         }
     ], 
     [ // screen 1
@@ -488,7 +489,9 @@ const interactableItems = [
             y: rectSize,
             width: ROCKET_SIZE,
             height: ROCKET_SIZE,
-            color: "Red"
+            color: "Red",
+            type: signalFlare,
+            activated: false
         }
     ], 
     [ // screen 2
@@ -497,21 +500,27 @@ const interactableItems = [
             y: rectSize * 2,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "Silver"
+            color: "Silver",
+            type: pushBlock,
+            activated: false
         },
         { // middle pushable rock
             x: canvas.width / 5 + PUSH_ROCK_SIZE * 3,
             y: canvas.height / 2,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "Silver"
+            color: "Silver",
+            type: pushBlock,
+            activated: false
         },
         { // left pushable rock
             x: canvas.width / 6 - PUSH_ROCK_SIZE,
             y: canvas.height / 3 - PUSH_ROCK_SIZE,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "Silver"
+            color: "Silver",
+            type: pushBlock,
+            activated: false
         }
     ], 
     [ // screen 3
@@ -520,32 +529,66 @@ const interactableItems = [
             y: PUSH_ROCK_SIZE * 2.8,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "red"
+            color: "silver",
+            type: pushBlock,
+            activated: false
         },
         { // left bubble
             x: canvas.width / 4.5,
             y: canvas.height / 2,
             width: BUBBLE_SIZE,
             height: BUBBLE_SIZE,
-            color: "PaleTurqoise"
+            color: "PaleTurqoise",
+            type: bubble,
+            activated: false
         },
         { // right bubble
             x: canvas.width - canvas.width / 4.5,
             y: canvas.height / 1.5,
             width: BUBBLE_SIZE,
             height: BUBBLE_SIZE,
-            color: "PaleTurqoise"
+            color: "PaleTurqoise",
+            type: bubble,
+            activated: false
         },
         { // rocket
             x: canvas.width - canvas.width / 5,
             y: rectSize,
             width: ROCKET_SIZE,
             height: ROCKET_SIZE,
-            color: "Red"
+            color: "Red",
+            type: signalFlare,
+            activated: false
         }
     ]
 ];
 return interactableItems;
+}
+
+function populateSaves(canvas){
+    const lvl1Saves = [
+        {
+            screen: 0,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        },
+        {
+            screen: 1,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        },
+        {
+            screen: 2,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        },
+        {
+            screen: 3,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        }
+    ]
+    return lvl1Saves;
 }
 
 
@@ -556,8 +599,8 @@ const level1spawn = [
        
             {
                 screen: 0,
-                x: window.innerWidth - 100,
-                y: window.innerHeight / 2
+                x: 1308 - 100,
+                y: 648 / 2
             },
             {
                 screen: 1,
@@ -572,7 +615,7 @@ const level1spawn = [
             },
             {
                 screen: 3,
-              x: window.innerWidth - 100,
+                x: window.innerWidth - 100,
                 y: window.innerHeight / 2
             }
         
