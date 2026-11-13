@@ -65,11 +65,12 @@ var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
-const moveDistance = 15; 
+const moveDistance = 50; 
+const STANDARD_MOVEMENT = 50; // pixels per frame
 const NO_MOVEMENT = 0;
-const pressedKeys = new Set();
+//const pressedKeys = new Set();
 
-counter = 0;
+let counter = 0;
 const playerVelocity = {x: 0, y: 0};
 let activeMovementElement = null;
 
@@ -88,13 +89,11 @@ let firstTimeTunnel = true;
 
 const spawnArr = [
     {
-        spawnPoints: level1spawn
+        spawnPoints: level3spawn
     }
 ];
 
 let spawnIndex = 0;
-
-
 
 const SEAWEED_SIZE = 40;
 const PUDDLE_SIZE = 50;
@@ -106,6 +105,7 @@ const PUSH_ROCK_SIZE = PUDDLE_SIZE;
 const barriers = createBarrier(canvas);
 const interactableItems = createInteractables(canvas);
 const jumpPuddles = createJumpPuddle(canvas);
+const waterCurrents = createWaterCurrents(canvas);
 
 function drawBarriers() {
     for (const b of barriers[currentScreen]) {
@@ -122,7 +122,7 @@ const enemy = {
     color: "purple"
 }; //color is a default, as the enemies will have pngs mapped to them
 
-const waterCurrents = [
+/* const waterCurrents = [
     {
     x: 100,
     y: 200,
@@ -132,6 +132,7 @@ const waterCurrents = [
     direction: {x: 1, y: 0}, // rightward   (y: -1 up, y: 1 down)
     }
 ];
+*/
 
 const tunnels = [ //Value of X and Y will change based on later implementation of each levels tunnels
     {
@@ -146,7 +147,7 @@ const tunnels = [ //Value of X and Y will change based on later implementation o
         id: "B",
         partnerId: "A",
         x: 500,
-        y: canvas.height - 600,
+        y: canvas.height - 500,
         width: 90,
         height: 45
     }
@@ -169,11 +170,14 @@ function drawEnemy() {
 
 function drawWaterCurrents() {
     playerPH.save();
+    /*
     playerPH.strokeStyle = "lightblue";
     playerPH.fillStyle = "rgba(148, 210, 231, 0.5)"; // light blue with transparency
     playerPH.lineWidth = 3;
-    for (const current of waterCurrents) {
-        playerPH.strokeRect(current.x, current.y, current.width, current.height);
+    */
+
+    for (const current of waterCurrents[currentScreen]) {
+        playerPH.fillStyle = current.color;
         playerPH.fillRect(current.x, current.y, current.width, current.height);
     }
     playerPH.restore();
@@ -218,11 +222,11 @@ function drawPlayer() {
 function drawAll() {
     playerPH.clearRect(0,0, canvas.width, canvas.height); // clear player so they dont duplicate at the starting teleporter
 
+    drawPlayer();
     drawWaterCurrents();
     drawTunnels();
     drawBarriers();
     drawEnemy();
-    drawPlayer();
     drawInteractables();
     drawJumpPuddles();
 }
@@ -429,7 +433,7 @@ function removeOldCharacter() {
 
 function reRender(movePosX, movePosY){
     if (teleportState) {return false; } // prevent movement during teleportation
-    const nextX = rectX + movePosX;
+    const newX = rectX + movePosX;
     const nextY = rectY + movePosY;
     if (reachScreenEnd(newX)) {
 
@@ -458,8 +462,8 @@ function reRender(movePosX, movePosY){
         drawAll();
         return;
     }
-    
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
+
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosY)) {
         return false;
     }
     if (collidesWithEnemy(rectX + movePosX, rectY + movePosY)) {
@@ -467,8 +471,9 @@ function reRender(movePosX, movePosY){
         return false;
     }
     
+    console.log("X: " + newX + " Y: " + nextY);
     playerPH.clearRect(rectX, rectY, rectSize, rectSize);
-    rectX = nextX;
+    rectX = newX;
     rectY = nextY;
 
     drawAll();
@@ -483,14 +488,21 @@ function pcInteract()
 // moves the player a fixed amount, depending on the key pressed (WASD)
 function moveCharacterWASD(moveKeys) {
     moveDistanceX = NO_MOVEMENT;
-    moveDistanceY = NO_MOVEMENT;
-    if (moveKeys.has('w')){
-        moveDistanceY -= STANDARD_MOVEMENT;
-    } else if (moveKeys.has('a')){
-	    moveDistanceX -= STANDARD_MOVEMENT;
-    } else if (moveKeys.has('s')){
+    let moveDistanceY = NO_MOVEMENT;
+    if (moveKeys.has('a')){
+        console.log("a pressed");
+        moveDistanceX -= STANDARD_MOVEMENT;
+    }
+     if (moveKeys.has('w')){
+        console.log("W pressed");
+	    moveDistanceY -= STANDARD_MOVEMENT;
+    }
+    if (moveKeys.has('s')){
+        console.log("S pressed")
         moveDistanceY += STANDARD_MOVEMENT;
-    } else if (moveKeys.has('d')){
+    }
+    if (moveKeys.has('d')){
+        console.log("D pressed");
         moveDistanceX += STANDARD_MOVEMENT;
     }
     //alert(moveDistanceX + " " + moveDistanceY);
@@ -498,6 +510,7 @@ function moveCharacterWASD(moveKeys) {
 }
 
 window.addEventListener("keydown", (e) =>{ 
+    const pressedKeys = new Set();
     main(); //infinite loop
     pressedKeys.add(e.key.toLowerCase());
     //Fix to allow caps letters and multiple buttons being pressed
@@ -509,9 +522,10 @@ window.addEventListener("keydown", (e) =>{
         moveCharacterWASD(pressedKeys);
     } else if (e.key === " ") { //Space Entered - call jump
         // reRender(0, -50);Jump no longer needed
-    } else if ((e.key).toLowerCase == "e") { //'e' key pressed, call enter
+    } else if (e.key.toLowerCase() === "e") { //'e' key pressed, call enter
         pcInteract();
-    } else if ((e.key).toLowerCase() == 'c')
+    }
+    else if ((e.key).toLowerCase() === 'c')
     {
         respawn();
     }
