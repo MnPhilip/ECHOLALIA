@@ -348,25 +348,38 @@ function reRender(movePosX, movePosY) {
     rectX = newX;
     rectY = newY;
 
-    // Redraw environment
-    drawBarriers();
-    drawInteractables();
-    drawJumpPuddles();
+   // Update bubble position before drawing
+if (currObj != -1 && interactActive) {
 
-    //Checking if interactables are active and what needs to be changed about them
-    if (currObj != -1){
-      if (interactableItems[currentScreen][currObj].type == pushBlock && interactableItems[currentScreen][currObj].activated){
-        interactableItems[currentScreen][currObj].x += movePosX;
-        interactableItems[currentScreen][currObj].y += movePosY;
-      } else if (interactableItems[currentScreen][currObj].type == bubble && interactableItems[currentScreen][currObj].activated){
-        interactableItems[currentScreen][currObj].x += movePosX;
-        interactableItems[currentScreen][currObj].y += movePosY;
-        bubbleCounter--;  
-        if (bubbleCounter == 0 && interactableItems[currentScreen][currObj].type == bubble) {
-          bubblePop();
+    const obj = interactableItems[currentScreen][currObj];
+
+    if (obj.type == pushBlock && obj.activated) {
+
+        obj.x += movePosX;
+        obj.y += movePosY;
+
+    } else if (obj.type == bubble && obj.activated) {
+
+        obj.x += movePosX;
+        obj.y += movePosY;
+
+        if (movePosX != 0 || movePosY != 0) {
+            bubbleCounter--;
+
+            if (bubbleCounter <= 0) {
+                bubblePop();
+            }
         }
-      }
     }
+}
+
+// Clear old level drawings
+lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
+
+// Redraw environment at updated positions
+drawBarriers();
+drawInteractables();
+drawJumpPuddles();
     //NOTE: Required changing interactableLoc, AND uses "currObj which may not work anymore"
 
     // Draw player
