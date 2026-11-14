@@ -208,6 +208,7 @@ function spawn(){
     rectY = spawnPoint.y;
     //alert("X: " + rectX  + "\n Y" + rectY)
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
 
     drawBarriers();
     drawInteractables();
@@ -226,6 +227,8 @@ function spawn(){
 
 
 function respawn(){
+    spawn();
+    /*
     findRespawn(); //Allows player to get spawn coordinates without hardcoding
     removeOldCharacter();
     if (interactActive){
@@ -239,6 +242,7 @@ function respawn(){
     rectY = RESPAWN_Y;
     
     reRender(0, 0);
+    */
 }
 
 
@@ -291,7 +295,8 @@ function reRender(movePosX, movePosY) {
 
         // Check if this is the last screen
         if (currentScreen === 3) {
-            alert("Level done");
+            //alert("Level done");
+            levelCompleted();
             return;
         }
 
@@ -319,6 +324,7 @@ function reRender(movePosX, movePosY) {
 
         // Draw new screen
         playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
 
         drawBarriers();
         drawInteractables();
@@ -331,7 +337,7 @@ function reRender(movePosX, movePosY) {
     }
 
     // Check collisions before normal movement
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosX) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosY) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
         return;
     }
 
@@ -392,29 +398,31 @@ function moveCharacterWASD(moveKeys) {
     reRender(moveDistanceX, moveDistanceY);
 }
 
-window.addEventListener("keydown", (e) =>{ 
-    // main(); //infinite loop
-    pressedKeys.add(e.key.toLowerCase());
-    //Fix to allow caps letters and multiple buttons being pressed
-    if(e.key === "Enter" && !gameStart){
-        gameStart = true; 
-        spawn();
-    } else if ((e.key.toLowerCase()) === 'e') { 
-        // alert("Interacted");
-        pcInteract();
-    } else if ((e.key.toLowerCase()) === 'c') {
-      alert("ERROR: RESPAWN FUNCTION NOT UPDATED FOR CURRENT IMPLEMENTATION");
-        // respawn();
+window.addEventListener("keydown", (e) => {
+
+    if (!gameStart) {
+        return;
     }
-    
-    if(pressedKeys.has('w') || pressedKeys.has('a') || 
-    pressedKeys.has('s') || pressedKeys.has('d')){
-      lastKeyPressed = e.key.toLowerCase();
+
+    pressedKeys.add(e.key.toLowerCase());
+
+    if (e.key.toLowerCase() === "e") {
+        pcInteract();
+    }
+
+    if (e.key.toLowerCase() === "c") {
+         respawn();
+    }
+
+    if (pressedKeys.has("w") ||
+        pressedKeys.has("a") ||
+        pressedKeys.has("s") ||
+        pressedKeys.has("d")) {
+
+        lastKeyPressed = e.key.toLowerCase();
         moveCharacterWASD(pressedKeys);
     }
-    else {}
-})
-
+});
 window.addEventListener('keyup', (event) => {
     // Remove the key from the Set when released
     // alert("keyup");
@@ -613,6 +621,13 @@ function loadLevel(level) {
     spawn();
 }
 
+
+function levelCompleted(){
+    gameStart = false;
+    pressedKeys.clear();
+
+    document.getElementById("completionMenu").hidden = false;
+}
 
 function onLevelCompleted(level) {
     if (level === highestUnlocked && level < TOTAL_LEVELS) {

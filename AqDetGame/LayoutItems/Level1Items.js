@@ -366,25 +366,31 @@ const barriers =  [
 
          // deep waters
          { // left deep water
+            /*
             x: canvas.width / 6,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
+            */
          },
          { // middle deep water
+            /*
             x: canvas.width / 2.5,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
+            */
          },
          { // right deep water
+            /*
             x: canvas.width - canvas.width / 3.5,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
+            */
          },
          // rock to explode
          { // upper rock
