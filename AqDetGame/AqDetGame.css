@@ -1,20 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Comfortaa:wght@600;700&display=swap");
 
+
 html {
     background-color: blue;
     overflow: hidden;
-    cursor:none;
+    /* cursor:none; */
     /* background-image: url("test.jpg"); */
 }
-    
+   
 canvas {
     font-size: 200%;
     position:absolute;
 }
 
+
 [hidden] {
   display: none !important;
 }
+
 
 .initial-setup {
   position: relative;
@@ -33,6 +36,7 @@ canvas {
   text-align: center;
 }
 
+
 .initial-setup::before,
 .initial-setup::after {
   position: absolute;
@@ -42,11 +46,13 @@ canvas {
   pointer-events: none;
 }
 
+
 .initial-setup::before {
   background:
     linear-gradient(112deg, transparent 18%, rgb(173 237 255 / 16%) 34%, transparent 48%),
     linear-gradient(76deg, transparent 54%, rgb(173 237 255 / 12%) 64%, transparent 76%);
 }
+
 
 .initial-setup::after {
   background:
@@ -58,11 +64,13 @@ canvas {
   animation: underwater-drift 10s ease-in-out infinite alternate;
 }
 
+
 .initial-setup h1 {
   position: relative;
   text-shadow: 0 0 28px rgb(87 209 238 / 50%);
   margin: 0;
 }
+
 
 .initial-setup__begin {
   position: relative;
@@ -76,14 +84,17 @@ canvas {
   cursor: pointer;
 }
 
+
 .initial-setup__begin:hover {
   filter: brightness(1.15);
 }
+
 
 .initial-setup__begin:focus-visible {
   outline: 3px solid #bfe7ff;
   outline-offset: 4px;
 }
+
 
 .game-screen {
   position: relative;
@@ -92,12 +103,14 @@ canvas {
   background: #0c2d57;
 }
 
+
 .game-screen__title {
   margin: 0;
   padding: 16px 24px;
   color: #ffffff;
   font: 700 24px "Comfortaa", system-ui, sans-serif;
 }
+
 
 .completion-menu {
   position: fixed;
@@ -109,6 +122,7 @@ canvas {
   background: rgb(0 0 0 / 55%);
 }
 
+
 .completion-menu__panel {
   width: min(100%, 480px);
   padding: 32px;
@@ -119,21 +133,25 @@ canvas {
   text-align: center;
 }
 
+
 .completion-menu__panel h2 {
   margin: 0 0 24px;
   font-family: "Comfortaa", system-ui, sans-serif;
 }
+
 
 .completion-menu__message {
   margin: -12px 0 24px;
   font-size: 24px;
 }
 
+
 .completion-menu__actions {
   display: flex;
   justify-content: center;
   gap: 16px;
 }
+
 
 .completion-menu__actions button {
   padding: 12px 24px;
@@ -145,12 +163,14 @@ canvas {
   cursor: pointer;
 }
 
+
 .completion-menu.is-waiting::before {
   position: absolute;
   inset: 0;
   content: "";
   background: rgb(0 0 0 / 70%);
 }
+
 
 .completion-menu.is-waiting .completion-menu__waiting {
   position: relative;
@@ -159,14 +179,17 @@ canvas {
   color: #ffffff;
 }
 
+
 .completion-menu.is-waiting .completion-menu__actions {
   opacity: 0.35;
   pointer-events: none;
 }
 
+
 .completion-menu.is-waiting .completion-menu__waiting[hidden] {
   display: block !important;
 }
+
 
 .surrender-pending {
   position: fixed;
@@ -178,6 +201,7 @@ canvas {
   background: rgb(3 20 43 / 74%);
   backdrop-filter: blur(3px);
 }
+
 
 .surrender-pending__panel {
   position: relative;
@@ -195,6 +219,7 @@ canvas {
   font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
 }
 
+
 .surrender-pending__panel::before {
   position: absolute;
   top: -55px;
@@ -208,6 +233,7 @@ canvas {
   pointer-events: none;
 }
 
+
 .surrender-pending__panel h2 {
   position: relative;
   margin: 0 0 10px;
@@ -217,6 +243,7 @@ canvas {
   line-height: 1.35;
 }
 
+
 .surrender-pending__panel > p:not(.surrender-pending__waiting) {
   position: relative;
   margin: 0 0 10px;
@@ -224,6 +251,7 @@ canvas {
   font-size: 12px;
   line-height: 1.4;
 }
+
 
 .surrender-pending__waiting,
 .surrender-pending__cancel {
@@ -236,6 +264,7 @@ canvas {
   text-align: center;
 }
 
+
 .surrender-pending__waiting {
   display: grid;
   place-items: center;
@@ -243,6 +272,7 @@ canvas {
   background: linear-gradient(110deg, #1875a3, #126184);
   color: #e9faff;
 }
+
 
 .surrender-pending__cancel {
   margin-bottom: 0;
@@ -252,9 +282,12 @@ canvas {
   cursor: pointer;
 }
 
+
 .surrender-pending__cancel:hover {
   background: rgb(36 105 145 / 58%);
 }
+
+
 
 
 .debugItem {
@@ -265,7 +298,9 @@ canvas {
     /* float:top; */
 }
 
+
 /* Level Select screen — based on Figma frame "2f Level Select" (1440 x 900). */
+
 
 .level-select,
 .level-select[data-theme="blue"] {
@@ -275,25 +310,30 @@ canvas {
   --tab-bg: #1c5b96;
   --text: #071d38;
 
+
   --level-1: #a8d8f5;
   --level-2: #79b9e5;
   --level-3: #4d91c9;
   --level-4: #286fa9;
   --level-5: #164f82;
 
+
   /* Label colors: white on the darker thumbnails for readability */
   --label-light: #000000;
   --label-dark: #ffffff;
 
+
   --locked-bg: #999999;
   --locked-text: #444444;
   --highlight: #bfe7ff;
+
 
   /* Sizes (from Figma, scaled down on narrow screens) */
   --thumb-w: clamp(140px, 19.5vw, 281px);
   --thumb-gap: clamp(24px, 9.7vw, 140px);
   --row-gap: clamp(32px, 9.8vw, 142px);
   --radius: 12px;
+
 
   position: relative;
   box-sizing: border-box;
@@ -314,6 +354,7 @@ canvas {
   font-weight: 700;
 }
 
+
 /* Blue palette */
 .level-select[data-theme="blue"] {
   --screen-bg: #0c2d57;
@@ -327,6 +368,7 @@ canvas {
   --label-dark: #ffffff;
   --highlight: #bfe7ff;
 }
+
 
 /* Title tab, top-left */
 .level-select__title {
@@ -348,6 +390,7 @@ canvas {
   margin: 0;
 }
 
+
 /* Offer Surrender button, top-right */
 .level-select__surrender {
   position: absolute;
@@ -365,8 +408,10 @@ canvas {
   cursor: pointer;
 }
 
+
 .level-select__surrender:hover { filter: brightness(0.95); }
 .level-select__surrender:active { filter: brightness(0.88); }
+
 
 /* Main panel */
 .level-select__panel {
@@ -389,6 +434,7 @@ canvas {
   gap: var(--row-gap);
 }
 
+
 .level-select__panel::before,
 .level-select__panel::after {
   position: absolute;
@@ -397,6 +443,7 @@ canvas {
   content: "";
   pointer-events: none;
 }
+
 
 .level-select__panel::before {
   background:
@@ -408,6 +455,7 @@ canvas {
   animation: underwater-drift 12s ease-in-out infinite alternate;
 }
 
+
 .level-select__panel::after {
   inset: auto 0 0;
   height: 32%;
@@ -417,15 +465,18 @@ canvas {
     linear-gradient(0deg, rgb(3 33 70 / 50%), transparent);
 }
 
+
 .level-select__panel > * {
   position: relative;
   z-index: 1;
 }
 
+
 @keyframes underwater-drift {
   from { transform: translateY(0); }
   to { transform: translateY(-12px); }
 }
+
 
 /* 3 thumbnails on top, 2 centered below */
 .level-select__row {
@@ -434,6 +485,7 @@ canvas {
   gap: var(--thumb-gap);
   width: 100%;
 }
+
 
 /* Level thumbnail (use a <button> for keyboard and click support) */
 .level {
@@ -455,11 +507,13 @@ canvas {
   transition: none;
 }
 
+
 .level[data-level="1"] { background: var(--level-1); }
 .level[data-level="2"] { background: var(--level-2); }
 .level[data-level="3"] { background: var(--level-3); }
 .level[data-level="4"] { background: var(--level-4); }
 .level[data-level="5"] { background: var(--level-5); }
+
 
 .level__thumbnail {
   position: absolute;
@@ -470,6 +524,7 @@ canvas {
   object-fit: cover;
   z-index: 0;
 }
+
 
 .level__lock {
   position: absolute;
@@ -483,6 +538,7 @@ canvas {
   pointer-events: none;
 }
 
+
 .level::before {
   position: absolute;
   inset: 0;
@@ -494,13 +550,16 @@ canvas {
   pointer-events: none;
 }
 
+
 .level:not(.is-locked):hover {
   box-shadow: inset 0 0 24px rgb(158 232 255 / 38%), 0 10px 28px rgb(3 27 57 / 40%);
 }
 
+
 .level__label {
   z-index: 3;
 }
+
 
 .level[data-level="1"] .level__label {
   padding-top: 22px;
@@ -508,13 +567,16 @@ canvas {
   background: linear-gradient(transparent, rgb(0 0 0 / 65%));
 }
 
+
 .level[data-level="3"] .level__label,
 .level[data-level="4"] .level__label,
 .level[data-level="5"] .level__label { color: var(--label-dark); }
 
+
 /* Locked levels keep dark grey labels on the grey background */
 .level.is-locked .level__label,
 .level[aria-disabled="true"] .level__label { color: var(--locked-text); }
+
 
 .level__label {
   position: absolute;
@@ -525,12 +587,14 @@ canvas {
   font-size: 16px;
 }
 
+
 /* Highlighted (currently selected) level — exactly one at a time */
 .level.is-highlighted,
 .level:focus-visible {
   outline: 6px solid var(--highlight);
   outline-offset: 0;
 }
+
 
 /* Locked level: greyed out and unresponsive.
    Use aria-disabled="true" (or the .is-locked class) when the level's
@@ -543,10 +607,12 @@ canvas {
   pointer-events: none;
 }
 
+
 .level[aria-disabled="true"] .level__thumbnail,
 .level.is-locked .level__thumbnail {
   filter: grayscale(1) brightness(0.6);
 }
+
 
 /* A locked level can still hold the highlight (keyboard focus),
    so the outline is applied by class, not by pointer interaction. */
@@ -554,6 +620,7 @@ canvas {
 .level[aria-disabled="true"].is-highlighted {
   outline: 6px solid var(--highlight);
 }
+
 
 /* Narrow screens: let thumbnails wrap into rows */
 @media (max-width: 720px) {
@@ -565,6 +632,8 @@ canvas {
   .level { --thumb-w: min(44vw, 281px); }
 }
 
+
 @media (prefers-reduced-motion: reduce) {
   .level-select * { transition: none !important; animation: none !important; }
 }
+
