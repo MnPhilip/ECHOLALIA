@@ -12,6 +12,7 @@ const gameScreen = document.getElementById("gameScreen");
 const completionMenu = document.getElementById("completionMenu");
 const completionWaiting = document.getElementById("completionWaiting");
 const surrenderMenu = document.getElementById("surrenderMenu");
+const levelTransitionOverlay = document.getElementById("levelTransition");
 const cancelSurrenderOfferButton = document.getElementById("cancelSurrenderOffer");
 const currentLevelTitle = document.getElementById("currentLevelTitle");
 const offerSurrenderButton = document.getElementById("offerSurrender");
@@ -38,6 +39,7 @@ let RESPAWN_X = rectX;
 let RESPAWN_Y = rectY;
 let gameStart = false;
 let teleportState = null;
+let levelTransition = null;
 let firstTimeTunnel = true;
 let spawnIndex = 0;
 
@@ -52,6 +54,11 @@ const TUNNEL_TIMING = {
   hidden: 1,
   exiting: 0.15,
 };
+const LEVEL_TRANSITION_DURATION = 0.65;
+const LEVEL_TRANSITION_FRAME_INTERVAL = 0.05;
+const LEVEL_TRANSITION_FRAME_COUNT = Math.ceil(
+  LEVEL_TRANSITION_DURATION / LEVEL_TRANSITION_FRAME_INTERVAL,
+);
 
 const SEAWEED_SIZE = 40;
 const PUDDLE_SIZE = 50;
@@ -59,14 +66,21 @@ const ROCKET_SIZE = 70;
 const BUBBLE_SIZE = 80;
 const PUSH_ROCK_SIZE = PUDDLE_SIZE;
 
-const level1spawn = [
+const level1SpawnPoints = [
   { screen: 0, x: 120, y: 480 },
   { screen: 1, x: 120, y: 190 },
   { screen: 2, x: 120, y: 190 },
   { screen: 3, x: 120, y: 190 },
 ];
 
-const spawnArr = [{ spawnPoints: level1spawn }];
+const level2spawn = [
+  { screen: 0, x: 120, y: 480 },
+  { screen: 1, x: 120, y: 190 },
+  { screen: 2, x: 120, y: 190 },
+  { screen: 3, x: 120, y: 190 },
+];
+
+const spawnArr = [{ spawnPoints: level1SpawnPoints }, { spawnPoints: level2spawn }];
 
 const SPRITES = [];
 const UrchinImage = new Image();
@@ -273,6 +287,29 @@ function drawAll() {
   drawPlayer();
   drawInteractables();
   drawJumpPuddles();
+  renderLevelTransition();
+}
+
+function renderLevelTransition() {
+  if (!levelTransition) {
+    levelTransitionOverlay.hidden = true;
+    return;
+  }
+
+  const frame = Math.min(
+    Math.floor(levelTransition.elapsed / LEVEL_TRANSITION_FRAME_INTERVAL),
+    LEVEL_TRANSITION_FRAME_COUNT - 1,
+  );
+  const frameIndex = levelTransition.phase === "exiting"
+    ? frame
+    : LEVEL_TRANSITION_FRAME_COUNT - frame - 1;
+  const overlayWidth = levelTransitionOverlay.clientWidth || canvas.width;
+  const overlayHeight = levelTransitionOverlay.clientHeight || canvas.height;
+
+  levelTransitionOverlay.hidden = false;
+  levelTransitionOverlay.style.backgroundSize =
+    `${overlayWidth * LEVEL_TRANSITION_FRAME_COUNT}px ${overlayHeight}px`;
+  levelTransitionOverlay.style.backgroundPosition = `${-overlayWidth * frameIndex}px 0`;
 }
 
 function WCCollision() {
@@ -338,7 +375,7 @@ function ableToExitTunnel(pcPosition) {
 }
 
 function tunnelCollision() {
-  if (!gameStart || teleportState) return false;
+  if (!gameStart || teleportState || levelTransition) return false;
 
   const entrance = tunnels.find((tunnel) => {
     return rectX < tunnel.x + tunnel.width &&
@@ -441,7 +478,7 @@ function removeOldCharacter() {
 }
 
 function reRender(movePosX, movePosY) {
-  if (teleportState) return false;
+  if (teleportState || levelTransition) return false;
 
   const nextX = rectX + movePosX;
   const nextY = rectY + movePosY;
@@ -455,7 +492,7 @@ function reRender(movePosX, movePosY) {
     updateCheckPoint(currentScreen + 1);
     currentScreen += 1;
 
-    const coordinates = spawnArr[currentLevel - 1].spawnPoints[currentScreen];
+    const coordinates = spawnArr[currentLevel - 1]?.spawnPoints[currentScreen] ?? { x: 120, y: 480 };
     rectX = coordinates.x;
     rectY = coordinates.y;
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
@@ -501,6 +538,11 @@ function moveCharacterWASD(moveKeys) {
 }
 
 function updatePhysics(deltaTime) {
+  if (levelTransition) {
+    updateLevelTransition(deltaTime);
+    return;
+  }
+
   if (teleportState) {
     updateTeleport(deltaTime);
     return;
@@ -538,6 +580,24 @@ function updateTeleport(deltaTime) {
       teleportState.phase = "exiting";
     } else {
       teleportState = null;
+    }
+  }
+
+  drawAll();
+}
+
+function updateLevelTransition(deltaTime) {
+  if (!levelTransition) return;
+
+  levelTransition.elapsed += deltaTime;
+  while (levelTransition && levelTransition.elapsed >= LEVEL_TRANSITION_DURATION) {
+    levelTransition.elapsed -= LEVEL_TRANSITION_DURATION;
+    if (levelTransition.phase === "exiting") {
+      levelTransition.phase = "entering";
+      activateLevel(levelTransition.destinationLevel);
+    } else {
+      levelTransition = null;
+      pressedKeys.clear();
     }
   }
 
@@ -625,11 +685,43 @@ function updateLevelSelectButtons() {
 }
 
 function loadLevel(level) {
+  if (level === 2 || (currentLevel === 2 && level === 3)) {
+    beginLevelTransition(level);
+    return;
+  }
+
+  activateLevel(level);
+}
+
+function beginLevelTransition(destinationLevel) {
+  pressedKeys.clear();
+  playerVelocity.x = 0;
+  playerVelocity.y = 0;
+  activeMovementElement = null;
+
+  levelTransition = {
+    destinationLevel,
+    elapsed: 0,
+    phase: gameStart && !gameScreen.hidden ? "exiting" : "entering",
+  };
+
+  if (levelTransition.phase === "entering") {
+    activateLevel(destinationLevel);
+  }
+
+  drawAll();
+  if (stopMain === null) {
+    stopMain = window.requestAnimationFrame(main);
+  }
+}
+
+function activateLevel(level) {
   currentLevel = level;
   currentScreen = 0;
+  spawnIndex = 0;
   levelSelectScreen.hidden = true;
   gameScreen.hidden = false;
-  currentLevelTitle.textContent = `Level ${level}`;
+  currentLevelTitle.textContent = level === 2 ? "Shallows" : `Level ${level}`;
   gameStart = true;
   spawn();
   if (stopMain === null) {
@@ -726,6 +818,7 @@ window.addEventListener("keydown", (event) => {
   }
 
   if (!gameStart || gameScreen.hidden || !completionMenu.hidden) return;
+  if (levelTransition) return;
 
   if (["w", "a", "s", "d"].includes(key)) {
     pressedKeys.add(key);
