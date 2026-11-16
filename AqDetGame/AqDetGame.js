@@ -13,8 +13,6 @@ window.main = () => {
     // updatePhysics();
     
     window.cancelAnimationFrame(stopMain);
-    
-    
 }
 
 function start(){
@@ -169,6 +167,32 @@ const TUNNEL_TIMING = {
   hidden: 1,
   exiting: 0.15,
 };
+
+// Sammy Sprite
+const SAMMY_PATH = "ECHOLALIA/Senior Project Art/Sammy Davis";
+const SAMMY_DRAW_SIZE = 64;
+
+function loadImage(src) {
+  const img = new Image();
+  img.onload = () => { if (gameStart) drawAll(); };
+  img.src = src;
+  return img;
+}
+
+const sammySprites = {
+  idle: loadImage(SAMMY_PATH + "Player Idle.png"),
+  walk: loadImage(SAMMY_PATH + "Player Walk.png"),
+  jump: loadImage(SAMMY_PATH + "Player Jump.png"),
+}
+
+let sammyPose = "idle";
+let sammyFacingLeft = false;
+
+function imageReady(img) {
+  return img.complete && img.naturalWidth !== 0;
+}
+
+// Sammy Sprite End
 
 function renderInit() {
     drawBarriers();
