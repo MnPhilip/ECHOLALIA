@@ -1,30 +1,142 @@
+// alert("Test of JS file worksssss");
 document.addEventListener('DOMContentLoaded', () => {
-    alert("DEBUG SPACE LOADED");
+    // alert("DEBUG SPACE LOADED");
 })
 
-let stopMain = null;
-let lastFrameTime = null;
+
+
 
 //Consider this function the Main of the entire game AND the infinite "While loop" that will call
 //      All natually-occuring events like gravity, enemy movement, and stuff like water currents
-window.main = (timestamp = performance.now()) => {
-    if (!gameStart) {
-        stopMain = null;
-        lastFrameTime = null;
-        return;
-    }
-
-    const deltaTime = lastFrameTime === null
-        ? 0 : Math.min((timestamp - lastFrameTime) / 1000, 0.05);
-    lastFrameTime = timestamp;  
-    counter++;
-    updatePhysics(deltaTime);
+window.main = () => {
     stopMain = window.requestAnimationFrame(main);
+    // alert(counter);    
+    counter++;
+    // updatePhysics();
+   
+    window.cancelAnimationFrame(stopMain);
+   
+   
 }
 
+
+
+
+const canvas = document.getElementById('PlrDisplay');
+const playerPH = canvas.getContext("2d");
+canvas.style.width = window.innerWidth;
+canvas.style.height = window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+
+
+
+const lvlCanvas = document.getElementById('LevelDisplay');
+const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
+lvlCanvas.style.width = window.innerWidth;
+lvlCanvas.style.height = window.innerHeight;
+lvlCanvas.width = window.innerWidth;
+lvlCanvas.height = window.innerHeight;
+
+
+
+
+const bckgrndCanvas = document.getElementById('BackgroundDisplay');
+const background = bckgrndCanvas.getContext("2d");
+bckgrndCanvas.style.width = window.innerWidth;
+bckgrndCanvas.style.height = window.innerHeight;
+// bckgrndCanvas.width = 1308;
+// bckgrndCanvas.height = 649;
+
+
+
+
+var currentLevel = 0;
+var currentScreen = 0;
+
+
+
+
+const rectSize = 60;
+var rectX; //player PlaceHolder
+var rectY;
+//INTERACTABLES MERGE
+var lastKeyPressed;
+
+
+var RESPAWN_X;
+var RESPAWN_Y;
+//0,0, IS TOP LEFT
+var bubbleResX = -1;
+var bubbleResY = -1;
+
+
+var signalFlareIndex = -1;
+
+
+//Interactable Type Constants
+const pushBlock = 11;
+const bubble = 22;
+const signalFlare = 33;
+var interactActive = false;
+var currObj = -1;
+//INTERACTABLES MERGE
+
+
+
+
+var moveDistanceX;
+var moveDistanceY;
+const NO_MOVEMENT = 0;
+const STANDARD_MOVEMENT = 15;
+var moveDistance = STANDARD_MOVEMENT;
+
+
+var pressedKeys = new Set();
+
+
+counter = 0;
+
+
+let gameStart = false;
+
+
+const spawnArr = [
+    {
+        spawnPoints: level3spawn
+    }
+];
+
+
+let spawnIndex = 0;
+
+
+
+
+
+
+const SEAWEED_SIZE = 40;
+const PUDDLE_SIZE = 50;
+const ROCKET_SIZE = 70;
+const BUBBLE_SIZE = 80;
+const PUSH_ROCK_SIZE = PUDDLE_SIZE;
+const interactableSize = 80;
+
+
+
+
+const barriers = createBarrier(lvlCanvas);
+const interactableItems = createInteractables(lvlCanvas);
+const jumpPuddles = createJumpPuddle(lvlCanvas);
+const respawnAnchors = populateSaves(lvlCanvas);
+
+
+
+
 function start(){
-    canvas.style.width = '1308px';
-    canvas.style.height = '649px';
+    // canvas.style.width = '1308px';
+    // canvas.style.height = '649px';
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
     if(!gameStart){
         playerPH.fillStyle = "Black";
@@ -35,298 +147,32 @@ function start(){
     } else{
         spawn();
     }
-    
+   
     //requestAnimationFrame(start);
 }
 
-const canvas = document.getElementById('PlrDisplay');
-const playerPH = canvas.getContext("2d"); 
 
 
-const SPRITES = [];
-
-const UrchinImage = new Image();
-//UrchinImage.src = "AqDetImport/UrchinEnemy.png"; //TEMP ASSET, will be replaced with a more appropriate asset later
-//Note the hitbox for the enemy is 50x50, so the asset should be scaled to that size for proper collision detection.
-
-UrchinImage.onload = () => {
-    SPRITES.push(UrchinImage);
-    console.log("Urchin image loaded successfully.");
-}
-var currentLevel = 0;
-var currentScreen = 0;
 
 
-const rectSize = 60;
-var rectX; //player PlaceHolder
-var rectY;
-var gravVector;
-
-var RESPAWN_X;
-var RESPAWN_Y;
-//0,0, IS TOP LEFT
-
-const moveDistance = 15; 
-const STANDARD_MOVEMENT = 15; // pixels per frame
-const NO_MOVEMENT = 0;
-//const pressedKeys = new Set();
-
-let counter = 0;
-const playerVelocity = {x: 0, y: 0};
-let activeMovementElement = null;
-
-const ELEMENT_WATER_CURRENT = "waterCurrent";
-const CURRENT_TYPES = {
-    gentle: { speed: 60 }, // pixels per second
-    strong: { speed: 120 }
-};
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let gameStart = false;
-let teleportState = null;
-let firstTimeTunnel = true;
-
-const spawnArr = [
-    {
-        spawnPoints: level3spawn
-    }
-];
-
-let spawnIndex = 0;
-
-const SEAWEED_SIZE = 40;
-const PUDDLE_SIZE = 50;
-const ROCKET_SIZE = 70;
-const BUBBLE_SIZE = 80;
-const PUSH_ROCK_SIZE = PUDDLE_SIZE;
-
-
-const barriers = createBarrier(canvas);
-const interactableItems = createInteractables(canvas);
-const jumpPuddles = createJumpPuddle(canvas);
-const waterCurrents = createWaterCurrents(canvas);
-const enemies = createEnemies(canvas);
 
 function drawBarriers() {
     for (const b of barriers[currentScreen]) {
-        playerPH.fillStyle = b.color;
-        playerPH.fillRect(b.x,b.y,b.width,b.height);
+        lvlLayout.fillStyle = b.color;
+        lvlLayout.fillRect(b.x,b.y,b.width,b.height);
+    }
+    drawObjectBarriers();
+}
+
+
+function drawObjectBarriers() {
+    // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
+    for (const obj of interactableItems[currentScreen]) {
+        lvlLayout.strokeStyle = 'red';
+        lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
     }
 }
 
-/*
-const enemy = {
-    x: 200,
-    y: 500,
-    width: 50,
-    height: 50,
-    color: "purple"
-}; //color is a default, as the enemies will have pngs mapped to them
-
- const waterCurrents = [
-    {
-    x: 100,
-    y: 200,
-    width: 250,
-    height: 150,
-    type: "strong",
-    direction: {x: 1, y: 0}, // rightward   (y: -1 up, y: 1 down)
-    }
-];
-*/
-
-const tunnels = [ //Value of X and Y will change based on later implementation of each levels tunnels
-    {
-        id: "A",
-        partnerId: "B",
-        x: 100,
-        y: canvas.height - 400,
-        width: 90,
-        height: 45
-    },
-    {
-        id: "B",
-        partnerId: "A",
-        x: 500,
-        y: canvas.height - 500,
-        width: 90,
-        height: 45
-    }
-];
-
-const TUNNEL_TIMING = {
-    entering: 0.15,
-    hidden: 1,
-    exiting: 0.15
-};
-
-function drawEnemy() {
-    for (const e of enemies[currentScreen]) {
-        if( UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
-            playerPH.drawImage(UrchinImage, e.x, e.y, e.width, e.height);
-        } else {
-            playerPH.fillStyle = e.color;
-            playerPH.fillRect(e.x, e.y, e.width, e.height); //Default loading if the asset art fails to load
-        }
-    }
-}
-
-function drawWaterCurrents() {
-    playerPH.save();
-    /*
-    playerPH.strokeStyle = "lightblue";
-    playerPH.fillStyle = "rgba(148, 210, 231, 0.5)"; // light blue with transparency
-    playerPH.lineWidth = 3;
-    */
-
-    for (const current of waterCurrents[currentScreen]) {
-        playerPH.fillStyle = current.color;
-        playerPH.fillRect(current.x, current.y, current.width, current.height);
-    }
-    playerPH.restore();
-}
-
-function drawTunnels() {
-    playerPH.save();
-    playerPH.lineWidth = 4;
-    playerPH.font = "14px Arial";
-    playerPH.textAlign = "center";
-    playerPH.textBaseline = "bottom";
-
-    for(const tunnel of jumpPuddles[currentScreen]) {
-        const centerX = tunnel.x + tunnel.width/2;
-        const centerY = tunnel.y + tunnel.height/2;
-        playerPH.beginPath(); //shows connecting paths for the tunnels.
-        playerPH.ellipse(centerX, centerY, tunnel.width/2, tunnel.height/2, 0, 0, Math.PI * 2);
-
-        playerPH.fillStyle = "MediumSpringGreen";
-        playerPH.fill();
-        playerPH.strokeStyle = "orange";
-        playerPH.stroke();
-        if (firstTimeTunnel) {
-            playerPH.fillText(`Press E to teleport`, centerX, tunnel.y - 8);
-        }
-    }
-    playerPH.restore();
-}
-
-function drawPlayer() {
-    if (teleportState?.phase === "hidden") return; //dont draw player if their state is hidden
-    let scale = 1; //scaler for teleporting animation
-    if (teleportState) {
-        const progress = Math.min(teleportState.elapsed / TUNNEL_TIMING[teleportState.phase], 1); //shrinks / grows player based on elapsed state
-        scale = teleportState.phase === "entering" ? 1 - progress : progress;
-    }
-    const size = rectSize * scale; // updates player size based on previously defined size
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX + (rectSize - size) / 2, rectY + (rectSize - size) / 2, size, size);
-}
-
-function drawAll() {
-    playerPH.clearRect(0,0, canvas.width, canvas.height); // clear player so they dont duplicate at the starting teleporter
-    drawWaterCurrents();
-    drawBarriers();
-    drawTunnels();
-    drawInteractables();
-    drawJumpPuddles();
-    drawEnemy();
-    drawPlayer();
-}
-
-function WCCollision() {
-    if (!gameStart) return;
-
-     const overlappingCurrents = waterCurrents.filter(current => {
-        return rectX < current.x + current.width && //boundary check for whether the player is in a current
-               rectX + rectSize > current.x &&
-               rectY < current.y + current.height &&
-               rectY + rectSize > current.y;
-    });
-
-    for (const current of overlappingCurrents) {
-        const currentType = CURRENT_TYPES[current.type]; //apply movement to player based on the defined speed tyoe for current 
-        if (!currentType) continue;
-        elementMovement(ELEMENT_WATER_CURRENT, current.direction, currentType.speed); //defines movement speed of player based on the kind of current type
-    }
-}
-
-function tunnelExit(tunnel) {
-    return {
-        x: tunnel.x + (tunnel.width - rectSize) / 2,
-        y: tunnel.y - rectSize + 4};
-    }
-
-function elementMovement(elementType, direction, speed) {
-    //Check if speed is valid or current is being passed
-    if (elementType !== ELEMENT_WATER_CURRENT || !Number.isInteger(speed) || speed <= 0) return false;
-
-    let directionVector;
-    if (typeof direction === "string") {
-        const normalizedDirection = direction.toLocaleLowerCase(); //
-        const directions = {
-            up: {x: 0, y: -1},
-            down: {x: 0, y: 1},
-            left: {x: -1, y: 0},
-            right: {x: 1, y: 0}
-        };
-        directionVector = directions[normalizedDirection];
-    }
-    else if (direction && Number.isFinite(direction.x) && Number.isFinite(direction.y)) { //Validates nums are in bounds
-        directionVector = direction;
-    }
-    if (!directionVector) {return false;}
-
-    const length = Math.hypot(directionVector.x, directionVector.y);
-    if (length === 0) return false;
-
-    //Determine player velocity given the parameters
-    playerVelocity.x += directionVector.x / length * speed;
-    playerVelocity.y += directionVector.y / length * speed;
-
-    //For future use when we implement animations for interactables and other objects
-    //Calls only when a movement element becomes active rather than every frame
-    if (activeMovementElement !== elementType) {
-        activeMovementElement = elementType;
-        //alert("Animation Called"); Commented out for sake of it not appearing everytime for testing, specified in task #249
-    }
-    return true;
-}
-
-function ableToExitTunnel(pcPosition) { //Ensures exit teleport isnt in a barrier or enemy
-    return(pcPosition.x >= 0 && pcPosition.y >= 0 && 
-        pcPosition.x + rectSize <= canvas.width &&
-        pcPosition.y + rectSize <= canvas.height &&
-        !collidesWithBarrier(pcPosition.x, pcPosition.y) && 
-        !collidesWithEnemy(pcPosition.x, pcPosition.y)
-    );
-}
-
-function tunnelCollision() {
-    if (!gameStart || teleportState) {
-        return false;
-    }
-    const entrance = tunnels.find(tunnel =>
-        rectX < tunnel.x + tunnel.width && rectX + rectSize > tunnel.x &&
-        rectY < tunnel.y + tunnel.height + 14 && rectY + rectSize > tunnel.y - 14); //define the entrance tunnel location and validate it
-
-    if (!entrance) { return false;}
-
-    const dest = tunnels.find(tunnel => tunnel.id === entrance.partnerId // validate destination tunnel and its partner match
-        && tunnel.partnerId === entrance.id && tunnel.id !== entrance.id);
-        
-    if(!dest || !ableToExitTunnel(tunnelExit(dest))) { return false; } //check if player can exit from destination tunnel
-
-    teleportState = {
-        dest,
-        elapsed: 0,
-        sourceX: rectX,
-        sourceY: rectY,
-        phase: "entering",
-    };
-    drawAll();
-}
 
 function collidesWithBarrier(x, y, width, height) {
     for (const b of barriers[currentScreen]) {
@@ -340,32 +186,40 @@ function collidesWithBarrier(x, y, width, height) {
     return false;
 }
 
-function collidesWithEnemy(x, y) {
-    for (const e of enemies[currentScreen]) {
-        if (x < e.x + e.width &&
-            x + rectSize > e.x &&
-            y < e.y + e.height &&
-            y + rectSize > e.y) {
-        return true;
-        }
+
+function collidesWithObject(x, y, width, height) {
+    if (interactActive) {
+        return false;
     }
-  return false;
+    for (const b of interactableItems[currentScreen]) {
+        if (x < b.x + b.width &&
+            x + rectSize > b.x &&
+            y < b.y + b.height &&
+            y + rectSize > b.y) {
+            return true;
+            }
+    }
+    return false;
 }
+
 
 function drawJumpPuddles() {
     for (const d of jumpPuddles[currentScreen]) {
-        playerPH.fillStyle = d.color;
-        playerPH.fillRect(d.x,d.y,d.width,d.height);
+        lvlLayout.fillStyle = d.color;
+        lvlLayout.fillRect(d.x,d.y,d.width,d.height);
     }
 }
+
+
 
 
 function drawInteractables() {
     for (const d of interactableItems[currentScreen]) {
-        playerPH.fillStyle = d.color;
-        playerPH.fillRect(d.x,d.y,d.width,d.height);
+        lvlLayout.fillStyle = d.color;
+        lvlLayout.fillRect(d.x,d.y,d.width,d.height);
     }
 }
+
 
 // returns true if player has reached left-most area, to proceed to the next screen
 function reachScreenEnd(rectX) {
@@ -376,9 +230,12 @@ function reachScreenEnd(rectX) {
 }
 
 
+
+
 function getSpawnPoint(){
     return spawnArr[currentLevel].spawnPoints[spawnIndex];
 }
+
 
 function updateCheckPoint(checknum){
     if(checknum == spawnIndex +1 && checknum < spawnArr[currentLevel].spawnPoints.length){
@@ -386,25 +243,58 @@ function updateCheckPoint(checknum){
     }
 }
 
+
 function spawn(){
-  teleportState = null;
     const spawnPoint = getSpawnPoint();
     currentScreen = spawnPoint.screen;
     rectX = spawnPoint.x;
-   rectY = spawnPoint.y;
+    rectY = spawnPoint.y;
     //alert("X: " + rectX  + "\n Y" + rectY)
     playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    drawAll();
+    lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
+
+
+    drawBarriers();
+    drawInteractables();
+    drawJumpPuddles();//draw movement element
+
+
+    playerPH.fillStyle = "green";
+    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+   
+
+
+   
+    // canvasTemp = document.getElementById("LayoutDisplay");
+    // playerPHTEMP = canvasTemp.getContext("2d");
+    // playerPHTEMP.fillStyle("red");
+    // playerPHTEMP.fillRect(300, 300, rectSize, rectSize);
 }
 
+
+
+
 function respawn(){
-    teleportState = null;
-    findRespawn();
+    spawn();
+    /*
+    findRespawn(); //Allows player to get spawn coordinates without hardcoding
     removeOldCharacter();
+    if (interactActive){
+      interactActive = !interactActive;
+      interactableItems[currentScreen][currObj].activated = false;
+      if (interactableItems[currentScreen][currObj].type == bubble){
+        bubblePop();
+      }
+    }
     rectX = RESPAWN_X;
     rectY = RESPAWN_Y;
+   
     reRender(0, 0);
+    */
 }
+
+
+
 
 function saveRespawnCoordinates(x, y) {
   RESPAWN_X = x;
@@ -422,6 +312,7 @@ function findRespawn(){
         newResX = 100;
     }
 
+
     if (rectY >= 500){
         newResY = 900;
     }
@@ -431,240 +322,482 @@ function findRespawn(){
     saveRespawnCoordinates(newResX, newResY);//AFTER CHANGE: By-level decision, CALL a function that changes based on what level is loaded
 }
 
-function removeOldCharacter() {
-  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
 
+function removeOldCharacter() {
+//   if (!player) return; // nothing to remove
+
+
+//   // stop anything still running on the old PC
+//   player.stopAnimations();
+//   player.detachInputHandlers();
+
+
+//   // take it out of the game and release the reference
+//   removeFromEntityList(player);
+//   player = null;
+  playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
+//   respawn();
 }
 
 
-function reRender(movePosX, movePosY){
-    if (teleportState) {return false; } // prevent movement during teleportation
+
+
+function reRender(movePosX, movePosY) {
+
+
     const newX = rectX + movePosX;
-    const nextY = rectY + movePosY;
+    const newY = rectY + movePosY;
+
+
+    // Check if player reached the left edge
     if (reachScreenEnd(newX)) {
+
 
         // Check if this is the last screen
         if (currentScreen === 3) {
-            alert("Level done");
+            //alert("Level done");
+            levelCompleted();
             return;
         }
+
 
         // Unlock the next checkpoint
         updateCheckPoint(currentScreen + 1);
 
+
         // Change to next screen
         currentScreen++;
+
 
         // Get new screen coordinates
         const coordinates =
             spawnArr[currentLevel].spawnPoints[currentScreen];
 
+
         rectX = coordinates.x;
         rectY = coordinates.y;
 
+
+        // New screen spawn coords using newer implementation
+        // var coordinates = {
+        //     x: respawnAnchors[currentScreen].x,
+        //     y: respawnAnchors[currentScreen].y
+        // }
+
+
+        // rectX = coordinates.x;
+        // rectY = coordinates.y;
+
+
         // Draw new screen
         playerPH.clearRect(0, 0, canvas.width, canvas.height);
+    lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
 
-        drawAll();
+
+        drawBarriers();
+        drawInteractables();
+        drawJumpPuddles();
+
+
+        playerPH.fillStyle = "green";
+        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+
+
         return;
     }
 
-    if (collidesWithBarrier(rectX + movePosX, rectY + movePosY)) {
-        return false;
+
+    // Check collisions before normal movement
+    if (collidesWithBarrier(rectX + movePosX, rectY + movePosY) || collidesWithObject(rectX+movePosX, rectY+movePosY)) {
+        return;
     }
-    if (collidesWithEnemy(rectX + movePosX, rectY + movePosY)) {
-        respawn();
-        return false;
-    }
-    
-    console.log("X: " + newX + " Y: " + nextY);
-    playerPH.clearRect(rectX, rectY, rectSize, rectSize);
+
+
+    // Clear old player
+    playerPH.clearRect(rectX, rectY, canvas.width, canvas.height);
+
+
+    // Update position
     rectX = newX;
-    rectY = nextY;
+    rectY = newY;
 
-    drawAll();
-    return true;
+
+   // Update bubble position before drawing
+if (currObj != -1 && interactActive) {
+
+
+    const obj = interactableItems[currentScreen][currObj];
+
+
+    if (obj.type == pushBlock && obj.activated) {
+
+
+        obj.x += movePosX;
+        obj.y += movePosY;
+
+
+    } else if (obj.type == bubble && obj.activated) {
+
+
+        obj.x += movePosX;
+        obj.y += movePosY;
+
+
+        if (movePosX != 0 || movePosY != 0) {
+            bubbleCounter--;
+
+
+            if (bubbleCounter <= 0) {
+                bubblePop();
+            }
+        }
+    }
 }
 
-function pcInteract()
-{   
-    return tunnelCollision();
+
+// Clear old level drawings
+lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
+
+
+// Redraw environment at updated positions
+drawBarriers();
+drawInteractables();
+drawJumpPuddles();
+    //NOTE: Required changing interactableLoc, AND uses "currObj which may not work anymore"
+
+
+    // Draw player
+    playerPH.fillStyle = "green";
+    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
 }
+
+
+
 
 // moves the player a fixed amount, depending on the key pressed (WASD)
 function moveCharacterWASD(moveKeys) {
     moveDistanceX = NO_MOVEMENT;
-    let moveDistanceY = NO_MOVEMENT;
+    moveDistanceY = NO_MOVEMENT;
+    if (moveKeys.has('w')){
+        moveDistanceY -= STANDARD_MOVEMENT;
+    }
+
+
     if (moveKeys.has('a')){
-        console.log("a pressed");
         moveDistanceX -= STANDARD_MOVEMENT;
     }
-     if (moveKeys.has('w')){
-        console.log("W pressed");
-	    moveDistanceY -= STANDARD_MOVEMENT;
-    }
+   
     if (moveKeys.has('s')){
-        console.log("S pressed")
         moveDistanceY += STANDARD_MOVEMENT;
     }
+   
     if (moveKeys.has('d')){
-        console.log("D pressed");
         moveDistanceX += STANDARD_MOVEMENT;
     }
     //alert(moveDistanceX + " " + moveDistanceY);
     reRender(moveDistanceX, moveDistanceY);
 }
 
-window.addEventListener("keydown", (e) =>{ 
-    const pressedKeys = new Set();
-    main(); //infinite loop
+
+window.addEventListener("keydown", (e) => {
+
+
+    if (!gameStart) {
+        return;
+    }
+
+
     pressedKeys.add(e.key.toLowerCase());
-    //Fix to allow caps letters and multiple buttons being pressed
-    if(e.key === "Enter" && !gameStart){
-        gameStart = true; 
-        spawn();
-    } else if(pressedKeys.has('w') || pressedKeys.has('a') || 
-    pressedKeys.has('s') || pressedKeys.has('d')){
-        moveCharacterWASD(pressedKeys);
-    } else if (e.key === " ") { //Space Entered - call jump
-        // reRender(0, -50);Jump no longer needed
-    } else if (e.key.toLowerCase() === "e") { //'e' key pressed, call enter
+
+
+    if (e.key.toLowerCase() === "e") {
         pcInteract();
     }
-    else if ((e.key).toLowerCase() === 'c')
+
+
+    if (e.key.toLowerCase() === "c") {
+         respawn();
+    }
+
+
+    if (pressedKeys.has("w") ||
+        pressedKeys.has("a") ||
+        pressedKeys.has("s") ||
+        pressedKeys.has("d")) {
+
+
+        lastKeyPressed = e.key.toLowerCase();
+        moveCharacterWASD(pressedKeys);
+    }
+});
+window.addEventListener('keyup', (event) => {
+    // Remove the key from the Set when released
+    // alert("keyup");
+    // pressedKeys.delete(event.key.toLowerCase());
+    pressedKeys.clear();
+});
+
+
+////INTERACTABLES IMPLEMENTATION
+
+
+
+
+//Full interactable implementation
+
+
+function pcInteract()
+{  
+    var objType;
+   
+    if (!interactActive){
+        objType = interactCheck();
+        // alert("Interact Key Pressed!");
+    } else {
+        interactActive = !interactActive;
+        interactableItems[currentScreen][currObj].activated = false;
+        currObj = -1;
+        objType = -1;
+    }
+
+
+
+
+    if (objType < 0)
     {
-        respawn();
-    }// added for testing purposes, NEEDS TO BE REMOVED BEFORE FINAL SUBMISSION
-    else if (e.key.toLowerCase() === 'n') {
-        goToNextScreenForTesting();
-    }
-    else {}
-})
-
-function updatePhysics(deltaTime) {
-    if (teleportState) {
-        updateTeleport(deltaTime);
+        // alert("No object found or object unbound");
         return;
     }
-    playerVelocity.x = 0; //reflect updates from elementMovement()
-    playerVelocity.y = 0;
-    WCCollision(deltaTime); // players velocity doesnt effect the currents ability to move player, so only use deltaTime
+    else if (objType == pushBlock) {
+        alert("push block active");
+    }//PushBlock found
+    else if (objType == bubble) {
+      alert("Bubble Found");
+      activateBubble();
+    }//Bubble found
+    else if (objType == signalFlare){
+      alert("Signal Flare Found");
+      window.dispatchEvent(flareSent);
+    } //Signal Flare found
+}
 
-    if (playerVelocity.x !== 0 || playerVelocity.y !== 0) { // only rerender if the velocity is changing or player is not stationary
-        reRender(playerVelocity.x * deltaTime, playerVelocity.y * deltaTime);
-    }
-    else {
-        activeMovementElement = null;
+
+//CONCEPT: if an interactable is found up, down, left, or right of the player when interact is called, return the type of interactable that was found
+//      and set the "activated" boolean of that interactable to 'true'
+function interactCheck(){
+    if (directionalCheck()) {//Checks above and below the player object
+        // alert(directionalCheck());
+        interactActive = true;  //Allows other functions to know an interaction is active
+        interactableItems[currentScreen][currObj].activated = true;
+        return interactableItems[currentScreen][currObj].type;
     }
 }
 
-function updateTeleport(deltaTime) {
-    if(!teleportState) return;
 
-    teleportState.elapsed += deltaTime;
-    while (teleportState && teleportState.elapsed >= TUNNEL_TIMING[teleportState.phase]) { // Checks progress of each state of teleporting
-        teleportState.elapsed -= TUNNEL_TIMING[teleportState.phase];
-        if (teleportState.phase === "entering") {
-            teleportState.phase = "hidden";
-        }
-        else if (teleportState.phase === "hidden") { // update player location based on the respective exit tunnel
-            const exit = tunnelExit(teleportState.dest);
+//PURPOSE: Will check all four directions around the player and find if an interactable is accessible
+function directionalCheck(){
+  count = 0;
+  //RectX, RectY+move -> RectX+move, RectY+move
+  //
+  //
+  //RectX, RectY -> RectX+move, RectY
+  if (lastKeyPressed == "w"){ //CHECK UP, NEG Y
+    // alert("W Check");
+    for (var obj of interactableItems[currentScreen]){
+      if ((obj.y <= rectY-(moveDistance/2)) && (rectY-(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
+        currObj = count;
+        alert(count);
+        return true;
+      }
+      count++;
+    }
+  } else if (lastKeyPressed == "a"){ //CHECK LEFT, NEG X
+    // alert("A Check");
+    for (var obj of interactableItems[currentScreen]){
+      if ((obj.x <= rectX-(moveDistance/2)) && (rectX-(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*3) {
+        currObj = count;
+        return true;
+      }
+    count++;
+    }
+  } else if (lastKeyPressed == "s"){ //CHECK DOWN, POS Y
+    // alert("S Check");
+    for (var obj of interactableItems[currentScreen]){
+      if ((obj.y <= rectY+rectSize+(moveDistance/2)) && (rectY+rectSize+(moveDistance/2) <= obj.y+interactableSize) && Math.abs(rectX-obj.x) <= moveDistance*2) {
+        currObj = count;
+        return true;
+      }
+    count++;
+    }
+  } else if (lastKeyPressed == "d"){ //CHECK RIGHT, POS X
+    // alert("D Check");
+    for (var obj of interactableItems[currentScreen]) {
+      if ((obj.x <= rectX+rectSize+(moveDistance/2)) && (rectX+rectSize+(moveDistance/2) <= obj.x+interactableSize) && Math.abs(rectY-obj.y) <= moveDistance*2) {
+        currObj = count;
+        return true;
+      }
+      count++;
+    }
+  } else {return false;}
 
-            if (ableToExitTunnel(exit)) { // if player is able to exit dest tunnel, update player location vars
-                rectX = exit.x;
-                rectY = exit.y;
+
+  return false;
+}
+
+
+function activateBubble(){
+  if (interactableItems[currentScreen][currObj].type == bubble) {
+    bubblePush(interactableItems[currentScreen][currObj].x, interactableItems[currentScreen][currObj].y);
+  }
+}
+
+
+function bubblePush(newX, newY){
+  bubbleCounter = bubble;
+  removeOldCharacter();
+  rectX = newX;
+  bubbleResX = newX;
+  rectY = newY;
+  bubbleResY = newY;
+  reRender(0, 0);
+}
+
+
+function bubblePop() {
+    interactableItems[currentScreen][currObj].activated = false;
+    interactableItems[currentScreen][currObj].x = bubbleResX;
+    interactableItems[currentScreen][currObj].y = bubbleResY;
+    interactActive = false;
+    pcInteract();
+}
+////INTERACTABLES IMPLEMENTATION
+
+
+const TOTAL_LEVELS = 5; //total lvels
+let highestUnlocked = 1; // start at level 1 for now
+let levelSelectShown = false; //level select
+
+
+
+
+const setupMenu = document.getElementById("initialSetup"); //begin
+const levelMenu = document.querySelector(".level-select"); //level select has no id so use query select
+const gameScreen = document.getElementById("gameScreen");  //game
+
+
+function showLevelSelect() {
+    gameStart = false;
+    pressedKeys.clear(); //clear keys so movement doesnt trigger
+    levelSelectShown = true;
+    setupMenu.hidden = true;
+    gameScreen.hidden = true;
+    levelMenu.hidden = false;
+    levelSelectDisplay();
+}
+
+
+
+
+function levelSelectDisplay() {
+    const buttons = document.querySelectorAll(".level");//get all level elements
+    buttons.forEach(button => {
+        const level = Number(button.dataset.level);
+        const lock = button.querySelector(".level__lock");
+        if (level == 1) {
+            button.disabled = false;//make button clickable
+          button.classList.remove("is-locked");//remove the faded level cover
+            if (lock) {
+              lock.hidden = true;//remove the lock png
             }
-            else {
-                rectX = teleportState.sourceX; 
-                rectY = teleportState.sourceY;
+        } else {//if it is not level 1 make it seem that it is locked
+            button.disabled = true;
+            button.classList.add("is-locked");
+            if (lock) {
+                lock.hidden = false;
             }
-            teleportState.phase = "exiting";
         }
-        else { 
-            teleportState = null; 
-        }
-    }
-    drawAll();
+    });
 }
 
-//For testing purposes, allows the player to skip to the next screen without having to reach the end of the current screen
-function goToNextScreenForTesting() {
-    const nextScreen = currentScreen + 1;
-    const spawnPoint = spawnArr[currentLevel]?.spawnPoints
-        .find(point => point.screen === nextScreen);
 
-    if (!barriers[nextScreen] || !spawnPoint) {
-        console.log("No next screen or spawn point available.");
-        return;
-    }
 
-    currentScreen = nextScreen;
-    rectX = spawnPoint.x;
-    rectY = spawnPoint.y;
-    drawAll();
-}
 
-let chosenOption = null;
-
-function levelCompleted() {
-  chosenOption = null;
-  showCompletionMenu(); // Continue and Exit buttons
-}
-
-function onOptionPressed(option) { // "continue" or "exit"
-  if (chosenOption !== null) return; // ignore repeat presses
-  chosenOption = option;
-  darkenMenu();
-  showMessage("Waiting");
-  alertAlternatePlayer(option); // placeholder, see questions
-}
-
-function onAlternatePlayerResponse() { // called when the signal arrives
-  hideMessage();
-  closeMenu();
-  if (chosenOption === "continue") loadNextLevel();
-  else if (chosenOption === "exit") loadLevelSelect();
-  chosenOption = null;
-}
-const TOTAL_LEVELS = 5;
-let highestUnlocked = 1; // Level 1 always unlocked
-
-function isUnlocked(level) {
+function isUnlocked(level){
   return level <= highestUnlocked;
 }
 
-function onLevelCompleted(level) {
-  if (level === highestUnlocked && level < TOTAL_LEVELS) {
-    highestUnlocked = level + 1;
-  }
-  //DISPLAY AN HTML POP_UP WINDOW THAT GIVES THE PLAYER CONTINUATINO OPTIONS
-}
 
-function onLevelSelected(level) {
-  if (!isUnlocked(level)) return; // blocked: do nothing
+
+
+function gointoLevel(level){
+  if(!isUnlocked(level) || level !==1){
+    return;
+  }
   loadLevel(level);
 }
 
-function onOfferSurrender() {
-  alertPartnerPlayer(SURRENDER_OFFERED); // flag value
-}
-let levelSelectShown = false;
 
-function onSetupKeyDown(event) {
-  if (event.key !== "Enter") return;
-  if (levelSelectShown) return; // ignore repeats
-  levelSelectShown = true;
 
-  hideSetupScreen();
-  document.removeEventListener("keydown", onSetupKeyDown);
-  levelSelectDisplay();
-}
 
-function levelSelectDisplay() {
-  const TOTAL_LEVELS = 5;
-  for (let level = 1; level <= TOTAL_LEVELS; level++) {
-    drawLevelOption(level, isUnlocked(level)); // positioned in order
-  }
+function loadLevel(level) {
+    if (level !== 1) return; // Add Level 2-5 data before enabling them.
+    currentLevel = level - 1;
+    currentScreen = 0;
+    spawnIndex = 0;
+    pressedKeys.clear();
+    document.getElementById("currentLevelTitle").textContent = `Level ${level}`;
+    levelMenu.hidden = true;
+    gameScreen.hidden = false;
+    gameStart = true;
+    spawn();
 }
 
-start()
+
+
+
+function levelCompleted(){
+    gameStart = false;
+    pressedKeys.clear();
+
+
+    document.getElementById("completionMenu").hidden = false;
+}
+
+
+function onLevelCompleted(level) {
+    if (level === highestUnlocked && level < TOTAL_LEVELS) {
+        highestUnlocked = level + 1;
+    }
+}
+
+
+
+
+document.getElementById("beginGame").addEventListener("click", showLevelSelect);
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !levelSelectShown) {
+        showLevelSelect();
+    }
+
+
+});
+
+
+document.querySelectorAll(".level").forEach(button => {
+    button.addEventListener("click", () => gointoLevel(Number(button.dataset.level)));
+});
+
+
+window.addEventListener("flareSent", () => {
+  interactableItems[currentScreen][currObj].color = "pink";
+  window.dispatchEvent(flareLanded);
+})
+
+
+window.addEventListener("flareLanded", (sfx, sfy) => {
+  lvlLayout.fillStyle = "Red";
+  lvlLayout.fillRect(400, 400, rectSize*2, rectSize);
+})
+
+
+
