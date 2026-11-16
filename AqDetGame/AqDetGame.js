@@ -104,7 +104,7 @@ let gameStart = false;
 
 const spawnArr = [
     {
-        spawnPoints: level1spawn
+        spawnPoints: level3spawn
     }
 ];
 
