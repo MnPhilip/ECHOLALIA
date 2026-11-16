@@ -44,8 +44,9 @@ const playerPH = canvas.getContext("2d");
 
 
 const SPRITES = [];
+
 const UrchinImage = new Image();
-UrchinImage.src = "AqDetImport/UrchinEnemy.png"; //TEMP ASSET, will be replaced with a more appropriate asset later
+//UrchinImage.src = "AqDetImport/UrchinEnemy.png"; //TEMP ASSET, will be replaced with a more appropriate asset later
 //Note the hitbox for the enemy is 50x50, so the asset should be scaled to that size for proper collision detection.
 
 UrchinImage.onload = () => {
@@ -65,8 +66,8 @@ var RESPAWN_X;
 var RESPAWN_Y;
 //0,0, IS TOP LEFT
 
-const moveDistance = 50; 
-const STANDARD_MOVEMENT = 50; // pixels per frame
+const moveDistance = 15; 
+const STANDARD_MOVEMENT = 15; // pixels per frame
 const NO_MOVEMENT = 0;
 //const pressedKeys = new Set();
 
@@ -106,6 +107,7 @@ const barriers = createBarrier(canvas);
 const interactableItems = createInteractables(canvas);
 const jumpPuddles = createJumpPuddle(canvas);
 const waterCurrents = createWaterCurrents(canvas);
+const enemies = createEnemies(canvas);
 
 function drawBarriers() {
     for (const b of barriers[currentScreen]) {
@@ -114,6 +116,7 @@ function drawBarriers() {
     }
 }
 
+/*
 const enemy = {
     x: 200,
     y: 500,
@@ -122,7 +125,7 @@ const enemy = {
     color: "purple"
 }; //color is a default, as the enemies will have pngs mapped to them
 
-/* const waterCurrents = [
+ const waterCurrents = [
     {
     x: 100,
     y: 200,
@@ -160,11 +163,13 @@ const TUNNEL_TIMING = {
 };
 
 function drawEnemy() {
-    if( UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
-        playerPH.drawImage(UrchinImage, enemy.x, enemy.y, enemy.width, enemy.height);
-    } else {
-        playerPH.fillStyle = enemy.color;
-    playerPH.fillRect(enemy.x, enemy.y, enemy.width, enemy.height); //Default loading if the asset art fails to load
+    for (const e of enemies[currentScreen]) {
+        if( UrchinImage.complete && UrchinImage.naturalWidth !== 0) {
+            playerPH.drawImage(UrchinImage, e.x, e.y, e.width, e.height);
+        } else {
+            playerPH.fillStyle = e.color;
+            playerPH.fillRect(e.x, e.y, e.width, e.height); //Default loading if the asset art fails to load
+        }
     }
 }
 
@@ -190,7 +195,7 @@ function drawTunnels() {
     playerPH.textAlign = "center";
     playerPH.textBaseline = "bottom";
 
-    for(const tunnel of tunnels) {
+    for(const tunnel of jumpPuddles[currentScreen]) {
         const centerX = tunnel.x + tunnel.width/2;
         const centerY = tunnel.y + tunnel.height/2;
         playerPH.beginPath(); //shows connecting paths for the tunnels.
@@ -221,14 +226,13 @@ function drawPlayer() {
 
 function drawAll() {
     playerPH.clearRect(0,0, canvas.width, canvas.height); // clear player so they dont duplicate at the starting teleporter
-
-    drawPlayer();
     drawWaterCurrents();
-    drawTunnels();
     drawBarriers();
-    drawEnemy();
+    drawTunnels();
     drawInteractables();
     drawJumpPuddles();
+    drawEnemy();
+    drawPlayer();
 }
 
 function WCCollision() {
@@ -337,11 +341,13 @@ function collidesWithBarrier(x, y, width, height) {
 }
 
 function collidesWithEnemy(x, y) {
-    if (x < enemy.x + enemy.width &&
-        x + rectSize > enemy.x &&
-        y < enemy.y + enemy.height &&
-        y + rectSize > enemy.y) {
-      return true;
+    for (const e of enemies[currentScreen]) {
+        if (x < e.x + e.width &&
+            x + rectSize > e.x &&
+            y < e.y + e.height &&
+            y + rectSize > e.y) {
+        return true;
+        }
     }
   return false;
 }
@@ -528,6 +534,9 @@ window.addEventListener("keydown", (e) =>{
     else if ((e.key).toLowerCase() === 'c')
     {
         respawn();
+    }// added for testing purposes, NEEDS TO BE REMOVED BEFORE FINAL SUBMISSION
+    else if (e.key.toLowerCase() === 'n') {
+        goToNextScreenForTesting();
     }
     else {}
 })
@@ -575,6 +584,23 @@ function updateTeleport(deltaTime) {
             teleportState = null; 
         }
     }
+    drawAll();
+}
+
+//For testing purposes, allows the player to skip to the next screen without having to reach the end of the current screen
+function goToNextScreenForTesting() {
+    const nextScreen = currentScreen + 1;
+    const spawnPoint = spawnArr[currentLevel]?.spawnPoints
+        .find(point => point.screen === nextScreen);
+
+    if (!barriers[nextScreen] || !spawnPoint) {
+        console.log("No next screen or spawn point available.");
+        return;
+    }
+
+    currentScreen = nextScreen;
+    rectX = spawnPoint.x;
+    rectY = spawnPoint.y;
     drawAll();
 }
 
