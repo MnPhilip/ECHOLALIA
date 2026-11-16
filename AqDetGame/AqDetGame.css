@@ -103,6 +103,15 @@ canvas {
   background: #0c2d57;
 }
 
+.level-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background-color: transparent;
+  background-image: url("level-transition-frames.svg");
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
 
 .game-screen__title {
   margin: 0;
