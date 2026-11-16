@@ -67,7 +67,8 @@ const barriers =  [
 function drawBarriers() {
     for (const b of barriers) {
         playerPH.fillStyle = b.color;
-        playerPH.fillRect(b.x,b.y,b.width,b.height);
+        drawAll();
+
     }
 }
 
@@ -87,13 +88,7 @@ function spawn(){
     rectX = 23;
     rectY = canvas.height/2;
 
-    playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    drawBarriers();
-
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-
-    
+    drawAll();
     // canvasTemp = document.getElementById("LayoutDisplay");
     // playerPHTEMP = canvasTemp.getContext("2d"); 
     // playerPHTEMP.fillStyle("red");
@@ -112,6 +107,20 @@ function saveRespawnCoordinates(x, y) {
   RESPAWN_X = x;
   RESPAWN_Y = y;
 }
+
+// Sammy Sprite
+const SAMMY_PATH = "ECHOLALIA/Senior Project Art/Sammy Davis/";
+const SAMMY_DRAW_SIZE = 64;
+
+// Load Sammy sprites
+const sammySprites = {
+  idle: loadImage(SAMMY_PATH + "Player Idle.png"),
+  walk: loadImage(SAMMY_PATH + "Player Walk.png"),
+  jump: loadImage(SAMMY_PATH + "Player Jump.png"),
+}
+let sammyPose = "idle";
+let sammyFacingLeft = false;
+
 
 function findRespawn(){
     var newResX;
@@ -146,7 +155,6 @@ function removeOldCharacter() {
 //   respawn();
 }
 
-
 function reRender(movePosX, movePosY){
     
     if (collidesWithBarrier(rectX + movePosX, rectY + movePosX)) {
@@ -157,17 +165,67 @@ function reRender(movePosX, movePosY){
     rectX += movePosX;
     rectY += movePosY;
 
-     drawBarriers();
-
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    drawAll();
+    //drawBarriers();
+    //playerPH.fillStyle = "green";
+    //drawAll();(rectX, rectY, rectSize, rectSize);
 }
 
+//Sammy Sprite Interact Function
 function pcInteract()
 {   
         // alert(rectX);
         // alert(rectY);
         alert("Interact Key Pressed!");
+}
+
+//Sammy Sprite Load Function
+function loadImage(src) {
+  const img = new Image();
+  img.onload = () => { if (gameStart) drawAll(); };
+  img.onerror = () => console.error("Could not load image:", src);   // tells you if a path is wrong
+  img.src = src;
+  return img;
+}
+
+//Sammy Sprite Load Check
+function imageReady(img) {
+  return img.complete && img.naturalWidth !== 0;
+}
+
+//Sammy Sprite Draw Function
+function drawPlayer() {
+  const size = SAMMY_DRAW_SIZE;
+  // center the 64x64 picture on the 60x60 hitbox (rectSize)
+  const drawX = Math.round(rectX + (rectSize - size) / 2);
+  const drawY = Math.round(rectY + (rectSize - size) / 2);
+
+  const sprite = sammySprites[sammyPose];
+  if (!imageReady(sprite)) {            // green square until the PNG has loaded
+    playerPH.fillStyle = "green";
+    drawAll();
+    return;
+  }
+
+  playerPH.imageSmoothingEnabled = false;   // keep pixel art sharp
+
+  // mirror the image if facing left
+  if (sammyFacingLeft) {
+    playerPH.save();
+    playerPH.translate(drawX + size, drawY);
+    playerPH.scale(-1, 1);              // mirror horizontally
+    playerPH.drawImage(sprite, 0, 0, size, size);
+    playerPH.restore();
+  } else {
+    playerPH.drawImage(sprite, drawX, drawY, size, size);
+  }
+}
+
+// Draw everything: barriers and player
+function drawAll() {
+  //playerPH.clearRect(0, 0, canvas.width, canvas.height);
+  drawBarriers();
+  drawPlayer();
 }
 
 function move(moveKey) {
