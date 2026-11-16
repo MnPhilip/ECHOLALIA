@@ -1,4 +1,3 @@
-
 function createBarrier(canvas){
 const barriers =  [
     [ // screen 0
@@ -8,14 +7,14 @@ const barriers =  [
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "aqua"
-        }, 
+        },
         { // top barrier
             x: 0,
             y: 0,
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "green"
-        }, 
+        },
         { // right barrier
             x: canvas.width - SEAWEED_SIZE,
             y: 0,
@@ -24,6 +23,7 @@ const barriers =  [
             color: "aqua"
          },
 
+
         // top blocks of seaweed barriers
         {
             x: 0,
@@ -31,7 +31,7 @@ const barriers =  [
             width: canvas.width / 2 - SEAWEED_SIZE,
             height: SEAWEED_SIZE,
             color: "SeaGreen"
-        }, 
+        },
         {
             x: 0,
             y: SEAWEED_SIZE * 2,
@@ -45,7 +45,7 @@ const barriers =  [
             width: canvas.width / 2 - SEAWEED_SIZE * 3,
             height: SEAWEED_SIZE,
             color: "SeaGreen"
-        }, 
+        },
         {
             x: 0,
             y: SEAWEED_SIZE * 4,
@@ -54,6 +54,7 @@ const barriers =  [
             color: "SeaGreen"
         },
 
+
         // bottoms blocks of seaweed barriers
         {
             x: 0,
@@ -61,7 +62,7 @@ const barriers =  [
             width: canvas.width / 2 - SEAWEED_SIZE,
             height: SEAWEED_SIZE,
             color: "SeaGreen"
-        }, 
+        },
         {
             x: 0,
             y: canvas.height - SEAWEED_SIZE * 3,
@@ -75,7 +76,7 @@ const barriers =  [
             width: canvas.width / 2 - SEAWEED_SIZE * 3,
             height: SEAWEED_SIZE,
             color: "SeaGreen"
-        }, 
+        },
         {
             x: 0,
             y: canvas.height - SEAWEED_SIZE * 5,
@@ -84,7 +85,8 @@ const barriers =  [
             color: "SeaGreen"
         },
 
-        
+
+       
         // generic beach barriers (shells?)
         {
             x: canvas.width / 2 + SEAWEED_SIZE * 3,
@@ -92,14 +94,14 @@ const barriers =  [
             width: SEAWEED_SIZE,
             height: SEAWEED_SIZE,
             color: "LightCoral"
-        }, 
+        },
         {
             x: canvas.width / 4,
             y: canvas.height / 2 + SEAWEED_SIZE,
             width: SEAWEED_SIZE,
             height: SEAWEED_SIZE,
             color: "LightCoral"
-        }, 
+        },
         {
             x: canvas.width / 4 + SEAWEED_SIZE * 4,
             y: canvas.height / 2 - SEAWEED_SIZE * 2,
@@ -107,7 +109,7 @@ const barriers =  [
             height: SEAWEED_SIZE,
             color: "LightCoral"
         },
-        
+       
         { // deep water
            // x: canvas.width / 10,
            // y: canvas.height / 2 - PUDDLE_SIZE * 2.5,
@@ -115,8 +117,9 @@ const barriers =  [
            // height: PUDDLE_SIZE * 5,
            // color: "purple"
         }
-    
+   
     ], // end of screen 0
+
 
     [ // screen 1
         { // bottom barrier
@@ -125,14 +128,14 @@ const barriers =  [
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "Aqua"
-        }, 
+        },
         { // top barrier
             x: 0,
             y: 0,
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "Green"
-        }, 
+        },
         { // right barrier
             x: canvas.width - SEAWEED_SIZE,
             y: 0,
@@ -147,6 +150,7 @@ const barriers =  [
             height: canvas.height / 2,
             color: "DarkBlue"
          },
+
 
          // maze barriers
          { // vertical barrier to right of rocket
@@ -191,7 +195,7 @@ const barriers =  [
             height: rectSize * 2 + SEAWEED_SIZE,
             color: "SeaGreen"
          },
-         { // middle vertical barrier 
+         { // middle vertical barrier
             x: ROCKET_SIZE * 2 + SEAWEED_SIZE + rectSize * 3,
             y: canvas.height / 6 + rectSize / 2,
             width: SEAWEED_SIZE,
@@ -212,6 +216,7 @@ const barriers =  [
             height: SEAWEED_SIZE,
             color: "SeaGreen"
          },
+
 
          // rock barrier (rocket erases it)
          /*
@@ -238,7 +243,7 @@ const barriers =  [
             color: "SandyBrown"
          }
         */
-        
+       
     ], // end of screen 1
     [ // screen 2
         { // bottom barrier
@@ -247,14 +252,14 @@ const barriers =  [
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "aqua"
-        }, 
+        },
         { // top barrier
             x: 0,
             y: 0,
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "Green"
-        }, 
+        },
         { // right barrier
             x: canvas.width - SEAWEED_SIZE,
             y: 0,
@@ -278,37 +283,38 @@ const barriers =  [
             width: SEAWEED_SIZE,
             height: canvas.height / 1.5,
             color: "SeaGreen"
-        }, 
+        },
         { // middle right vertical barrier
             x: canvas.width / 1.5,
             y: canvas.height / 2.5,
             width: SEAWEED_SIZE,
             height: canvas.height - canvas.height / 2.5,
             color: "SeaGreen"
-        }, 
+        },
         { // middle left vertical barrier
             x: canvas.width / 2.5,
             y: 0,
             width: SEAWEED_SIZE,
             height: canvas.height / 1.5,
             color: "SeaGreen"
-        }, 
+        },
         { // left vertical barrier
             x: canvas.width / 5,
             y: canvas.height / 2.5,
             width: SEAWEED_SIZE,
             height: canvas.height - canvas.height / 2.5,
             color: "SeaGreen"
-        }, 
+        },
         { // right-most horizontal barrier
             x: canvas.width / 1.8,
             y: canvas.height / 2.5,
             width: canvas.width / 8,
             height: SEAWEED_SIZE,
             color: "SeaGreen"
-        }, 
+        },
 
-        
+
+       
         // deep water barriers
         /*
         { // left-most water
@@ -317,14 +323,14 @@ const barriers =  [
             width: PUDDLE_SIZE * 4.4,
             height: PUDDLE_SIZE,
             color: "DarkBlue"
-        }, 
+        },
         { // middle water
             x: canvas.width / 5 + SEAWEED_SIZE + 1,
             y: canvas.height / 2.5,
             width: PUDDLE_SIZE * 4.4,
             height: PUDDLE_SIZE,
             color: "DarkBlue"
-        }, 
+        },
         { // right-most water
             x: canvas.width / 1.7,
             y: SEAWEED_SIZE,
@@ -334,6 +340,7 @@ const barriers =  [
         }
         */
 
+
     ], // end of screen 2
     [ // screen 3
         { // bottom barrier
@@ -342,14 +349,14 @@ const barriers =  [
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "Aqua"
-        }, 
+        },
         { // top barrier
             x: 0,
             y: 0,
             width: canvas.width,
             height: SEAWEED_SIZE,
             color: "Green"
-        }, 
+        },
         { // right barrier
             x: canvas.width - SEAWEED_SIZE,
             y: 0,
@@ -365,27 +372,34 @@ const barriers =  [
             color: "DarkBlue"
          },
 
+
          // deep waters
          { // left deep water
+            /*
             x: canvas.width / 6,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
+            */
          },
          { // middle deep water
+            /*
             x: canvas.width / 2.5,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
+            */
          },
          { // right deep water
+            /*
             x: canvas.width - canvas.width / 3.5,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
+            */
          },
          // rock to explode
          { // upper rock
@@ -415,6 +429,8 @@ return barriers;
 }
 
 
+
+
 function createJumpPuddle (canvas){
 const jumpPuddles = [
     [], // screen 0, no jump puddles
@@ -433,7 +449,7 @@ const jumpPuddles = [
             height: PUDDLE_SIZE,
             color: "orange"
         }
-    ], 
+    ],
     [ // screen 2
         { // top right puddle, swaps with [2][1]
             x: canvas.width - rectSize * 2 - SEAWEED_SIZE,
@@ -471,6 +487,8 @@ const jumpPuddles = [
 }
 
 
+
+
 function createInteractables(canvas){
 const interactableItems = [
     [ // screen 0
@@ -479,69 +497,87 @@ const interactableItems = [
             y: canvas.height / 2 - PUDDLE_SIZE * 2,
             width: BUBBLE_SIZE,
             height: BUBBLE_SIZE,
-            color: "PaleTurqoise"
+            color: "aqua",
+            type: bubble,
+            activated: false
         }
-    ], 
+    ],
     [ // screen 1
         { // rocket
             x: rectSize,
             y: rectSize,
             width: ROCKET_SIZE,
             height: ROCKET_SIZE,
-            color: "Red"
+            color: "Red",
+            type: signalFlare,
+            activated: false
         }
-    ], 
+    ],
     [ // screen 2
         { // right pushable rock
             x: canvas.width / 1.5,
             y: rectSize * 2,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "Silver"
+            color: "Silver",
+            type: pushBlock,
+            activated: false
         },
         { // middle pushable rock
             x: canvas.width / 5 + PUSH_ROCK_SIZE * 3,
             y: canvas.height / 2,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "Silver"
+            color: "Silver",
+            type: pushBlock,
+            activated: false
         },
         { // left pushable rock
             x: canvas.width / 6 - PUSH_ROCK_SIZE,
             y: canvas.height / 3 - PUSH_ROCK_SIZE,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "Silver"
+            color: "Silver",
+            type: pushBlock,
+            activated: false
         }
-    ], 
+    ],
     [ // screen 3
         { // pushable rock
             x: canvas.width / 2.2,
             y: PUSH_ROCK_SIZE * 2.8,
             width: PUSH_ROCK_SIZE,
             height: PUSH_ROCK_SIZE,
-            color: "red"
+            color: "silver",
+            type: pushBlock,
+            activated: false
         },
         { // left bubble
             x: canvas.width / 4.5,
             y: canvas.height / 2,
             width: BUBBLE_SIZE,
             height: BUBBLE_SIZE,
-            color: "PaleTurqoise"
+            color: "PaleTurqoise",
+            type: bubble,
+            activated: false
         },
         { // right bubble
             x: canvas.width - canvas.width / 4.5,
             y: canvas.height / 1.5,
             width: BUBBLE_SIZE,
             height: BUBBLE_SIZE,
-            color: "PaleTurqoise"
+            color: "PaleTurqoise",
+            type: bubble,
+            activated: false
         },
         { // rocket
             x: canvas.width - canvas.width / 5,
             y: rectSize,
             width: ROCKET_SIZE,
             height: ROCKET_SIZE,
-            color: "Red"
+            color: "Red",
+            type: signalFlare,
+            activated: false
         }
     ]
 ];
@@ -549,15 +585,45 @@ return interactableItems;
 }
 
 
+function populateSaves(canvas){
+    const lvl1Saves = [
+        {
+            screen: 0,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        },
+        {
+            screen: 1,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        },
+        {
+            screen: 2,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        },
+        {
+            screen: 3,
+            x: canvas.width - 100,
+            y: canvas.height / 2
+        }
+    ]
+    return lvl1Saves;
+}
+
+
+
+
+
 
 const level1spawn = [
-    
+   
         // Level 0
        
             {
                 screen: 0,
-                x: window.innerWidth - 100,
-                y: window.innerHeight / 2
+                x: 1308 - 100,
+                y: 648 / 2
             },
             {
                 screen: 1,
@@ -572,9 +638,10 @@ const level1spawn = [
             },
             {
                 screen: 3,
-              x: window.innerWidth - 100,
+                x: window.innerWidth - 100,
                 y: window.innerHeight / 2
             }
-        
-    
+       
+   
 ];
+
