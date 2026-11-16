@@ -427,7 +427,9 @@ function createInteractables(canvas) {
                 y: 75,
                 width: BUBBLE_SIZE,
                 height: BUBBLE_SIZE,
-                color: "PaleTurquoise",
+                color: "aqua",
+                type: bubble,
+                activated: false
             }
         ],
         [ //screen 1
@@ -436,21 +438,27 @@ function createInteractables(canvas) {
                 y: canvas.height - 400,
                 width: BUBBLE_SIZE,
                 height: BUBBLE_SIZE,
-                color: "PaleTurquoise",
+                color: "aqua",
+                type: bubble,
+                activated: false
             },
             { // push block (end of level push block)
                 x: canvas.width - 1350,
                 y: canvas.height - 480,
                 width: PUSH_ROCK_SIZE,
                 height: PUSH_ROCK_SIZE,
-                color: "Silver"
+                color: "Silver",
+                type: pushBlock,
+                activated: false
             },
             { // push block (for push block in A -> B section)
                 x: canvas.width - 800,
                 y: canvas.height - 600,
                 width: PUSH_ROCK_SIZE,
                 height: PUSH_ROCK_SIZE,
-                color: "Silver"
+                color: "Silver",
+                type: pushBlock,
+                activated: false
             },
         ],
         [//screen 2
@@ -459,14 +467,18 @@ function createInteractables(canvas) {
                 y: canvas.height - 125,
                 width: rectSize,
                 height: rectSize,
-                color: "red"
+                color: "red",
+                type: signalFlare,
+                activated: false
             },
             { // rocket B
                 x: canvas.width - 950,
                 y: canvas.height - 615,
                 width: rectSize,
                 height: rectSize,
-                color: "red"
+                color: "red",
+                type: signalFlare,
+                activated: false
             },
         ]
     ];
@@ -702,6 +714,27 @@ function createEnemies(canvas) {
         ]
     ];
     return enemies;
+}
+
+function populateSaves(canvas){
+    const lvl3Saves = [
+        {
+            screen: 0,
+            x: window.innerWidth - 175,
+            y: window.innerHeight - 125,
+        },
+        {
+            screen: 1,
+            x: window.innerWidth - 175,
+            y: window.innerHeight - 450,
+        },
+        {
+            screen: 2,
+            x: window.innerWidth - 175,
+            y: window.innerHeight - 600,
+        },
+    ]
+    return lvl3Saves;
 }
 
 const level3spawn = [
