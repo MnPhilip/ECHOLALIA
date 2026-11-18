@@ -1,4 +1,4 @@
-function createBarrier(canvas){
+function createBarrier1(canvas){
 const barriers =  [
     [ // screen 0
         { // bottom barrier
@@ -431,7 +431,7 @@ return barriers;
 
 
 
-function createJumpPuddle (canvas){
+function createJumpPuddle1(canvas){
 const jumpPuddles = [
     [], // screen 0, no jump puddles
     [ // screen 1
@@ -489,7 +489,7 @@ const jumpPuddles = [
 
 
 
-function createInteractables(canvas){
+function createInteractables1(canvas){
 const interactableItems = [
     [ // screen 0
         { // bubble
@@ -585,7 +585,7 @@ return interactableItems;
 }
 
 
-function populateSaves(canvas){
+function populateSaves1(canvas){
     const lvl1Saves = [
         {
             screen: 0,

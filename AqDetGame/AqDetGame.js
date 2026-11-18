@@ -15,12 +15,9 @@ window.main = () => {
     // updatePhysics();
    
     window.cancelAnimationFrame(stopMain);
-   
-   
 }
 
-
-
+fuckingWdith
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d");
@@ -30,16 +27,12 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 
-
-
 const lvlCanvas = document.getElementById('LevelDisplay');
 const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
 lvlCanvas.style.width = window.innerWidth;
 lvlCanvas.style.height = window.innerHeight;
 lvlCanvas.width = window.innerWidth;
 lvlCanvas.height = window.innerHeight;
-
-
 
 
 const bckgrndCanvas = document.getElementById('BackgroundDisplay');
@@ -104,15 +97,15 @@ let gameStart = false;
 
 const spawnArr = [
     {
-        spawnPoints: level2spawn
+        // spawnPoints: level2spawn
     }
 ];
-
 
 let spawnIndex = 0;
 
 
 
+alert("here");
 
 
 
@@ -126,10 +119,10 @@ const interactableSize = 80;
 
 
 
-const barriers = createBarrier(lvlCanvas);
-const interactableItems = createInteractables(lvlCanvas);
-const jumpPuddles = createJumpPuddle(lvlCanvas);
-const respawnAnchors = populateSaves(lvlCanvas);
+var barriers //= createBarrier(lvlCanvas);
+var interactableItems// = createInteractables(lvlCanvas);
+var jumpPuddles //= createJumpPuddle(lvlCanvas);
+var respawnAnchors// = populateSaves(lvlCanvas);
 
 
 
@@ -391,7 +384,7 @@ function reRender(movePosX, movePosY) {
 
         // Draw new screen
         playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
+        lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
 
 
         drawBarriers();
@@ -525,7 +518,7 @@ window.addEventListener("keydown", (e) => {
         pressedKeys.has("s") ||
         pressedKeys.has("d")) {
 
-
+        alert("moving");    
         lastKeyPressed = e.key.toLowerCase();
         moveCharacterWASD(pressedKeys);
     }
@@ -730,7 +723,7 @@ function isUnlocked(level){
 
 
 function gointoLevel(level){
-  if(!isUnlocked(level) || level !==1){
+  if(!isUnlocked(level) /*|| level !==1*/){
     return;
   }
   loadLevel(level);
@@ -740,10 +733,11 @@ function gointoLevel(level){
 
 
 function loadLevel(level) {
-    if (level !== 1) return; // Add Level 2-5 data before enabling them.
+    // if (level !== 1) return; // Add Level 2-5 data before enabling them.
     currentLevel = level - 1;
     currentScreen = 0;
     spawnIndex = 0;
+    renderLevel(level);
     pressedKeys.clear();
     document.getElementById("currentLevelTitle").textContent = `Level ${level}`;
     levelMenu.hidden = true;
@@ -752,7 +746,40 @@ function loadLevel(level) {
     spawn();
 }
 
-
+function renderLevel(level){
+    if (level == 1){
+        barriers = createBarrier1(lvlCanvas);
+        interactableItems = createInteractables1(lvlCanvas);
+        jumpPuddles = createJumpPuddle1(lvlCanvas);
+        respawnAnchors = populateSaves1(lvlCanvas);
+    }
+    else if (level == 2){
+        barriers = createBarrier2(lvlCanvas);
+        interactableItems = createInteractables2(lvlCanvas);
+        jumpPuddles = createJumpPuddle2(lvlCanvas);
+        respawnAnchors = populateSaves2(lvlCanvas);
+    }
+    else if (level == 3){
+        barriers = createBarrier3(lvlCanvas);
+        interactableItems = createInteractables3(lvlCanvas);
+        jumpPuddles = createJumpPuddle1(lvlCanvas);
+        respawnAnchors = populateSaves3(lvlCanvas);
+    }
+    else if (level == 4){
+        barriers = createBarrier4(lvlCanvas);
+        interactableItems = createInteractables4(lvlCanvas);
+        jumpPuddles = createJumpPuddle4(lvlCanvas);
+        respawnAnchors = populateSaves4(lvlCanvas);
+    }
+    else if (level == 5){
+        barriers = createBarrier5(lvlCanvas);
+        interactableItems = createInteractables5(lvlCanvas);
+        jumpPuddles = createJumpPuddle5(lvlCanvas);
+        respawnAnchors = populateSaves5(lvlCanvas);
+    }
+    else {alert("ERROR: LEVEL NOT FOUND")}
+    reRender();
+}
 
 
 function levelCompleted(){
@@ -798,6 +825,4 @@ window.addEventListener("flareLanded", (sfx, sfy) => {
   lvlLayout.fillStyle = "Red";
   lvlLayout.fillRect(400, 400, rectSize*2, rectSize);
 })
-
-
 
