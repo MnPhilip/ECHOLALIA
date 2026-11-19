@@ -17,7 +17,6 @@ window.main = () => {
     window.cancelAnimationFrame(stopMain);
 }
 
-fuckingWdith
 
 const canvas = document.getElementById('PlrDisplay');
 const playerPH = canvas.getContext("2d");
@@ -97,7 +96,7 @@ let gameStart = false;
 
 const spawnArr = [
     {
-        // spawnPoints: level2spawn
+         spawnPoints: level1spawn
     }
 ];
 
@@ -123,6 +122,22 @@ var barriers //= createBarrier(lvlCanvas);
 var interactableItems// = createInteractables(lvlCanvas);
 var jumpPuddles //= createJumpPuddle(lvlCanvas);
 var respawnAnchors// = populateSaves(lvlCanvas);
+
+
+
+var enemies = [];
+
+const UrchinImage = new Image();
+UrchinImage.src = "AqDetImport/UrchinEnemy.png";
+
+//let enemyAnimationId = null;
+//let enemyLastTime = null;
+
+UrchinImage.onload = function() {
+    if (gameStart) {
+        drawActors();
+    }
+};
 
 
 
@@ -214,6 +229,70 @@ function drawInteractables() {
 }
 
 
+
+
+
+function drawEnemy() {
+    if (!enemies[currentScreen]) {
+        return;
+    }
+
+    for (const enemy of enemies[currentScreen]) {
+        if (UrchinImage.complete && UrchinImage.naturalWidth > 0) {
+            playerPH.drawImage(
+                UrchinImage,
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
+        } else {
+            playerPH.fillStyle = enemy.color;
+            playerPH.fillRect(
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
+        }
+    }
+}
+
+function drawActors() {
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawEnemy();
+
+    playerPH.fillStyle = "green";
+    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+}
+
+
+
+
+
+function collidesWithEnemy(x, y) {
+    if (!enemies[currentScreen]) {
+        return false;
+    }
+
+    for (const enemy of enemies[currentScreen]) {
+        if (
+            x < enemy.x + enemy.width &&
+            x + rectSize > enemy.x &&
+            y < enemy.y + enemy.height &&
+            y + rectSize > enemy.y
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+
 // returns true if player has reached left-most area, to proceed to the next screen
 function reachScreenEnd(rectX) {
     if (rectX < 1 && rectX > -20) {
@@ -252,9 +331,9 @@ function spawn(){
     drawJumpPuddles();//draw movement element
 
 
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-   
+   // playerPH.fillStyle = "green";
+    //playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+   drawActors();
 
 
    
@@ -340,6 +419,10 @@ function reRender(movePosX, movePosY) {
 
     const newX = rectX + movePosX;
     const newY = rectY + movePosY;
+    if (collidesWithEnemy(newX, newY)) {
+    respawn();
+    return;
+}
 
 
     // Check if player reached the left edge
@@ -392,9 +475,9 @@ function reRender(movePosX, movePosY) {
         drawJumpPuddles();
 
 
-        playerPH.fillStyle = "green";
-        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-
+        //playerPH.fillStyle = "green";
+        //playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+        drawActors();
 
         return;
     }
@@ -460,8 +543,9 @@ drawJumpPuddles();
 
 
     // Draw player
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    //playerPH.fillStyle = "green";
+   // playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+   drawActors();
 }
 
 
@@ -518,7 +602,7 @@ window.addEventListener("keydown", (e) => {
         pressedKeys.has("s") ||
         pressedKeys.has("d")) {
 
-        alert("moving");    
+       // alert("moving");    
         lastKeyPressed = e.key.toLowerCase();
         moveCharacterWASD(pressedKeys);
     }
@@ -747,11 +831,13 @@ function loadLevel(level) {
 }
 
 function renderLevel(level){
+     enemies = [[], [], [], []];
     if (level == 1){
         barriers = createBarrier1(lvlCanvas);
         interactableItems = createInteractables1(lvlCanvas);
         jumpPuddles = createJumpPuddle1(lvlCanvas);
         respawnAnchors = populateSaves1(lvlCanvas);
+        enemies = createEnemies1(lvlCanvas);
     }
     else if (level == 2){
         barriers = createBarrier2(lvlCanvas);
@@ -778,7 +864,7 @@ function renderLevel(level){
         respawnAnchors = populateSaves5(lvlCanvas);
     }
     else {alert("ERROR: LEVEL NOT FOUND")}
-    reRender();
+    //reRender();
 }
 
 

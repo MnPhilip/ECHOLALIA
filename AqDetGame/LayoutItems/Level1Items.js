@@ -645,3 +645,24 @@ const level1spawn = [
    
 ];
 
+
+
+function createEnemies1(canvas) {
+    return [
+        [ // Screen 0
+            {
+                x: canvas.width / 2,
+                y: canvas.height / 2 - 25,
+                width: 100,
+                height: 100,
+                speed: 100,
+                direction: 1,
+                minX: canvas.width / 2 - 100,
+                maxX: canvas.width / 2 + 100
+            }
+        ],
+        [], // Screen 1
+        [], // Screen 2
+        []  // Screen 3
+    ];
+}
