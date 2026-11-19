@@ -43,7 +43,7 @@ bckgrndCanvas.style.height = window.innerHeight;
 
 
 
-
+let puddleCheck = false; //prevent teleport bug false means able to use puddles
 var currentLevel = 0;
 var currentScreen = 0;
 
@@ -219,6 +219,65 @@ function drawJumpPuddles() {
 }
 
 
+function collidesWithJumpPuddle(x, y, puddle) {
+    return (
+        x < puddle.x + puddle.width &&
+        x + rectSize > puddle.x &&
+        y < puddle.y + puddle.height &&
+        y + rectSize > puddle.y
+    );
+}
+
+
+
+
+function checkJumpPuddle() {
+    const puddles = jumpPuddles[currentScreen];
+    
+    // Check if the player is standing on a puddle
+    let puddleIndex = -1;
+    for (let i = 0; i < puddles.length; i++) {
+        if (collidesWithJumpPuddle(rectX, rectY, puddles[i])) {
+            puddleIndex = i;
+            break;
+        }
+    }
+    if (puddleIndex === -1) {
+        puddleLocked = false;
+        return;
+    }
+
+    // Prevent repeated teleportaton
+    if (puddleLocked) {
+        return;
+    }
+
+  
+    let destinationIndex;
+    if(puddleIndex == 0){
+        destinationIndex = 1;
+    }else{
+        destinationIndex = 0;
+    }
+    const destination = puddles[destinationIndex];
+
+    const newX = destination.x +  (destination.width - rectSize) / 2;
+
+    const newY = destination.y + (destination.height - rectSize) / 2;
+
+    // Prevent teleporting inside a wall
+    if (collidesWithBarrier(newX, newY) || collidesWithObject(newX, newY) || collidesWithEnemy(newX, newY)) {
+        return;
+    }
+    // Teleport player to new coors
+    rectX = newX;
+    rectY = newY;
+
+    // Lock until player moves off the destination puddle so they dont tp infinitely
+    puddleLocked = true;
+
+    drawActors();
+}
 
 
 function drawInteractables() {
@@ -317,6 +376,7 @@ function updateCheckPoint(checknum){
 
 
 function spawn(){
+    puddleLocked = false;
     const spawnPoint = getSpawnPoint();
     currentScreen = spawnPoint.screen;
     rectX = spawnPoint.x;
@@ -545,6 +605,7 @@ drawJumpPuddles();
     // Draw player
     //playerPH.fillStyle = "green";
    // playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+   checkJumpPuddle();
    drawActors();
 }
 
