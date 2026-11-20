@@ -124,14 +124,23 @@ var jumpPuddles //= createJumpPuddle(lvlCanvas);
 var respawnAnchors// = populateSaves(lvlCanvas);
 
 
+var waterCurrents = [];
+
+const CURRENT_TYPES = {
+    gentle: { speed: 60 },
+    strong: { speed: 120 }
+};
+
+let currentAnimationId = null;
+let lastCurrentFrame = null;
+
 
 var enemies = [];
 
 const UrchinImage = new Image();
 UrchinImage.src = "AqDetImport/UrchinEnemy.png";
 
-//let enemyAnimationId = null;
-//let enemyLastTime = null;
+
 
 UrchinImage.onload = function() {
     if (gameStart) {
@@ -177,7 +186,11 @@ function drawObjectBarriers() {
     // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const obj of interactableItems[currentScreen]) {
         lvlLayout.strokeStyle = 'red';
-        lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
+        lvlLayout.strokeRect(
+            obj.x, 
+            obj.y, 
+            obj.width, 
+            obj.height);
     }
 }
 
@@ -289,6 +302,36 @@ function drawInteractables() {
 
 
 
+function drawWaterCurrents() {
+    if (!waterCurrents[currentScreen]) {
+        return;
+    }
+
+    lvlLayout.save();
+
+    lvlLayout.fillStyle = "rgba(148, 210, 231, 0.5)";
+    lvlLayout.strokeStyle = "lightblue";
+    lvlLayout.lineWidth = 3;
+
+    for (const current of waterCurrents[currentScreen]) {
+        lvlLayout.fillRect(
+            current.x,
+            current.y,
+            current.width,
+            current.height
+        );
+
+        lvlLayout.strokeRect(
+            current.x,
+            current.y,
+            current.width,
+            current.height
+        );
+    }
+
+    lvlLayout.restore();
+}
+
 
 
 function drawEnemy() {
@@ -352,6 +395,94 @@ function collidesWithEnemy(x, y) {
 
 
 
+function WCCollision(deltaTime) {
+    if (!gameStart) {
+        return;
+    }
+
+    if (!waterCurrents[currentScreen]) {
+        return;
+    }
+
+    for (const current of waterCurrents[currentScreen]) {
+
+        // Check if player overlaps water current
+        if (
+            rectX < current.x + current.width &&
+            rectX + rectSize > current.x &&
+            rectY < current.y + current.height &&
+            rectY + rectSize > current.y
+        ) {
+
+            const currentType = CURRENT_TYPES[current.type];
+
+            if (!currentType) {
+                continue;
+            }
+
+            const movement = currentType.speed * deltaTime;
+
+            elementMovement(current.direction, movement);
+        }
+    }
+}
+
+
+
+
+function elementMovement(direction, movement) {
+
+    if (!direction || !Number.isFinite(movement)) {
+        return;
+    }
+
+    const length = Math.hypot(direction.x, direction.y);
+
+    if (!Number.isFinite(length) || length === 0) {
+        return;
+    }
+
+    const moveX = (direction.x / length) * movement;
+    const moveY = (direction.y / length) * movement;
+
+    // Use existing player movement function
+    reRender(moveX, moveY);
+}
+
+
+
+function waterCurrentLoop(timestamp) {
+    currentAnimationId = null;
+
+    if (!gameStart) {
+        lastCurrentFrame = null;
+        return;
+    }
+
+    const deltaTime = lastCurrentFrame === null
+        ? 0
+        : Math.min((timestamp - lastCurrentFrame) / 1000, 0.05);
+
+    lastCurrentFrame = timestamp;
+
+    WCCollision(deltaTime);
+
+    currentAnimationId =
+        requestAnimationFrame(waterCurrentLoop);
+}
+
+function startWaterCurrentLoop() {
+    if (currentAnimationId !== null) {
+        return;
+    }
+
+    lastCurrentFrame = null;
+    currentAnimationId =
+        requestAnimationFrame(waterCurrentLoop);
+}
+
+
+
 // returns true if player has reached left-most area, to proceed to the next screen
 function reachScreenEnd(rectX) {
     if (rectX < 1 && rectX > -20) {
@@ -389,6 +520,7 @@ function spawn(){
     drawBarriers();
     drawInteractables();
     drawJumpPuddles();//draw movement element
+    drawWaterCurrents();
 
 
    // playerPH.fillStyle = "green";
@@ -889,16 +1021,19 @@ function loadLevel(level) {
     gameScreen.hidden = false;
     gameStart = true;
     spawn();
+    startWaterCurrentLoop();
 }
 
 function renderLevel(level){
      enemies = [[], [], [], []];
+     waterCurrents = [[], [], [], []];
     if (level == 1){
         barriers = createBarrier1(lvlCanvas);
         interactableItems = createInteractables1(lvlCanvas);
         jumpPuddles = createJumpPuddle1(lvlCanvas);
         respawnAnchors = populateSaves1(lvlCanvas);
         enemies = createEnemies1(lvlCanvas);
+        waterCurrents = createWaterCurrents(lvlCanvas);
     }
     else if (level == 2){
         barriers = createBarrier2(lvlCanvas);
