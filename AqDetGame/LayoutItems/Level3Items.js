@@ -1,5 +1,5 @@
 /* Layout for Level 3 items */
-function createBarrier(canvas) {
+function createBarrier3(canvas) {
     const barriers = [
         [ //screen 0 
             { //bottom barrier (deep water)
@@ -280,7 +280,7 @@ function createBarrier(canvas) {
     return barriers;
 }
 
-function createJumpPuddle(canvas) {
+function createJumpPuddle3(canvas) {
     // Enter here
     const jumpPuddles = [
         [], //screen 0 (none)
@@ -384,7 +384,7 @@ function createJumpPuddle(canvas) {
     return jumpPuddles;
 }
 
-function createWaterCurrents(canvas) {
+function createWaterCurrents3(canvas) {
     const waterCurrents = [
         [ //screen 0
             {//current 1 (furthest right)
@@ -419,7 +419,7 @@ function createWaterCurrents(canvas) {
     return waterCurrents;
 }
 
-function createInteractables(canvas) {
+function createInteractables3(canvas) {
     const interactableItems = [
         [ //screen 0
             { //bubble
@@ -485,7 +485,7 @@ function createInteractables(canvas) {
     return interactableItems;
 }
 
-function createEnemies(canvas) {
+function createEnemies3(canvas) {
     const enemies = [
         [ //screen 0
             { //Enemy numubers based on how the player first interacts with them
@@ -716,22 +716,22 @@ function createEnemies(canvas) {
     return enemies;
 }
 
-function populateSaves(canvas){
+function populateSaves3(canvas){
     const lvl3Saves = [
         {
             screen: 0,
-            x: window.innerWidth - 175,
-            y: window.innerHeight - 125,
+            x: canvas.innerWidth - 175,
+            y: canvas.innerHeight - 125,
         },
         {
             screen: 1,
-            x: window.innerWidth - 175,
-            y: window.innerHeight - 450,
+            x: canvas.innerWidth - 175,
+            y: canvas.innerHeight - 450,
         },
         {
             screen: 2,
-            x: window.innerWidth - 175,
-            y: window.innerHeight - 600,
+            x: canvas.innerWidth - 175,
+            y: canvas.innerHeight - 600,
         },
     ]
     return lvl3Saves;

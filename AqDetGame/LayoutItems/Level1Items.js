@@ -1,4 +1,4 @@
-function createBarrier(canvas){
+function createBarrier1(canvas){
 const barriers =  [
     [ // screen 0
         { // bottom barrier
@@ -111,11 +111,13 @@ const barriers =  [
         },
        
         { // deep water
-           // x: canvas.width / 10,
-           // y: canvas.height / 2 - PUDDLE_SIZE * 2.5,
-           // width: PUDDLE_SIZE,
-           // height: PUDDLE_SIZE * 5,
-           // color: "purple"
+            /*
+           x: canvas.width / 10,
+            y: canvas.height / 2 - PUDDLE_SIZE * 2.5,
+            width: PUDDLE_SIZE,
+            height: PUDDLE_SIZE * 5,
+           color: "purple"
+           */
         }
    
     ], // end of screen 0
@@ -219,7 +221,7 @@ const barriers =  [
 
 
          // rock barrier (rocket erases it)
-         /*
+         
          { // bottom part of rock
             x: 0,
             y: canvas.height - SEAWEED_SIZE * 2,
@@ -236,13 +238,15 @@ const barriers =  [
          },
          
          { // vertical edge of rock
+            /*
             x: rectSize * 2,
             y: canvas.height - SEAWEED_SIZE * 2 - rectSize * 2,
             width: SEAWEED_SIZE,
             height: rectSize * 2 + SEAWEED_SIZE,
             color: "SandyBrown"
+            */
          }
-        */
+        
        
     ], // end of screen 1
     [ // screen 2
@@ -267,7 +271,7 @@ const barriers =  [
             height: canvas.height,
             color: "DarkBlue"
          },
-         /*
+         
          { // left barrier
             x: 0,
             y: 0,
@@ -275,7 +279,7 @@ const barriers =  [
             height: canvas.height / 2,
             color: "DarkBlue"
          },
-         */
+         
          // maze components
          { // right vertical barrier
             x: canvas.width - 4 * rectSize,
@@ -375,31 +379,31 @@ const barriers =  [
 
          // deep waters
          { // left deep water
-            /*
+            
             x: canvas.width / 6,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
-            */
+            
          },
          { // middle deep water
-            /*
+            
             x: canvas.width / 2.5,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
-            */
+            
          },
          { // right deep water
-            /*
+            
             x: canvas.width - canvas.width / 3.5,
             y: SEAWEED_SIZE,
             width: PUDDLE_SIZE,
             height: canvas.height - SEAWEED_SIZE * 2,
             color: "DarkBlue"
-            */
+            
          },
          // rock to explode
          { // upper rock
@@ -431,7 +435,7 @@ return barriers;
 
 
 
-function createJumpPuddle (canvas){
+function createJumpPuddle1(canvas){
 const jumpPuddles = [
     [], // screen 0, no jump puddles
     [ // screen 1
@@ -489,7 +493,7 @@ const jumpPuddles = [
 
 
 
-function createInteractables(canvas){
+function createInteractables1(canvas){
 const interactableItems = [
     [ // screen 0
         { // bubble
@@ -585,7 +589,7 @@ return interactableItems;
 }
 
 
-function populateSaves(canvas){
+function populateSaves1(canvas){
     const lvl1Saves = [
         {
             screen: 0,
@@ -645,3 +649,44 @@ const level1spawn = [
    
 ];
 
+
+
+function createEnemies1(canvas) {
+    return [
+        [ // Screen 0
+            {
+                x: canvas.width / 2,
+                y: canvas.height / 2 - 25,
+                width: 70,
+                height: 70,
+                speed: 100,
+                direction: 1,
+                minX: canvas.width / 2 - 100,
+                maxX: canvas.width / 2 + 100
+            }
+        ],
+        [], // Screen 1
+        [], // Screen 2
+        []  // Screen 3
+    ];
+}
+
+
+
+function createWaterCurrents(canvas) {
+    return [
+        [ // Screen 0
+            {
+                x: canvas.width * 0.55,
+                y: canvas.height * 0.65,
+                width: 160,
+                height: 90,
+                type: "strong",
+                direction: { x: 1, y: 0 }
+            }
+        ],
+        [], // Screen 1
+        [], // Screen 2
+        []  // Screen 3
+    ];
+}

@@ -15,11 +15,7 @@ window.main = () => {
     // updatePhysics();
    
     window.cancelAnimationFrame(stopMain);
-   
-   
 }
-
-
 
 
 const canvas = document.getElementById('PlrDisplay');
@@ -30,16 +26,12 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 
-
-
 const lvlCanvas = document.getElementById('LevelDisplay');
 const lvlLayout = lvlCanvas.getContext("2d"); //CANVAS LAYER FOR LEVEL LAYOUT, MOVEMENT/INTERACTABLES
 lvlCanvas.style.width = window.innerWidth;
 lvlCanvas.style.height = window.innerHeight;
 lvlCanvas.width = window.innerWidth;
 lvlCanvas.height = window.innerHeight;
-
-
 
 
 const bckgrndCanvas = document.getElementById('BackgroundDisplay');
@@ -51,7 +43,7 @@ bckgrndCanvas.style.height = window.innerHeight;
 
 
 
-
+let puddleCheck = false; //prevent teleport bug false means able to use puddles
 var currentLevel = 0;
 var currentScreen = 0;
 
@@ -104,15 +96,15 @@ let gameStart = false;
 
 const spawnArr = [
     {
-        spawnPoints: level2spawn
+         spawnPoints: level1spawn
     }
 ];
-
 
 let spawnIndex = 0;
 
 
 
+alert("here");
 
 
 
@@ -126,10 +118,35 @@ const interactableSize = 80;
 
 
 
-const barriers = createBarrier(lvlCanvas);
-const interactableItems = createInteractables(lvlCanvas);
-const jumpPuddles = createJumpPuddle(lvlCanvas);
-const respawnAnchors = populateSaves(lvlCanvas);
+var barriers //= createBarrier(lvlCanvas);
+var interactableItems// = createInteractables(lvlCanvas);
+var jumpPuddles //= createJumpPuddle(lvlCanvas);
+var respawnAnchors// = populateSaves(lvlCanvas);
+
+
+var waterCurrents = [];
+
+const CURRENT_TYPES = {
+    gentle: { speed: 60 },
+    strong: { speed: 120 }
+};
+
+let currentAnimationId = null;
+let lastCurrentFrame = null;
+
+
+var enemies = [];
+
+const UrchinImage = new Image();
+UrchinImage.src = "AqDetImport/UrchinEnemy.png";
+
+
+
+UrchinImage.onload = function() {
+    if (gameStart) {
+        drawActors();
+    }
+};
 
 
 
@@ -169,7 +186,11 @@ function drawObjectBarriers() {
     // lvlLayout.clearRect(0, 0, canvas.width, canvas.height);
     for (const obj of interactableItems[currentScreen]) {
         lvlLayout.strokeStyle = 'red';
-        lvlLayout.strokeRect(obj.x, obj.y, obj.width, obj.height);
+        lvlLayout.strokeRect(
+            obj.x, 
+            obj.y, 
+            obj.width, 
+            obj.height);
     }
 }
 
@@ -211,6 +232,65 @@ function drawJumpPuddles() {
 }
 
 
+function collidesWithJumpPuddle(x, y, puddle) {
+    return (
+        x < puddle.x + puddle.width &&
+        x + rectSize > puddle.x &&
+        y < puddle.y + puddle.height &&
+        y + rectSize > puddle.y
+    );
+}
+
+
+
+
+function checkJumpPuddle() {
+    const puddles = jumpPuddles[currentScreen];
+    
+    // Check if the player is standing on a puddle
+    let puddleIndex = -1;
+    for (let i = 0; i < puddles.length; i++) {
+        if (collidesWithJumpPuddle(rectX, rectY, puddles[i])) {
+            puddleIndex = i;
+            break;
+        }
+    }
+    if (puddleIndex === -1) {
+        puddleLocked = false;
+        return;
+    }
+
+    // Prevent repeated teleportaton
+    if (puddleLocked) {
+        return;
+    }
+
+  
+    let destinationIndex;
+    if(puddleIndex == 0){
+        destinationIndex = 1;
+    }else{
+        destinationIndex = 0;
+    }
+    const destination = puddles[destinationIndex];
+
+    const newX = destination.x +  (destination.width - rectSize) / 2;
+
+    const newY = destination.y + (destination.height - rectSize) / 2;
+
+    // Prevent teleporting inside a wall
+    if (collidesWithBarrier(newX, newY) || collidesWithObject(newX, newY) || collidesWithEnemy(newX, newY)) {
+        return;
+    }
+    // Teleport player to new coors
+    rectX = newX;
+    rectY = newY;
+
+    // Lock until player moves off the destination puddle so they dont tp infinitely
+    puddleLocked = true;
+
+    drawActors();
+}
 
 
 function drawInteractables() {
@@ -219,6 +299,188 @@ function drawInteractables() {
         lvlLayout.fillRect(d.x,d.y,d.width,d.height);
     }
 }
+
+
+
+function drawWaterCurrents() {
+    if (!waterCurrents[currentScreen]) {
+        return;
+    }
+
+    lvlLayout.save();
+
+    lvlLayout.fillStyle = "rgba(148, 210, 231, 0.5)";
+    lvlLayout.strokeStyle = "lightblue";
+    lvlLayout.lineWidth = 3;
+
+    for (const current of waterCurrents[currentScreen]) {
+        lvlLayout.fillRect(
+            current.x,
+            current.y,
+            current.width,
+            current.height
+        );
+
+        lvlLayout.strokeRect(
+            current.x,
+            current.y,
+            current.width,
+            current.height
+        );
+    }
+
+    lvlLayout.restore();
+}
+
+
+
+function drawEnemy() {
+    if (!enemies[currentScreen]) {
+        return;
+    }
+
+    for (const enemy of enemies[currentScreen]) {
+        if (UrchinImage.complete && UrchinImage.naturalWidth > 0) {
+            playerPH.drawImage(
+                UrchinImage,
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
+        } else {
+            playerPH.fillStyle = enemy.color;
+            playerPH.fillRect(
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
+        }
+    }
+}
+
+function drawActors() {
+    playerPH.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawEnemy();
+
+    playerPH.fillStyle = "green";
+    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+}
+
+
+
+
+
+function collidesWithEnemy(x, y) {
+    if (!enemies[currentScreen]) {
+        return false;
+    }
+
+    for (const enemy of enemies[currentScreen]) {
+        if (
+            x < enemy.x + enemy.width &&
+            x + rectSize > enemy.x &&
+            y < enemy.y + enemy.height &&
+            y + rectSize > enemy.y
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+
+function WCCollision(deltaTime) {
+    if (!gameStart) {
+        return;
+    }
+
+    if (!waterCurrents[currentScreen]) {
+        return;
+    }
+
+    for (const current of waterCurrents[currentScreen]) {
+
+        // Check if player overlaps water current
+        if (
+            rectX < current.x + current.width &&
+            rectX + rectSize > current.x &&
+            rectY < current.y + current.height &&
+            rectY + rectSize > current.y
+        ) {
+
+            const currentType = CURRENT_TYPES[current.type];
+
+            if (!currentType) {
+                continue;
+            }
+
+            const movement = currentType.speed * deltaTime;
+
+            elementMovement(current.direction, movement);
+        }
+    }
+}
+
+
+
+
+function elementMovement(direction, movement) {
+
+    if (!direction || !Number.isFinite(movement)) {
+        return;
+    }
+
+    const length = Math.hypot(direction.x, direction.y);
+
+    if (!Number.isFinite(length) || length === 0) {
+        return;
+    }
+
+    const moveX = (direction.x / length) * movement;
+    const moveY = (direction.y / length) * movement;
+
+    // Use existing player movement function
+    reRender(moveX, moveY);
+}
+
+
+
+function waterCurrentLoop(timestamp) {
+    currentAnimationId = null;
+
+    if (!gameStart) {
+        lastCurrentFrame = null;
+        return;
+    }
+
+    const deltaTime = lastCurrentFrame === null
+        ? 0
+        : Math.min((timestamp - lastCurrentFrame) / 1000, 0.05);
+
+    lastCurrentFrame = timestamp;
+
+    WCCollision(deltaTime);
+
+    currentAnimationId =
+        requestAnimationFrame(waterCurrentLoop);
+}
+
+function startWaterCurrentLoop() {
+    if (currentAnimationId !== null) {
+        return;
+    }
+
+    lastCurrentFrame = null;
+    currentAnimationId =
+        requestAnimationFrame(waterCurrentLoop);
+}
+
 
 
 // returns true if player has reached left-most area, to proceed to the next screen
@@ -245,6 +507,7 @@ function updateCheckPoint(checknum){
 
 
 function spawn(){
+    puddleLocked = false;
     const spawnPoint = getSpawnPoint();
     currentScreen = spawnPoint.screen;
     rectX = spawnPoint.x;
@@ -257,11 +520,12 @@ function spawn(){
     drawBarriers();
     drawInteractables();
     drawJumpPuddles();//draw movement element
+    drawWaterCurrents();
 
 
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-   
+   // playerPH.fillStyle = "green";
+    //playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+   drawActors();
 
 
    
@@ -347,6 +611,10 @@ function reRender(movePosX, movePosY) {
 
     const newX = rectX + movePosX;
     const newY = rectY + movePosY;
+    if (collidesWithEnemy(newX, newY)) {
+    respawn();
+    return;
+}
 
 
     // Check if player reached the left edge
@@ -391,7 +659,7 @@ function reRender(movePosX, movePosY) {
 
         // Draw new screen
         playerPH.clearRect(0, 0, canvas.width, canvas.height);
-    lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
+        lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
 
 
         drawBarriers();
@@ -399,9 +667,9 @@ function reRender(movePosX, movePosY) {
         drawJumpPuddles();
 
 
-        playerPH.fillStyle = "green";
-        playerPH.fillRect(rectX, rectY, rectSize, rectSize);
-
+        //playerPH.fillStyle = "green";
+        //playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+        drawActors();
 
         return;
     }
@@ -467,8 +735,10 @@ drawJumpPuddles();
 
 
     // Draw player
-    playerPH.fillStyle = "green";
-    playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+    //playerPH.fillStyle = "green";
+   // playerPH.fillRect(rectX, rectY, rectSize, rectSize);
+   checkJumpPuddle();
+   drawActors();
 }
 
 
@@ -525,7 +795,7 @@ window.addEventListener("keydown", (e) => {
         pressedKeys.has("s") ||
         pressedKeys.has("d")) {
 
-
+       // alert("moving");    
         lastKeyPressed = e.key.toLowerCase();
         moveCharacterWASD(pressedKeys);
     }
@@ -730,7 +1000,7 @@ function isUnlocked(level){
 
 
 function gointoLevel(level){
-  if(!isUnlocked(level) || level !==1){
+  if(!isUnlocked(level) /*|| level !==1*/){
     return;
   }
   loadLevel(level);
@@ -740,19 +1010,58 @@ function gointoLevel(level){
 
 
 function loadLevel(level) {
-    if (level !== 1) return; // Add Level 2-5 data before enabling them.
+    // if (level !== 1) return; // Add Level 2-5 data before enabling them.
     currentLevel = level - 1;
     currentScreen = 0;
     spawnIndex = 0;
+    renderLevel(level);
     pressedKeys.clear();
     document.getElementById("currentLevelTitle").textContent = `Level ${level}`;
     levelMenu.hidden = true;
     gameScreen.hidden = false;
     gameStart = true;
     spawn();
+    startWaterCurrentLoop();
 }
 
-
+function renderLevel(level){
+     enemies = [[], [], [], []];
+     waterCurrents = [[], [], [], []];
+    if (level == 1){
+        barriers = createBarrier1(lvlCanvas);
+        interactableItems = createInteractables1(lvlCanvas);
+        jumpPuddles = createJumpPuddle1(lvlCanvas);
+        respawnAnchors = populateSaves1(lvlCanvas);
+        enemies = createEnemies1(lvlCanvas);
+        waterCurrents = createWaterCurrents(lvlCanvas);
+    }
+    else if (level == 2){
+        barriers = createBarrier2(lvlCanvas);
+        interactableItems = createInteractables2(lvlCanvas);
+        jumpPuddles = createJumpPuddle2(lvlCanvas);
+        respawnAnchors = populateSaves2(lvlCanvas);
+    }
+    else if (level == 3){
+        barriers = createBarrier3(lvlCanvas);
+        interactableItems = createInteractables3(lvlCanvas);
+        jumpPuddles = createJumpPuddle1(lvlCanvas);
+        respawnAnchors = populateSaves3(lvlCanvas);
+    }
+    else if (level == 4){
+        barriers = createBarrier4(lvlCanvas);
+        interactableItems = createInteractables4(lvlCanvas);
+        jumpPuddles = createJumpPuddle4(lvlCanvas);
+        respawnAnchors = populateSaves4(lvlCanvas);
+    }
+    else if (level == 5){
+        barriers = createBarrier5(lvlCanvas);
+        interactableItems = createInteractables5(lvlCanvas);
+        jumpPuddles = createJumpPuddle5(lvlCanvas);
+        respawnAnchors = populateSaves5(lvlCanvas);
+    }
+    else {alert("ERROR: LEVEL NOT FOUND")}
+    //reRender();
+}
 
 
 function levelCompleted(){
@@ -798,6 +1107,4 @@ window.addEventListener("flareLanded", (sfx, sfy) => {
   lvlLayout.fillStyle = "Red";
   lvlLayout.fillRect(400, 400, rectSize*2, rectSize);
 })
-
-
 

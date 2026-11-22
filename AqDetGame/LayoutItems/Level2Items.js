@@ -1,5 +1,5 @@
 /* Layout for Level 2 items */
-function createBarrier(canvas) {
+function createBarrier2(canvas) {
     const barriers = [
         [ //screen 0 
             { //top barrier (sand)
@@ -140,7 +140,7 @@ function createBarrier(canvas) {
     return barriers;
 }
 
-function createJumpPuddle(canvas) {
+function createJumpPuddle2(canvas) {
     // Enter here
     const jumpPuddles = [
         [], // screen 0
@@ -194,7 +194,7 @@ function createJumpPuddle(canvas) {
     return jumpPuddles;
 }
 
-function createInteractables(canvas) {
+function createInteractables2(canvas) {
     const interactableItems = [
         [ //screen 0
             { // pushable rock
@@ -229,7 +229,7 @@ function createInteractables(canvas) {
     return interactableItems;
 }
 
-function createEnemies(canvas) {
+function createEnemies2(canvas) {
     const enemies = [
         [ // screen 0, urchins
             { // top left urchin
@@ -287,46 +287,49 @@ function createEnemies(canvas) {
     ]
 }
 
-function populateSaves(canvas){
+function populateSaves2(canvas){
     const lvl3Saves = [
         {
             screen: 0,
-            x: window.innerWidth - 175,
-            y: window.innerHeight - 125,
+            x: canvas.innerWidth - 175,
+            y: canvas.innerHeight - 125,
         },
         {
             screen: 1,
-            x: window.innerWidth - 175,
-            y: window.innerHeight - 450,
+            x: canvas.innerWidth - 175,
+            y: canvas.innerHeight - 450,
         },
         {
             screen: 2,
-            x: window.innerWidth - 175,
-            y: window.innerHeight - 600,
+            x: canvas.innerWidth - 175,
+            y: canvas.innerHeight - 600,
         },
     ]
     return lvl3Saves;
 }
 
-const level2spawn = [
-    {
-        screen: 0,
-        x: canvas.width - SEAWEED_SIZE * 1.5,
-        y: canvas.height / 2,
-    },
-    {
-        screen: 1,
-        x: canvas.width - SEAWEED_SIZE * 1.5,
-        y: PUDDLE_SIZE * 2 + SEAWEED_SIZE * 2,
-    },
-    {
-        screen: 2,
-        x: canvas.width - SEAWEED_SIZE * 1.5,
-        y: SEAWEED_SIZE * 2,
-    },
-    {
-        screen: 3,
-        x: canvas.width - SEAWEED_SIZE * 1.5,
-        y: SEAWEED_SIZE * 2,
-    }
-];
+// populateSaves(canvas) {
+// const level2spawn = [
+//     {
+//         screen: 0,
+//         x: canvas.width - SEAWEED_SIZE * 1.5,
+//         y: canvas.height / 2,
+//     },
+//     {
+//         screen: 1,
+//         x: canvas.width - SEAWEED_SIZE * 1.5,
+//         y: PUDDLE_SIZE * 2 + SEAWEED_SIZE * 2,
+//     },
+//     {
+//         screen: 2,
+//         x: canvas.width - SEAWEED_SIZE * 1.5,
+//         y: SEAWEED_SIZE * 2,
+//     },
+//     {
+//         screen: 3,
+//         x: canvas.width - SEAWEED_SIZE * 1.5,
+//         y: SEAWEED_SIZE * 2,
+//     }
+// ];
+// return level2spawn;
+// }
