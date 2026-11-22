@@ -171,6 +171,16 @@ function start(){
 
 
 
+function isBubbleActive() {
+    if (!interactActive || currObj === -1) {
+        return false;
+    }
+
+    const item = interactableItems[currentScreen][currObj];
+
+    return item.type === bubble && item.activated === true;
+}
+
 
 
 function drawBarriers() {
@@ -180,6 +190,11 @@ function drawBarriers() {
     }
     drawObjectBarriers();
 }
+    
+
+
+
+
 
 
 function drawObjectBarriers() {
@@ -196,6 +211,32 @@ function drawObjectBarriers() {
 
 
 function collidesWithBarrier(x, y, width, height) {
+
+    //If bubble is active, allow player to go throgh barriers
+    if (isBubbleActive()) {
+        return false;
+    }
+
+    for (const b of barriers[currentScreen]) {
+        if (
+            x < b.x + b.width &&
+            x + rectSize > b.x &&
+            y < b.y + b.height &&
+            y + rectSize > b.y
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+
+
+/*
+function collidesWithBarrier(x, y, width, height) {
     for (const b of barriers[currentScreen]) {
         if (x < b.x + b.width &&
             x + rectSize > b.x &&
@@ -206,7 +247,7 @@ function collidesWithBarrier(x, y, width, height) {
     }
     return false;
 }
-
+*/
 
 function collidesWithObject(x, y, width, height) {
     if (interactActive) {
@@ -309,7 +350,7 @@ function drawWaterCurrents() {
 
     lvlLayout.save();
 
-    lvlLayout.fillStyle = "rgba(148, 210, 231, 0.5)";
+    lvlLayout.fillStyle = "rgba(0, 150, 256, 0.8)";
     lvlLayout.strokeStyle = "lightblue";
     lvlLayout.lineWidth = 3;
 
@@ -665,7 +706,7 @@ function reRender(movePosX, movePosY) {
         drawBarriers();
         drawInteractables();
         drawJumpPuddles();
-
+        drawWaterCurrents();
 
         //playerPH.fillStyle = "green";
         //playerPH.fillRect(rectX, rectY, rectSize, rectSize);
@@ -731,6 +772,7 @@ lvlLayout.clearRect(0, 0, lvlCanvas.width, lvlCanvas.height);
 drawBarriers();
 drawInteractables();
 drawJumpPuddles();
+drawWaterCurrents();
     //NOTE: Required changing interactableLoc, AND uses "currObj which may not work anymore"
 
 
@@ -842,9 +884,19 @@ function pcInteract()
         alert("push block active");
     }//PushBlock found
     else if (objType == bubble) {
-      alert("Bubble Found");
-      activateBubble();
-    }//Bubble found
+    activateBubble();
+
+    lvlLayout.clearRect(
+        0, 0,
+        lvlCanvas.width,
+        lvlCanvas.height
+    );
+
+    drawBarriers();
+    drawInteractables();
+    drawJumpPuddles();
+    drawWaterCurrents();
+}
     else if (objType == signalFlare){
       alert("Signal Flare Found");
       window.dispatchEvent(flareSent);
